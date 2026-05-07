@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "내 비디오, 내 비즈니스",
+    "subtitle": "한 번 업로드하고 모든 네트워크에서 팔로워와 직접 고객을 동시에 얻으세요.",
+    "register": "시작하기",
+    "login": "로그인",
+    "languageDetected": "기기가 {{lang}}으로 설정되어 있습니다. 변경할까요?"
+  },
+  "feed": {
+    "forYou": "나를 위해",
+    "following": "팔로잉",
+    "categories": "카테고리",
+    "nearby": "근처"
+  },
+  "upload": {
+    "publishButton": "게시하기",
+    "fromGallery": "갤러리에서 업로드",
+    "recordNow": "지금 녹화"
+  },
+  "profile": {
+    "logout": "로그아웃",
+    "myStats": "내 통계",
+    "premiumPlan": "프리미엄 플랜"
+  },
+  "errors": {
+    "generic": "오류가 발생했습니다. 다시 시도해 주세요.",
+    "networkError": "인터넷 연결이 없습니다."
+  }
+}

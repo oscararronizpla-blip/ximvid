@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "動画でビジネスを加速",
+    "subtitle": "一度アップロードして、すべてのネットワークでフォロワーと直接顧客を同時に獲得。",
+    "register": "始める",
+    "login": "ログイン",
+    "languageDetected": "デバイスは{{lang}}に設定されています。切り替えますか？"
+  },
+  "feed": {
+    "forYou": "あなたへ",
+    "following": "フォロー中",
+    "categories": "カテゴリ",
+    "nearby": "近く"
+  },
+  "upload": {
+    "publishButton": "公開する",
+    "fromGallery": "ギャラリーからアップロード",
+    "recordNow": "今すぐ録画"
+  },
+  "profile": {
+    "logout": "ログアウト",
+    "myStats": "統計",
+    "premiumPlan": "プレミアムプラン"
+  },
+  "errors": {
+    "generic": "エラーが発生しました。もう一度お試しください。",
+    "networkError": "インターネット接続がありません。"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "Video của bạn, kinh doanh của bạn",
+    "subtitle": "Đăng một lần và nhận người theo dõi trên tất cả mạng xã hội và khách hàng trực tiếp cùng lúc.",
+    "register": "Bắt đầu",
+    "login": "Đăng nhập",
+    "languageDetected": "Thiết bị của bạn đang ở {{lang}}. Chuyển đổi?"
+  },
+  "feed": {
+    "forYou": "Dành cho bạn",
+    "following": "Đang theo dõi",
+    "categories": "Danh mục",
+    "nearby": "Gần đây"
+  },
+  "upload": {
+    "publishButton": "Đăng",
+    "fromGallery": "Tải từ thư viện",
+    "recordNow": "Quay ngay"
+  },
+  "profile": {
+    "logout": "Đăng xuất",
+    "myStats": "Thống kê của tôi",
+    "premiumPlan": "Gói Premium"
+  },
+  "errors": {
+    "generic": "Đã xảy ra lỗi. Thử lại.",
+    "networkError": "Không có kết nối internet."
+  }
+}

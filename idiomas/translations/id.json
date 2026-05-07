@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "Videomu, bisnismu",
+    "subtitle": "Unggah sekali dan dapatkan pengikut di semua jaringan dan pelanggan langsung secara bersamaan.",
+    "register": "Mulai",
+    "login": "Masuk",
+    "languageDetected": "Perangkat Anda dalam bahasa {{lang}}. Ganti?"
+  },
+  "feed": {
+    "forYou": "Untukmu",
+    "following": "Mengikuti",
+    "categories": "Kategori",
+    "nearby": "Terdekat"
+  },
+  "upload": {
+    "publishButton": "Terbitkan",
+    "fromGallery": "Unggah dari galeri",
+    "recordNow": "Rekam sekarang"
+  },
+  "profile": {
+    "logout": "Keluar",
+    "myStats": "Statistik saya",
+    "premiumPlan": "Paket Premium"
+  },
+  "errors": {
+    "generic": "Terjadi kesalahan. Coba lagi.",
+    "networkError": "Tidak ada koneksi internet."
+  }
+}

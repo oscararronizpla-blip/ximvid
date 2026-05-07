@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "I tuoi video, il tuo business",
+    "subtitle": "Carica una volta e ottieni follower in tutte le reti e clienti diretti allo stesso tempo.",
+    "register": "Inizia ora",
+    "login": "Accedi",
+    "languageDetected": "Il tuo dispositivo è in {{lang}}. Cambiare?"
+  },
+  "feed": {
+    "forYou": "Per te",
+    "following": "Seguiti",
+    "categories": "Categorie",
+    "nearby": "Vicino a me"
+  },
+  "upload": {
+    "publishButton": "Pubblica",
+    "fromGallery": "Carica dalla galleria",
+    "recordNow": "Registra ora"
+  },
+  "profile": {
+    "logout": "Esci",
+    "myStats": "Le mie statistiche",
+    "premiumPlan": "Piano Premium"
+  },
+  "errors": {
+    "generic": "Qualcosa è andato storto. Riprova.",
+    "networkError": "Nessuna connessione internet."
+  }
+}

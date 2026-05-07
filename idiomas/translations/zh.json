@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "你的视频，你的生意",
+    "subtitle": "上传一次，同时在所有网络获得粉丝和直接客户。",
+    "register": "开始",
+    "login": "登录",
+    "languageDetected": "您的设备语言为{{lang}}。切换？"
+  },
+  "feed": {
+    "forYou": "为你",
+    "following": "关注",
+    "categories": "分类",
+    "nearby": "附近"
+  },
+  "upload": {
+    "publishButton": "发布",
+    "fromGallery": "从相册上传",
+    "recordNow": "立即录制"
+  },
+  "profile": {
+    "logout": "退出登录",
+    "myStats": "我的数据",
+    "premiumPlan": "高级计划"
+  },
+  "errors": {
+    "generic": "出错了，请重试。",
+    "networkError": "网络连接失败。"
+  }
+}

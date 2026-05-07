@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "Videoene dine, virksomheten din",
+    "subtitle": "Last opp én gang og få følgere på alle nettverkene dine og direkte kunder samtidig.",
+    "register": "Kom i gang",
+    "login": "Logg inn",
+    "languageDetected": "Enheten din er på {{lang}}. Bytte?"
+  },
+  "feed": {
+    "forYou": "For deg",
+    "following": "Følger",
+    "categories": "Kategorier",
+    "nearby": "I nærheten"
+  },
+  "upload": {
+    "publishButton": "Publiser",
+    "fromGallery": "Last opp fra galleri",
+    "recordNow": "Ta opp nå"
+  },
+  "profile": {
+    "logout": "Logg ut",
+    "myStats": "Min statistikk",
+    "premiumPlan": "Premium-plan"
+  },
+  "errors": {
+    "generic": "Noe gikk galt. Prøv igjen.",
+    "networkError": "Ingen internettforbindelse."
+  }
+}

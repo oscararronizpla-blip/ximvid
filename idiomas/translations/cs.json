@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "Tvoje videa, tvůj byznys",
+    "subtitle": "Nahraj jednou a získej sledující na všech sítích a přímé zákazníky zároveň.",
+    "register": "Začít",
+    "login": "Přihlásit se",
+    "languageDetected": "Tvoje zařízení je v {{lang}}. Přepnout?"
+  },
+  "feed": {
+    "forYou": "Pro tebe",
+    "following": "Sledovaní",
+    "categories": "Kategorie",
+    "nearby": "V blízkosti"
+  },
+  "upload": {
+    "publishButton": "Publikovat",
+    "fromGallery": "Nahrát z galerie",
+    "recordNow": "Nahrávat nyní"
+  },
+  "profile": {
+    "logout": "Odhlásit se",
+    "myStats": "Moje statistiky",
+    "premiumPlan": "Prémiový plán"
+  },
+  "errors": {
+    "generic": "Něco se pokazilo. Zkus to znovu.",
+    "networkError": "Žádné internetové připojení."
+  }
+}

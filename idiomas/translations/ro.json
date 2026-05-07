@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "Videoclipurile tale, afacerea ta",
+    "subtitle": "Încarcă o dată și câștigă urmăritori pe toate rețelele și clienți direcți în același timp.",
+    "register": "Începe",
+    "login": "Conectează-te",
+    "languageDetected": "Dispozitivul tău este în {{lang}}. Schimbi?"
+  },
+  "feed": {
+    "forYou": "Pentru tine",
+    "following": "Urmărești",
+    "categories": "Categorii",
+    "nearby": "Aproape"
+  },
+  "upload": {
+    "publishButton": "Publică",
+    "fromGallery": "Încarcă din galerie",
+    "recordNow": "Înregistrează acum"
+  },
+  "profile": {
+    "logout": "Deconectează-te",
+    "myStats": "Statisticile mele",
+    "premiumPlan": "Plan Premium"
+  },
+  "errors": {
+    "generic": "Ceva a mers greșit. Încearcă din nou.",
+    "networkError": "Fără conexiune la internet."
+  }
+}

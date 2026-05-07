@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "Video anda, perniagaan anda",
+    "subtitle": "Muat naik sekali dan dapatkan pengikut di semua rangkaian dan pelanggan langsung pada masa yang sama.",
+    "register": "Mulakan",
+    "login": "Log masuk",
+    "languageDetected": "Peranti anda dalam {{lang}}. Tukar?"
+  },
+  "feed": {
+    "forYou": "Untuk anda",
+    "following": "Mengikuti",
+    "categories": "Kategori",
+    "nearby": "Berhampiran"
+  },
+  "upload": {
+    "publishButton": "Terbitkan",
+    "fromGallery": "Muat naik dari galeri",
+    "recordNow": "Rakam sekarang"
+  },
+  "profile": {
+    "logout": "Log keluar",
+    "myStats": "Statistik saya",
+    "premiumPlan": "Pelan Premium"
+  },
+  "errors": {
+    "generic": "Sesuatu telah berlaku. Cuba lagi.",
+    "networkError": "Tiada sambungan internet."
+  }
+}

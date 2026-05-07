@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "Twoje filmy, twój biznes",
+    "subtitle": "Wgraj raz i zdobywaj obserwujących na wszystkich sieciach oraz bezpośrednich klientów jednocześnie.",
+    "register": "Zacznij",
+    "login": "Zaloguj się",
+    "languageDetected": "Twoje urządzenie jest w {{lang}}. Zmienić?"
+  },
+  "feed": {
+    "forYou": "Dla ciebie",
+    "following": "Obserwowani",
+    "categories": "Kategorie",
+    "nearby": "W pobliżu"
+  },
+  "upload": {
+    "publishButton": "Opublikuj",
+    "fromGallery": "Prześlij z galerii",
+    "recordNow": "Nagraj teraz"
+  },
+  "profile": {
+    "logout": "Wyloguj się",
+    "myStats": "Moje statystyki",
+    "premiumPlan": "Plan Premium"
+  },
+  "errors": {
+    "generic": "Coś poszło nie tak. Spróbuj ponownie.",
+    "networkError": "Brak połączenia z internetem."
+  }
+}

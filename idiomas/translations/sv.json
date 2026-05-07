@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "Dina videor, ditt företag",
+    "subtitle": "Ladda upp en gång och få följare på alla nätverk och direkta kunder samtidigt.",
+    "register": "Kom igång",
+    "login": "Logga in",
+    "languageDetected": "Din enhet är på {{lang}}. Byta?"
+  },
+  "feed": {
+    "forYou": "För dig",
+    "following": "Följer",
+    "categories": "Kategorier",
+    "nearby": "I närheten"
+  },
+  "upload": {
+    "publishButton": "Publicera",
+    "fromGallery": "Ladda upp från galleri",
+    "recordNow": "Spela in nu"
+  },
+  "profile": {
+    "logout": "Logga ut",
+    "myStats": "Min statistik",
+    "premiumPlan": "Premiumplan"
+  },
+  "errors": {
+    "generic": "Något gick fel. Försök igen.",
+    "networkError": "Ingen internetanslutning."
+  }
+}

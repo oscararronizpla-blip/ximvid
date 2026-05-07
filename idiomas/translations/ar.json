@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "فيديوهاتك، عملك",
+    "subtitle": "ارفع مرة واحدة واحصل على متابعين في جميع شبكاتك وعملاء مباشرين في نفس الوقت.",
+    "register": "ابدأ",
+    "login": "تسجيل الدخول",
+    "languageDetected": "جهازك بالعربية. تبديل؟"
+  },
+  "feed": {
+    "forYou": "لك",
+    "following": "المتابَعون",
+    "categories": "الفئات",
+    "nearby": "قريب"
+  },
+  "upload": {
+    "publishButton": "نشر",
+    "fromGallery": "رفع من المعرض",
+    "recordNow": "تسجيل الآن"
+  },
+  "profile": {
+    "logout": "تسجيل الخروج",
+    "myStats": "إحصائياتي",
+    "premiumPlan": "خطة بريميوم"
+  },
+  "errors": {
+    "generic": "حدث خطأ. حاول مرة أخرى.",
+    "networkError": "لا يوجد اتصال بالإنترنت."
+  }
+}

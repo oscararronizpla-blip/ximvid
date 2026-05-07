@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "Jouw video's, jouw business",
+    "subtitle": "Upload één keer en krijg tegelijkertijd volgers op al je netwerken en directe klanten.",
+    "register": "Begin nu",
+    "login": "Inloggen",
+    "languageDetected": "Je apparaat is in het {{lang}}. Wisselen?"
+  },
+  "feed": {
+    "forYou": "Voor jou",
+    "following": "Gevolgd",
+    "categories": "Categorieën",
+    "nearby": "Dichtbij"
+  },
+  "upload": {
+    "publishButton": "Publiceren",
+    "fromGallery": "Uploaden vanuit galerij",
+    "recordNow": "Nu opnemen"
+  },
+  "profile": {
+    "logout": "Uitloggen",
+    "myStats": "Mijn statistieken",
+    "premiumPlan": "Premium plan"
+  },
+  "errors": {
+    "generic": "Er is iets misgegaan. Probeer het opnieuw.",
+    "networkError": "Geen internetverbinding."
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "A te videóid, a te vállalkozásod",
+    "subtitle": "Töltsd fel egyszer, és egyszerre szerezz követőket minden hálózatodon és közvetlen ügyfeleket.",
+    "register": "Kezdés",
+    "login": "Bejelentkezés",
+    "languageDetected": "Az eszközöd {{lang}} nyelvre van állítva. Váltasz?"
+  },
+  "feed": {
+    "forYou": "Neked",
+    "following": "Követett",
+    "categories": "Kategóriák",
+    "nearby": "A közelemben"
+  },
+  "upload": {
+    "publishButton": "Közzétesz",
+    "fromGallery": "Feltöltés a galériából",
+    "recordNow": "Felvétel most"
+  },
+  "profile": {
+    "logout": "Kijelentkezés",
+    "myStats": "Saját statisztikák",
+    "premiumPlan": "Prémium csomag"
+  },
+  "errors": {
+    "generic": "Valami hiba történt. Próbáld újra.",
+    "networkError": "Nincs internetkapcsolat."
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "הסרטונים שלך, העסק שלך",
+    "subtitle": "העלה פעם אחת וקבל עוקבים בכל הרשתות ולקוחות ישירים בו זמנית.",
+    "register": "התחל",
+    "login": "התחבר",
+    "languageDetected": "המכשיר שלך ב{{lang}}. לעבור?"
+  },
+  "feed": {
+    "forYou": "בשבילך",
+    "following": "עוקב",
+    "categories": "קטגוריות",
+    "nearby": "בקרבתי"
+  },
+  "upload": {
+    "publishButton": "פרסם",
+    "fromGallery": "העלה מהגלריה",
+    "recordNow": "הקלט עכשיו"
+  },
+  "profile": {
+    "logout": "התנתק",
+    "myStats": "הסטטיסטיקה שלי",
+    "premiumPlan": "תוכנית Premium"
+  },
+  "errors": {
+    "generic": "משהו השתבש. נסה שוב.",
+    "networkError": "אין חיבור לאינטרנט."
+  }
+}

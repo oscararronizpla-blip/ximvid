@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "Videoların, işin",
+    "subtitle": "Bir kez yükle ve aynı anda tüm ağlarında takipçi ve doğrudan müşteri kazan.",
+    "register": "Başla",
+    "login": "Giriş yap",
+    "languageDetected": "Cihazın {{lang}} dilinde. Değiştir?"
+  },
+  "feed": {
+    "forYou": "Sana özel",
+    "following": "Takip edilenler",
+    "categories": "Kategoriler",
+    "nearby": "Yakınımda"
+  },
+  "upload": {
+    "publishButton": "Yayınla",
+    "fromGallery": "Galeriden yükle",
+    "recordNow": "Şimdi kaydet"
+  },
+  "profile": {
+    "logout": "Çıkış yap",
+    "myStats": "İstatistiklerim",
+    "premiumPlan": "Premium plan"
+  },
+  "errors": {
+    "generic": "Bir şeyler yanlış gitti. Tekrar dene.",
+    "networkError": "İnternet bağlantısı yok."
+  }
+}
