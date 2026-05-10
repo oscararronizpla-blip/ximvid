@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Un video. 29 redes. Crecimiento exponencial en todas tus redes sociales al mismo tiempo.">
+<title>Ximvid — Un video. Crecimiento exponencial.</title>
+<!-- iOS Safari / Apple -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ximvid">
+<meta name="format-detection" content="telephone=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#eef5fc">
+<!-- Prevent iOS text size adjust -->
+<meta name="text-size-adjust" content="100%">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   XIMVID — Azul cielo + metálico navy en movimiento
+   ═══════════════════════════════════════════════ */
+:root {
+  /* Fondos azul–blanco */
+  --bg:      #eef5fc;
+  --bg2:     #f4f9ff;
+  --bg3:     #e4eff9;
+  --bg4:     #dceaf5;
+
+  /* Navy metálico (botones / banners / cards oscuras) */
+  --n0:  #06101e;
+  --n1:  #0b1a30;
+  --n2:  #0f2040;
+  --n3:  #162c54;
+  --n4:  #1a3668;
+  --n5:  #1e407c;
+  --steel: #2258a8;
+  --sky:   #4a90d9;
+  --ice:   #a8d0f0;
+  --shine: #daeeff;
+
+  /* Texto */
+  --tx:   #07111f;
+  --tx2:  rgba(7,17,31,.58);
+  --tx3:  rgba(7,17,31,.32);
+
+  /* Lines */
+  --bl:   rgba(7,17,31,.09);
+  --wl:   rgba(255,255,255,.1);
+  --r: 20px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+html { scroll-behavior:smooth; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg2); color:var(--tx); overflow-x:hidden; }
+a { text-decoration:none; color:inherit; }
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:var(--bg4); }
+::-webkit-scrollbar-thumb { background:var(--n3); border-radius:3px; }
+
+/* ─────────────────────────────────────────
+   METAL ANIMATIONS  (el alma del diseño)
+   ───────────────────────────────────────── */
+
+/* Gradiente metálico deslizante */
+@keyframes metalSlide {
+  0%   { background-position: 0%   center; }
+  100% { background-position: 300% center; }
+}
+/* Shimmer diagonal sobre superficie */
+@keyframes shimmerPass {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+/* Pulso brillante */
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(74,144,217,.0), 0 8px 32px rgba(7,17,31,.35); }
+  50%     { box-shadow: 0 0 24px 4px rgba(74,144,217,.25), 0 8px 32px rgba(7,17,31,.35); }
+}
+/* Texto metálico: navy → ice → sky → navy */
+@keyframes textMetal {
+  0%   { background-position: 0%   center; }
+  100% { background-position: 300% center; }
+}
+/* Barra de relleno shimmer */
+@keyframes barShimmer {
+  0%   { background-position: 0%   center; }
+  100% { background-position: 200% center; }
+}
+/* Blob flotante */
+@keyframes blobA { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(-30px,25px) scale(1.07)} 70%{transform:translate(18px,-18px) scale(.96)} }
+@keyframes blobB { 0%,100%{transform:translate(0,0)} 50%{transform:translate(25px,-35px) scale(1.08)} }
+@keyframes blobC { 0%,100%{transform:translateX(-50%) scale(1)} 50%{transform:translateX(-50%) scale(1.13)} }
+/* Fade reveal */
+@keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+/* Scroll hint bar */
+@keyframes scbar {
+  0%   { transform:scaleY(0); transform-origin:top; }
+  50%  { transform:scaleY(1); transform-origin:top; }
+  51%  { transform:scaleY(1); transform-origin:bottom; }
+  100% { transform:scaleY(0); transform-origin:bottom; }
+}
+/* Orbit spin */
+@keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+/* ─────────────────────────────────────────
+   SHARED METAL SURFACE  (botones/cards)
+   Aplica a cualquier elemento .metal-*
+   ───────────────────────────────────────── */
+
+/* Metal gradient helper */
+.metal-bg {
+  background: linear-gradient(115deg,
+    var(--n0) 0%,
+    var(--n2) 18%,
+    var(--n4) 35%,
+    var(--steel) 50%,
+    var(--n4) 65%,
+    var(--n2) 82%,
+    var(--n0) 100%
+  );
+  background-size: 300% 100%;
+  animation: metalSlide 6s linear infinite;
+}
+
+/* ─────────────────────────────────────────
+   NAV
+   ───────────────────────────────────────── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:500;
+  padding:16px 56px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(238,245,252,.88);
+  backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
+  border-bottom:1px solid var(--bl);
+  transition:all .35s;
+}
+nav.solid {
+  background:rgba(238,245,252,.97);
+  box-shadow:0 4px 24px rgba(7,17,31,.07);
+}
+.logo {
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.5rem; font-weight:600; letter-spacing:.04em; color:var(--n1);
+}
+.logo em {
+  font-style:italic;
+  background:linear-gradient(135deg, var(--n1) 0%, var(--steel) 30%, var(--sky) 55%, var(--ice) 70%, var(--n2) 100%);
+  background-size:300% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 5s linear infinite;
+}
+.nav-links { display:flex; gap:30px; }
+.nav-links a { color:var(--tx2); font-size:.85rem; transition:color .2s; }
+.nav-links a:hover { color:var(--n1); }
+.nav-right { display:flex; gap:12px; align-items:center; }
+.nav-ghost { font-size:.84rem; color:var(--tx2); transition:color .2s; }
+.nav-ghost:hover { color:var(--n1); }
+
+/* ─── BTN METAL (principal) ─── */
+.btn-m {
+  display:inline-flex; align-items:center; gap:10px;
+  padding:13px 28px; border-radius:100px;
+  font-size:.9rem; font-weight:500; letter-spacing:.03em;
+  color:#fff; border:none; cursor:pointer;
+  position:relative; overflow:hidden;
+  background:linear-gradient(115deg,
+    var(--n0) 0%, var(--n2) 18%, var(--n4) 35%,
+    var(--steel) 50%, var(--n4) 65%,
+    var(--n2) 82%, var(--n0) 100%);
+  background-size:300% 100%;
+  animation:metalSlide 6s linear infinite;
+  box-shadow:
+    0 6px 24px rgba(7,17,31,.32),
+    0 1px 0 rgba(255,255,255,.14) inset,
+    0 -1px 0 rgba(0,0,0,.3) inset;
+  transition:transform .2s, box-shadow .2s;
+}
+.btn-m::before {            /* shimmer diagonal */
+  content:'';
+  position:absolute; top:0; left:0; width:60px; height:100%;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.26),transparent);
+  animation:shimmerPass 2.8s ease infinite;
+}
+.btn-m::after {             /* top highlight line */
+  content:''; position:absolute; top:0; left:8%; right:8%; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
+}
+.btn-m:hover {
+  transform:translateY(-2px);
+  box-shadow:0 12px 36px rgba(7,17,31,.42), 0 1px 0 rgba(255,255,255,.16) inset, 0 -1px 0 rgba(0,0,0,.3) inset;
+}
+.btn-m:active { transform:translateY(1px); }
+
+/* Hero size */
+.btn-m-lg { padding:17px 38px; font-size:1rem; border-radius:100px; }
+
+/* ─── BTN GHOST (secundario) ─── */
+.btn-g {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:17px 30px; border-radius:100px;
+  font-size:1rem; font-weight:400; color:var(--tx2);
+  background:rgba(255,255,255,.55); backdrop-filter:blur(8px);
+  border:1px solid rgba(7,17,31,.14); transition:all .2s;
+}
+.btn-g:hover { background:rgba(255,255,255,.88); border-color:rgba(7,17,31,.28); color:var(--n1); }
+
+@media(max-width:768px){ nav{padding:14px 20px;} .nav-links{display:none;} }
+
+/* ─────────────────────────────────────────
+   HERO
+   ───────────────────────────────────────── */
+#hero {
+  min-height:100vh; min-height:calc(var(--vh, 1vh) * 100); min-height:100dvh;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:130px 24px 90px;
+  position:relative; overflow:hidden;
+  background:linear-gradient(160deg, #eef5fc 0%, #f4f9ff 30%, #e0edf8 65%, #ebf3fb 100%);
+}
+.hero-blob { position:absolute; border-radius:50%; filter:blur(72px); pointer-events:none; }
+.bA { width:640px; height:640px; background:rgba(34,88,168,.1);  top:-160px; right:-120px; animation:blobA 13s ease-in-out infinite; }
+.bB { width:420px; height:420px; background:rgba(11,26,48,.08); bottom:-80px; left:-60px;  animation:blobB 16s ease-in-out infinite; }
+.bC { width:280px; height:280px; background:rgba(74,144,217,.13); top:42%; left:50%; animation:blobC 9s ease-in-out infinite; }
+
+.hero-grid {
+  position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(7,17,31,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(7,17,31,.045) 1px, transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 80% 65% at 50% 38%, black 22%, transparent 72%);
+  -webkit-mask-image:radial-gradient(ellipse 80% 65% at 50% 38%, black 22%, transparent 72%);
+}
+
+.hero-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  border:1px solid rgba(7,17,31,.13);
+  background:linear-gradient(135deg, rgba(255,255,255,.9), rgba(210,232,255,.6));
+  box-shadow:0 2px 12px rgba(7,17,31,.09), 0 1px 0 rgba(255,255,255,.9) inset;
+  color:var(--n3); font-size:.73rem; font-weight:500;
+  letter-spacing:.12em; text-transform:uppercase;
+  padding:7px 18px; border-radius:100px;
+  margin-bottom:34px; position:relative; z-index:3;
+  animation:fadeUp .7s ease both;
+}
+.bdot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--steel);
+  animation:glowPulse 2s infinite;
+  box-shadow:0 0 0 0 rgba(34,88,168,.4);
+}
+@keyframes bdotPulse {
+  0%,100%{box-shadow:0 0 0 0 rgba(34,88,168,.4)}
+  50%{box-shadow:0 0 0 7px transparent}
+}
+
+h1 {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(3rem, 8vw, 7.2rem);
+  font-weight:300; line-height:.97; letter-spacing:-.022em;
+  max-width:960px; position:relative; z-index:3;
+  color:var(--n1);
+  animation:fadeUp .85s .08s ease both;
+}
+h1 strong { font-weight:600; }
+h1 .hg {
+  font-weight:600;
+  background:linear-gradient(135deg,
+    var(--n1) 0%, var(--n3) 15%,
+    var(--steel) 35%, var(--sky) 52%,
+    var(--ice) 62%, var(--steel) 75%,
+    var(--n2) 90%, var(--n1) 100%);
+  background-size:300% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 5s linear infinite;
+}
+h1 .hdim { color:rgba(7,17,31,.28); font-style:italic; font-weight:300; }
+
+.hero-sub {
+  margin-top:26px; font-size:clamp(.95rem,1.9vw,1.17rem); font-weight:300;
+  color:var(--tx2); max-width:570px; line-height:1.76;
+  position:relative; z-index:3;
+  animation:fadeUp .9s .16s ease both;
+}
+.hero-sub strong { color:var(--n1); font-weight:500; }
+
+.hero-btns {
+  margin-top:44px; display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
+  position:relative; z-index:3; animation:fadeUp .9s .24s ease both;
+}
+
+.hero-stats {
+  margin-top:70px; display:flex; gap:52px; flex-wrap:wrap; justify-content:center;
+  position:relative; z-index:3; animation:fadeUp 1s .32s ease both;
+}
+.stat { text-align:center; }
+.stat-n {
+  font-family:'Cormorant Garamond',serif; font-size:2.8rem; font-weight:600; line-height:1; display:block;
+  background:linear-gradient(135deg, var(--n1) 0%, var(--n3) 20%, var(--steel) 40%, var(--sky) 60%, var(--n2) 80%, var(--n1) 100%);
+  background-size:250% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 6s linear infinite;
+}
+.stat-l { font-size:.7rem; font-weight:300; color:var(--tx3); letter-spacing:.09em; text-transform:uppercase; margin-top:5px; display:block; }
+.stat-div { width:1px; background:var(--bl); align-self:stretch; }
+@media(max-width:600px){ .stat-div{display:none;} .hero-stats{gap:30px;} }
+
+.scroll-hint {
+  position:absolute; bottom:34px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  color:var(--tx3); font-size:.67rem; letter-spacing:.15em; text-transform:uppercase;
+  z-index:3; animation:fadeIn 2s 1.2s both;
+}
+.scroll-bar {
+  width:1px; height:40px;
+  background:linear-gradient(to bottom, var(--n3), transparent);
+  animation:scbar 2.2s ease infinite;
+}
+
+/* ─────────────────────────────────────────
+   PRESS BAR
+   ───────────────────────────────────────── */
+.press-bar {
+  padding:24px 56px;
+  border-top:1px solid var(--bl); border-bottom:1px solid var(--bl);
+  background:rgba(255,255,255,.48); backdrop-filter:blur(12px);
+}
+.press-in { max-width:1100px; margin:0 auto; display:flex; align-items:center; gap:30px; flex-wrap:wrap; }
+.press-lbl { font-size:.7rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--tx3); white-space:nowrap; }
+.press-logos { display:flex; gap:26px; align-items:center; flex:1; flex-wrap:wrap; opacity:.28; filter:grayscale(1) brightness(.4); }
+.press-logo { font-family:'Cormorant Garamond',serif; font-weight:600; font-size:.9rem; color:var(--n1); letter-spacing:.06em; text-transform:uppercase; }
+@media(max-width:600px){ .press-bar{padding:16px 20px;} .press-logos{gap:14px;} }
+
+/* ─────────────────────────────────────────
+   SECTION WRAPPERS
+   ───────────────────────────────────────── */
+section { position:relative; z-index:1; }
+.sec-lt  { background:linear-gradient(160deg,#f4f9ff,#eef5fc,#f8fbff); padding:110px 24px; }
+.sec-lt2 { background:linear-gradient(160deg,#e8f1fa,#dceaf5,#eef4fb); padding:110px 24px; }
+.sec-wh  { background:#fff; padding:110px 24px; }
+
+/* ─── Navy section ─── */
+.sec-nv {
+  padding:110px 24px;
+  background:linear-gradient(155deg, var(--n0) 0%, var(--n2) 30%, var(--n4) 60%, var(--n1) 100%);
+  background-size:300% 100%;
+  animation:metalSlide 10s linear infinite;
+  position:relative; overflow:hidden;
+}
+.sec-nv::before {      /* top highlight */
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent 5%,rgba(255,255,255,.42) 35%,rgba(255,255,255,.14) 70%,transparent 95%);
+}
+.sec-nv::after {       /* radial glow */
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse 70% 55% at 50% 50%, rgba(74,144,217,.11), transparent 70%);
+  pointer-events:none;
+}
+.sec-nv > * { position:relative; z-index:2; }
+
+.wrap { max-width:1120px; margin:0 auto; }
+
+/* Eyebrow labels */
+.eyebrow    { display:block; font-size:.71rem; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--steel); margin-bottom:14px; }
+.eyebrow-lt { color:rgba(168,208,240,.65); }
+
+/* Headings */
+.sh {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.1rem,4.5vw,3.6rem); font-weight:300; line-height:1.1;
+  margin-bottom:14px; color:var(--n1);
+}
+.sh em {
+  font-style:italic;
+  background:linear-gradient(135deg, var(--n1) 0%, var(--n4) 20%, var(--steel) 40%, var(--sky) 58%, var(--ice) 68%, var(--steel) 80%, var(--n2) 100%);
+  background-size:300% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 5s linear infinite;
+}
+.sh-lt { color:#fff; }
+.sh-lt em {
+  background:linear-gradient(135deg,#fff 0%,var(--shine) 25%,var(--ice) 45%,var(--sky) 60%,var(--shine) 80%,#fff 100%);
+  background-size:300% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 5s linear infinite;
+}
+.sp   { font-size:1rem; font-weight:300; color:var(--tx2); max-width:500px; line-height:1.78; margin-bottom:60px; }
+.sp-lt { font-size:1rem; font-weight:300; color:rgba(255,255,255,.5); max-width:500px; line-height:1.78; margin-bottom:60px; }
+
+/* ─────────────────────────────────────────
+   PHONES
+   ───────────────────────────────────────── */
+#screens { background:linear-gradient(160deg,#eef5fc,#f4f9ff,#eef5fc); padding:110px 24px 130px; display:flex; flex-direction:column; align-items:center; }
+.phones-row { display:flex; gap:22px; align-items:flex-end; justify-content:center; flex-wrap:wrap; margin-top:64px; }
+.phone-wrap  { display:flex; flex-direction:column; align-items:center; gap:14px; }
+.phone-caption { font-size:.7rem; color:var(--tx3); letter-spacing:.08em; text-transform:uppercase; text-align:center; }
+
+.phone {
+  width:200px; border-radius:36px; overflow:hidden;
+  position:relative;
+  background:linear-gradient(145deg, var(--n0), var(--n2));
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:
+    0 28px 68px rgba(7,17,31,.25),
+    0 0 0 1px rgba(255,255,255,.07),
+    0 1px 0 rgba(255,255,255,.15) inset;
+  transition:transform .4s ease;
+}
+.phone::before { /* top chrome line */
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  z-index:10;
+}
+.phone:hover { transform:translateY(-10px); }
+
+.phone.mid {
+  width:228px; transform:translateY(-22px); z-index:2;
+  background:linear-gradient(145deg, var(--n0), var(--n2), var(--n4), var(--n1));
+  background-size:300% 100%;
+  animation:metalSlide 8s linear infinite;
+  box-shadow:
+    0 44px 90px rgba(7,17,31,.32),
+    0 0 60px rgba(34,88,168,.14),
+    0 0 0 1px rgba(255,255,255,.12),
+    0 1px 0 rgba(255,255,255,.2) inset;
+  border-color:rgba(255,255,255,.13);
+}
+.phone.mid:hover { transform:translateY(-32px); }
+
+.pscreen {
+  width:100%; aspect-ratio:9/19.5; display:flex; flex-direction:column;
+  position:relative; overflow:hidden;
+  background:linear-gradient(165deg,#0c1624,#08111e,#101828);
+}
+.pgrid {
+  position:absolute; inset:0;
+  background-image:linear-gradient(rgba(74,144,217,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(74,144,217,.05) 1px,transparent 1px);
+  background-size:18px 18px;
+}
+.pvid  { position:absolute; inset:0; z-index:1; background:linear-gradient(165deg,#0e1c30,#080f1c,#101a28); }
+.pglow { position:absolute; bottom:0; left:0; right:0; height:55%; background:linear-gradient(to top,rgba(7,17,31,.75),transparent); z-index:2; }
+
+.ptabs { position:relative; z-index:3; display:flex; justify-content:center; gap:12px; padding:10px 12px 6px; border-bottom:1px solid rgba(74,144,217,.1); }
+.ptab  { font-size:7px; color:rgba(168,208,240,.38); font-weight:400; }
+.ptab.on { color:#fff; border-bottom:1px solid rgba(74,144,217,.8); padding-bottom:2px; }
+
+.pright { position:absolute; right:7px; top:38px; display:flex; flex-direction:column; align-items:center; gap:9px; z-index:4; }
+.pav {
+  width:28px; height:28px; border-radius:50%;
+  background:linear-gradient(135deg, var(--n2), var(--steel), var(--sky));
+  border:2px solid rgba(255,255,255,.7);
+  box-shadow:0 2px 8px rgba(0,0,0,.5), 0 0 12px rgba(34,88,168,.35);
+}
+.pic { width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center; }
+.pic svg { width:10px; height:10px; fill:#fff; }
+.pnum { font-size:6.5px; color:rgba(168,208,240,.6); text-align:center; margin-top:1px; }
+
+.pcreator { position:absolute; bottom:52px; left:8px; right:34px; z-index:4; }
+.pcname  { font-size:7.5px; font-weight:600; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.9); margin-bottom:2px; }
+.pcrole  { font-size:6.5px; color:rgba(168,208,240,.6); text-shadow:0 1px 3px rgba(0,0,0,.8); }
+
+.pbottom { position:absolute; bottom:0; left:0; right:0; z-index:4; }
+.pcta {
+  margin:0 8px 6px; border-radius:7px; padding:7px 8px; text-align:center; font-size:7.5px; font-weight:700; color:#fff;
+  position:relative; overflow:hidden;
+  background:linear-gradient(115deg, var(--n0) 0%, var(--n3) 25%, var(--steel) 50%, var(--n3) 75%, var(--n0) 100%);
+  background-size:300% 100%;
+  animation:metalSlide 4s linear infinite;
+  box-shadow:0 2px 10px rgba(7,17,31,.5), 0 1px 0 rgba(255,255,255,.12) inset;
+}
+.pcta::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent); }
+.pnav { background:rgba(6,14,24,.92); backdrop-filter:blur(10px); display:flex; justify-content:space-around; padding:7px 8px 11px; border-top:1px solid rgba(74,144,217,.08); }
+.pni  { font-size:12px; opacity:.3; } .pni.on { opacity:1; }
+.pplus {
+  border-radius:6px; padding:2px 8px; font-weight:800; font-size:12px; color:#fff; opacity:1;
+  position:relative; overflow:hidden;
+  background:linear-gradient(115deg, var(--n1), var(--n4), var(--steel), var(--n2));
+  background-size:300% 100%;
+  animation:metalSlide 5s linear infinite;
+  box-shadow:0 1px 6px rgba(7,17,31,.4), 0 1px 0 rgba(255,255,255,.12) inset;
+}
+@media(max-width:600px){ .phone:not(.mid){display:none;} .phone.mid{width:228px;transform:none;} }
+
+/* ─────────────────────────────────────────
+   VIRAL GRID  (cards navy)
+   ───────────────────────────────────────── */
+.viral-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:2px; max-width:960px; margin:60px auto 0;
+  border:1px solid rgba(255,255,255,.09); border-radius:24px; overflow:hidden;
+}
+.vcell {
+  padding:50px 42px;
+  background:linear-gradient(145deg, rgba(11,26,48,.97), rgba(7,17,31,.93));
+  position:relative; transition:background .3s;
+}
+.vcell:hover { background:linear-gradient(145deg, rgba(18,40,74,.97), rgba(11,26,48,.95)); }
+.vcell::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent); }
+.vcell:nth-child(1) { border-right:1px solid rgba(255,255,255,.07); border-bottom:1px solid rgba(255,255,255,.07); }
+.vcell:nth-child(2) { border-bottom:1px solid rgba(255,255,255,.07); }
+.vcell:nth-child(3) { border-right:1px solid rgba(255,255,255,.07); }
+.vcell-n  { font-family:'Cormorant Garamond',serif; font-size:5rem; font-weight:600; color:rgba(74,144,217,.07); line-height:1; position:absolute; top:20px; right:24px; }
+.vcell-i  { font-size:2rem; display:block; margin-bottom:16px; }
+.vcell-ti { font-family:'Cormorant Garamond',serif; font-size:1.52rem; font-weight:600; color:#fff; margin-bottom:10px; line-height:1.18; }
+.vcell-ti em {
+  font-style:italic;
+  background:linear-gradient(135deg,#fff,var(--shine),var(--ice),var(--sky),var(--shine),#fff);
+  background-size:300% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 5s linear infinite;
+}
+.vcell-p { font-size:.88rem; color:rgba(168,208,240,.48); font-weight:300; line-height:1.75; }
+@media(max-width:640px){
+  .viral-grid{grid-template-columns:1fr;}
+  .vcell:nth-child(1){border-right:none;border-bottom:1px solid rgba(255,255,255,.07);}
+  .vcell:nth-child(2){border-bottom:1px solid rgba(255,255,255,.07);}
+  .vcell:nth-child(3){border-right:none;border-bottom:1px solid rgba(255,255,255,.07);}
+}
+
+/* Quote banner */
+.vquote {
+  max-width:960px; margin:50px auto 0;
+  padding:42px 52px;
+  position:relative; overflow:hidden; border-radius:20px;
+  border:1px solid rgba(255,255,255,.1);
+  text-align:center;
+  background:linear-gradient(115deg, var(--n0) 0%, var(--n2) 20%, var(--n4) 40%, var(--steel) 55%, var(--n4) 70%, var(--n2) 85%, var(--n0) 100%);
+  background-size:300% 100%;
+  animation:metalSlide 8s linear infinite;
+  box-shadow:0 8px 32px rgba(7,17,31,.3), 0 1px 0 rgba(255,255,255,.12) inset;
+}
+.vquote::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent 5%,rgba(255,255,255,.48) 35%,rgba(255,255,255,.16) 70%,transparent 95%); }
+.vquote::after  { content:''; position:absolute; inset:0; background:linear-gradient(125deg,rgba(255,255,255,.05) 0%,transparent 50%,rgba(0,0,0,.08) 100%); pointer-events:none; }
+.vquote-bg { font-family:'Cormorant Garamond',serif; font-size:8rem; font-weight:600; color:rgba(255,255,255,.06); position:absolute; top:-18px; left:28px; line-height:1; }
+.vquote-t  { font-family:'Cormorant Garamond',serif; font-size:clamp(1.2rem,3vw,2rem); font-weight:300; font-style:italic; color:#fff; line-height:1.52; position:relative; z-index:2; }
+.vquote-t em {
+  font-style:normal; font-weight:600;
+  background:linear-gradient(135deg,#fff,var(--shine),var(--ice),var(--shine),#fff);
+  background-size:300% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 4s linear infinite;
+}
+.vquote-s { margin-top:14px; font-size:.76rem; color:rgba(255,255,255,.28); letter-spacing:.09em; position:relative; z-index:2; }
+@media(max-width:640px){ .vquote{padding:30px 24px;} }
+
+/* ─────────────────────────────────────────
+   ORBIT (split section)
+   ───────────────────────────────────────── */
+#split { display:grid; grid-template-columns:1fr 1fr; min-height:580px; background:linear-gradient(160deg,#eef5fc,#e4eff9); }
+.sl { display:flex; align-items:center; padding:80px 64px; border-right:1px solid var(--bl); }
+.sl-c { max-width:460px; }
+.sl-ti {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2rem,3.8vw,3.4rem); font-weight:300; line-height:1.08;
+  color:var(--n1); margin:14px 0 20px;
+}
+.sl-ti em {
+  font-style:italic;
+  background:linear-gradient(135deg, var(--n1) 0%, var(--n4) 22%, var(--steel) 42%, var(--sky) 58%, var(--n2) 80%, var(--n1) 100%);
+  background-size:300% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 5s linear infinite;
+}
+.sl-p { font-size:.97rem; font-weight:300; color:var(--tx2); line-height:1.78; max-width:380px; margin-bottom:30px; }
+.sr {
+  position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(145deg, var(--n0) 0%, var(--n2) 35%, var(--n4) 65%, var(--n1) 100%);
+  background-size:300% 100%;
+  animation:metalSlide 10s linear infinite;
+}
+.sr::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent); }
+.sr::after  { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 55% at 50% 42%,rgba(74,144,217,.15),transparent); pointer-events:none; }
+
+/* Orbit */
+.orb-w { position:relative; width:290px; height:290px; }
+.orb-c {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:68px; height:68px; border-radius:50%; z-index:3;
+  background:linear-gradient(145deg, var(--n0), var(--n2), var(--steel), var(--n1));
+  background-size:300% 100%; animation:metalSlide 6s linear infinite;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 40px rgba(34,88,168,.5), 0 0 80px rgba(34,88,168,.18), 0 2px 0 rgba(255,255,255,.14) inset;
+}
+.orb-c::before { content:''; position:absolute; inset:0; border-radius:50%; background:linear-gradient(135deg,rgba(255,255,255,.16) 0%,transparent 50%,rgba(0,0,0,.12) 100%); }
+.orb-c span { font-family:'Cormorant Garamond',serif; font-size:1.2rem; font-weight:600; color:#fff; position:relative; z-index:1; }
+.orb-ring { position:absolute; top:50%; left:50%; border-radius:50%; border:1px solid rgba(74,144,217,.14); }
+.orb-r1 { width:144px; height:144px; margin:-72px; animation:spin 8s linear infinite; }
+.orb-r2 { width:224px; height:224px; margin:-112px; animation:spin 14s linear infinite reverse; }
+.orb-r3 { width:290px; height:290px; margin:-145px; animation:spin 20s linear infinite; }
+.orb-dot {
+  position:absolute; width:28px; height:28px; border-radius:50%;
+  top:-14px; left:50%; margin-left:-14px;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.16) inset;
+}
+.orb-dot svg { fill:#fff; width:12px; height:12px; }
+@media(max-width:860px){ #split{grid-template-columns:1fr;} .sl{padding:56px 28px;border-right:none;border-bottom:1px solid var(--bl);} .sr{min-height:300px;} }
+
+/* ─────────────────────────────────────────
+   HOW STEPS  (light cards)
+   ───────────────────────────────────────── */
+.steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:22px; }
+.step {
+  background:linear-gradient(145deg,rgba(255,255,255,.9),rgba(230,244,255,.7));
+  border:1px solid rgba(7,17,31,.08); border-radius:var(--r); padding:36px 28px;
+  box-shadow:6px 6px 18px rgba(7,17,31,.07),-3px -3px 10px rgba(255,255,255,.9),0 1px 0 rgba(255,255,255,.8) inset;
+  transition:transform .3s,box-shadow .3s; position:relative; overflow:hidden;
+}
+/* Metal top accent */
+.step::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, var(--steel), var(--sky), var(--steel), transparent);
+  background-size:200% 100%;
+  animation:barShimmer 3s linear infinite;
+}
+.step:hover { transform:translateY(-6px); box-shadow:10px 14px 32px rgba(7,17,31,.1),-3px -3px 12px rgba(255,255,255,.95); }
+.step-n  { font-family:'Cormorant Garamond',serif; font-size:4.2rem; font-weight:600; color:rgba(7,17,31,.05); line-height:1; margin-bottom:10px; }
+.step-ti { font-family:'Cormorant Garamond',serif; font-size:1.22rem; font-weight:600; color:var(--n1); margin-bottom:8px; }
+.step-p  { font-size:.87rem; color:var(--tx2); font-weight:300; line-height:1.68; }
+
+/* ─────────────────────────────────────────
+   NETWORKS
+   ───────────────────────────────────────── */
+#networks { padding:120px 24px; background:linear-gradient(160deg,var(--bg2),var(--bg4),var(--bg2)); }
+.net-in { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+@media(max-width:860px){ .net-in{grid-template-columns:1fr;gap:44px;} }
+.net-ti { font-family:'Cormorant Garamond',serif; font-size:clamp(2rem,4vw,3.4rem); font-weight:300; line-height:1.1; margin-bottom:14px; color:var(--n1); }
+.net-ti em {
+  font-style:italic;
+  background:linear-gradient(135deg, var(--n1) 0%, var(--n4) 22%, var(--steel) 42%, var(--sky) 58%, var(--n2) 80%, var(--n1) 100%);
+  background-size:300% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 5s linear infinite;
+}
+.net-p  { font-size:1rem; font-weight:300; color:var(--tx2); line-height:1.78; margin-bottom:28px; max-width:380px; }
+
+/* Metal badge */
+.nbadge {
+  display:inline-flex; align-items:center; gap:10px;
+  border-radius:12px; padding:14px 20px;
+  position:relative; overflow:hidden;
+  background:linear-gradient(115deg, var(--n0) 0%, var(--n2) 20%, var(--n4) 40%, var(--steel) 55%, var(--n4) 70%, var(--n2) 85%, var(--n0) 100%);
+  background-size:300% 100%;
+  animation:metalSlide 7s linear infinite;
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 6px 20px rgba(7,17,31,.22), 0 1px 0 rgba(255,255,255,.1) inset;
+}
+.nbadge::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent); }
+.nbadge::after  { content:''; position:absolute; inset:0; background:linear-gradient(125deg,rgba(255,255,255,.05),transparent 50%,rgba(0,0,0,.06) 100%); pointer-events:none; }
+.nbadge-ico  { font-size:1.4rem; position:relative; z-index:1; }
+.nbadge-tx strong { display:block; font-size:.88rem; font-weight:500; color:#fff; margin-bottom:2px; position:relative; z-index:1; }
+.nbadge-tx span   { font-size:.76rem; font-weight:300; color:rgba(168,208,240,.42); position:relative; z-index:1; }
+
+/* Network pills */
+.nets { display:flex; flex-wrap:wrap; gap:9px; }
+.npill {
+  display:flex; align-items:center; gap:6px;
+  background:linear-gradient(145deg,rgba(255,255,255,.88),rgba(225,242,255,.65));
+  border:1px solid rgba(7,17,31,.09); border-radius:100px; padding:8px 15px;
+  font-size:.8rem; color:var(--n1); font-weight:400;
+  box-shadow:3px 3px 8px rgba(7,17,31,.07),-2px -2px 6px rgba(255,255,255,.8),0 1px 0 rgba(255,255,255,.7) inset;
+  transition:all .25s; cursor:default;
+}
+.npill:hover {
+  background:linear-gradient(115deg, var(--n0), var(--n2), var(--n4), var(--steel), var(--n2), var(--n0));
+  background-size:300% 100%;
+  animation:metalSlide 4s linear infinite;
+  color:#fff; border-color:rgba(255,255,255,.08);
+  transform:translateY(-3px) scale(1.04);
+  box-shadow:6px 6px 16px rgba(7,17,31,.2),0 1px 0 rgba(255,255,255,.1) inset;
+}
+.npill:hover .ndot { background:var(--sky); }
+.ndot { width:5px; height:5px; border-radius:50%; background:var(--steel); flex-shrink:0; }
+
+/* ─────────────────────────────────────────
+   METRICS  (navy section)
+   ───────────────────────────────────────── */
+.met-in { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+@media(max-width:860px){ .met-in{grid-template-columns:1fr;gap:44px;} }
+.met-ti { font-family:'Cormorant Garamond',serif; font-size:clamp(2rem,4vw,3.4rem); font-weight:300; line-height:1.1; margin-bottom:14px; }
+.met-p  { font-size:1rem; font-weight:300; color:rgba(255,255,255,.5); line-height:1.78; margin-bottom:28px; max-width:420px; }
+
+.bar-item  { margin-bottom:18px; }
+.bar-head  { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+.bar-lbl   { font-size:.84rem; font-weight:400; color:rgba(168,208,240,.72); }
+.bar-score {
+  font-family:'Cormorant Garamond',serif; font-size:1rem; font-weight:600;
+  background:linear-gradient(90deg,#fff,var(--shine),var(--sky));
+  background-size:200% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; animation:textMetal 4s linear infinite;
+}
+.bar-track { height:5px; background:rgba(255,255,255,.07); border-radius:100px; overflow:hidden; }
+.bar-fill {
+  height:100%; border-radius:100px; width:0%;
+  background:linear-gradient(90deg, var(--n2), var(--n4), var(--steel), var(--sky), var(--ice));
+  background-size:200% 100%;
+  animation:barShimmer 3s linear infinite;
+  transition:width 1.4s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 10px rgba(74,144,217,.6);
+}
+.met-foot { display:flex; align-items:center; gap:10px; margin-top:24px; padding-top:22px; border-top:1px solid rgba(255,255,255,.08); }
+.met-foot-t { font-size:.78rem; font-weight:300; color:rgba(255,255,255,.3); line-height:1.5; }
+.met-foot-t strong { color:rgba(255,255,255,.55); font-weight:500; }
+
+/* ─────────────────────────────────────────
+   PRICING
+   ───────────────────────────────────────── */
+.price-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; max-width:860px; margin:60px auto 0; }
+.pcard {
+  border-radius:24px; padding:42px;
+  position:relative; overflow:hidden; transition:transform .3s;
+  background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(224,240,255,.7));
+  box-shadow:8px 8px 24px rgba(7,17,31,.1),-4px -4px 16px rgba(255,255,255,.9),0 1px 0 rgba(255,255,255,.8) inset;
+  border:1px solid rgba(7,17,31,.08);
+}
+.pcard::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--steel),var(--sky),var(--steel),transparent); background-size:200% 100%; animation:barShimmer 4s linear infinite; }
+.pcard:hover { transform:translateY(-6px); box-shadow:14px 18px 40px rgba(7,17,31,.13),-5px -5px 18px rgba(255,255,255,.95); }
+.pcard.pro {
+  background:linear-gradient(145deg, var(--n0) 0%, var(--n2) 35%, var(--n4) 65%, var(--n1) 100%);
+  background-size:300% 100%;
+  animation:metalSlide 8s linear infinite;
+  box-shadow:12px 12px 40px rgba(7,17,31,.3),0 0 60px rgba(34,88,168,.12),0 1px 0 rgba(255,255,255,.12) inset;
+  border:1px solid rgba(255,255,255,.1);
+}
+.pcard.pro::before { background:linear-gradient(90deg,transparent 5%,rgba(255,255,255,.48) 35%,rgba(255,255,255,.15) 70%,transparent 95%); animation:none; }
+.pcard.pro::after  { content:''; position:absolute; inset:0; background:linear-gradient(125deg,rgba(255,255,255,.05),transparent 50%,rgba(0,0,0,.08) 100%); pointer-events:none; }
+.pbadge {
+  position:absolute; top:22px; right:22px; color:#fff;
+  font-size:.74rem; font-weight:600; padding:4px 14px; border-radius:100px;
+  background:linear-gradient(115deg, var(--n1), var(--steel), var(--sky), var(--steel), var(--n1));
+  background-size:300% 100%;
+  animation:metalSlide 5s linear infinite;
+  box-shadow:0 3px 12px rgba(34,88,168,.45), 0 1px 0 rgba(255,255,255,.16) inset;
+  overflow:hidden;
+}
+.pbadge::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent); }
+.pname  { font-size:.71rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; margin-bottom:18px; }
+.pname.lt { color:var(--tx3); } .pname.dk { color:rgba(255,255,255,.32); }
+.pamt   { font-family:'Cormorant Garamond',serif; font-size:3.8rem; font-weight:600; line-height:1; }
+.pamt.lt { color:var(--n1); } .pamt.dk { color:#fff; }
+.pper   { font-size:.88rem; font-weight:300; margin-bottom:4px; }
+.pper.lt { color:var(--tx3); } .pper.dk { color:rgba(255,255,255,.32); }
+.pdiv   { height:1px; margin:24px 0; }
+.pdiv.lt { background:rgba(7,17,31,.08); } .pdiv.dk { background:rgba(255,255,255,.1); }
+.pfeats { display:flex; flex-direction:column; gap:11px; margin-bottom:28px; }
+.pfeat  { display:flex; align-items:center; gap:9px; font-size:.9rem; font-weight:300; }
+.pfeat.lt { color:var(--tx2); } .pfeat.dk { color:rgba(168,208,240,.72); }
+.pchk   { width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.pchk.lt { background:rgba(34,88,168,.1); border:1px solid rgba(34,88,168,.25); }
+.pchk.dk { background:rgba(74,144,217,.14); border:1px solid rgba(74,144,217,.28); }
+.pchk svg { width:9px; height:9px; }
+/* Ghost outline btn */
+.btn-outline-nv {
+  display:block; text-align:center; padding:14px; border-radius:14px;
+  font-size:.9rem; font-weight:500; color:var(--n1);
+  border:1.5px solid rgba(7,17,31,.18); background:rgba(255,255,255,.6);
+  transition:all .2s;
+}
+.btn-outline-nv:hover { background:rgba(255,255,255,.9); border-color:rgba(7,17,31,.32); transform:translateY(-2px); }
+@media(max-width:640px){ .price-grid{grid-template-columns:1fr;} }
+
+/* ─────────────────────────────────────────
+   SOCIAL PROOF
+   ───────────────────────────────────────── */
+.proof-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px; max-width:1100px; margin:60px auto 0; }
+.prf {
+  border-radius:20px; padding:30px;
+  background:linear-gradient(145deg,rgba(255,255,255,.9),rgba(220,240,255,.64));
+  box-shadow:6px 6px 18px rgba(7,17,31,.08),-3px -3px 12px rgba(255,255,255,.88),0 1px 0 rgba(255,255,255,.75) inset;
+  border:1px solid rgba(7,17,31,.07);
+  transition:all .3s; position:relative; overflow:hidden;
+}
+.prf::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--steel),var(--sky),var(--steel),transparent); opacity:0; transition:opacity .3s; background-size:200% 100%; animation:barShimmer 3s linear infinite paused; }
+.prf:hover::before { opacity:1; animation-play-state:running; }
+.prf:hover { transform:translateY(-6px); box-shadow:12px 16px 36px rgba(7,17,31,.12),-4px -4px 14px rgba(255,255,255,.92); }
+.prf-q  { font-size:2.2rem; color:rgba(7,17,31,.1); font-family:'Cormorant Garamond',serif; font-weight:600; line-height:1; margin-bottom:4px; }
+.prf-t  { font-size:.9rem; color:var(--tx2); line-height:1.72; font-weight:300; font-style:italic; margin-bottom:20px; }
+.prf-ft { display:flex; align-items:center; gap:10px; padding-top:16px; border-top:1px solid rgba(7,17,31,.07); }
+.prf-av {
+  width:36px; height:36px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Cormorant Garamond',serif; font-weight:600; font-size:.88rem; color:#fff; flex-shrink:0;
+  background:linear-gradient(115deg, var(--n1), var(--steel), var(--sky), var(--steel), var(--n1));
+  background-size:300% 100%;
+  animation:metalSlide 7s linear infinite;
+  box-shadow:0 2px 8px rgba(7,17,31,.22), 0 1px 0 rgba(255,255,255,.12) inset;
+  position:relative; overflow:hidden;
+}
+.prf-av::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent); }
+.prf-nm { font-size:.86rem; font-weight:500; color:var(--n1); }
+.prf-ro { font-size:.75rem; color:var(--tx3); }
+.prf-st {
+  font-size:.8rem;
+  background:linear-gradient(90deg, var(--n2), var(--steel), var(--sky));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+/* Stat card */
+.prf.stat { display:flex; flex-direction:column; justify-content:space-between; }
+.stn {
+  font-family:'Cormorant Garamond',serif; font-size:5rem; font-weight:600; line-height:1;
+  background:linear-gradient(135deg, var(--n1) 0%, var(--n3) 25%, var(--steel) 45%, var(--sky) 62%, var(--n2) 80%, var(--n1) 100%);
+  background-size:250% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 5s linear infinite;
+}
+.stbar { height:3px; border-radius:2px; background:rgba(7,17,31,.08); overflow:hidden; margin-top:14px; }
+.stfil {
+  height:100%; border-radius:2px; width:78%;
+  background:linear-gradient(90deg, var(--n2), var(--n4), var(--steel), var(--sky));
+  background-size:200% 100%;
+  animation:barShimmer 3s linear infinite;
+  box-shadow:0 0 6px rgba(34,88,168,.35);
+}
+.stcmp { display:flex; justify-content:space-between; margin-top:7px; }
+.stcmp span { font-size:.74rem; color:var(--tx3); }
+.stcmp strong {
+  font-size:.74rem; font-weight:600;
+  background:linear-gradient(90deg,var(--n1),var(--steel));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+/* ─────────────────────────────────────────
+   FAQ
+   ───────────────────────────────────────── */
+.faq-list { max-width:760px; margin:52px auto 0; display:flex; flex-direction:column; gap:8px; }
+.faq-item {
+  border-radius:14px; overflow:hidden;
+  background:linear-gradient(145deg,rgba(255,255,255,.9),rgba(220,240,255,.62));
+  box-shadow:4px 4px 12px rgba(7,17,31,.07),-2px -2px 8px rgba(255,255,255,.85),0 1px 0 rgba(255,255,255,.7) inset;
+  border:1px solid rgba(7,17,31,.07); transition:all .25s;
+}
+.faq-item.open {
+  background:linear-gradient(145deg, var(--n0) 0%, var(--n2) 35%, var(--n4) 65%, var(--n1) 100%);
+  background-size:300% 100%;
+  animation:metalSlide 8s linear infinite;
+  box-shadow:8px 8px 24px rgba(7,17,31,.2),0 1px 0 rgba(255,255,255,.1) inset;
+  border-color:rgba(255,255,255,.08);
+}
+.faq-q  { padding:19px 22px; display:flex; justify-content:space-between; align-items:center; gap:16px; cursor:pointer; }
+.faq-q span { font-size:.93rem; font-weight:400; transition:color .2s; }
+.faq-item:not(.open) .faq-q span { color:var(--n1); }
+.faq-item.open .faq-q span { color:#fff; }
+.faq-ico {
+  width:24px; height:24px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; line-height:1; transition:transform .3s;
+  background:linear-gradient(135deg, var(--n1), var(--n4), var(--steel));
+  box-shadow:2px 2px 6px rgba(7,17,31,.15),0 1px 0 rgba(255,255,255,.1) inset;
+  color:rgba(74,144,217,.9); border:1px solid rgba(255,255,255,.08);
+  position:relative; overflow:hidden;
+}
+.faq-ico::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent); }
+.faq-item.open .faq-ico { transform:rotate(45deg); }
+.faq-body { max-height:0; overflow:hidden; transition:max-height .35s ease; }
+.faq-item.open .faq-body { max-height:220px; }
+.faq-a   { padding:0 22px 20px; font-size:.88rem; line-height:1.75; font-weight:300; }
+.faq-item:not(.open) .faq-a { color:var(--tx2); }
+.faq-item.open .faq-a { color:rgba(168,208,240,.55); }
+
+/* ─────────────────────────────────────────
+   FINAL CTA  (big metal navy)
+   ───────────────────────────────────────── */
+#cta {
+  padding:160px 24px; text-align:center; position:relative; overflow:hidden;
+  background:linear-gradient(155deg, var(--n0) 0%, var(--n2) 30%, var(--n4) 58%, var(--n1) 100%);
+  background-size:300% 100%;
+  animation:metalSlide 10s linear infinite;
+}
+#cta::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent 5%,rgba(255,255,255,.45) 35%,rgba(255,255,255,.15) 70%,transparent 95%); }
+#cta::after  { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(74,144,217,.12),transparent 68%); pointer-events:none; }
+.cta-h {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(3rem,8vw,6.5rem); font-weight:300; line-height:.97; letter-spacing:-.02em;
+  margin-bottom:22px; color:#fff; position:relative; z-index:2;
+}
+.cta-h em {
+  font-style:italic;
+  background:linear-gradient(135deg,#fff 0%,var(--shine) 25%,var(--ice) 45%,var(--sky) 60%,var(--shine) 80%,#fff 100%);
+  background-size:300% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 4s linear infinite;
+}
+.cta-s  { font-size:1.05rem; color:rgba(255,255,255,.42); font-weight:300; margin-bottom:48px; position:relative; z-index:2; }
+.cta-bt { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-bottom:44px; position:relative; z-index:2; }
+.store-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; position:relative; z-index:2; }
+.sbtn {
+  display:flex; align-items:center; gap:12px;
+  border-radius:14px; padding:14px 22px;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+  transition:all .2s; position:relative; overflow:hidden;
+}
+.sbtn::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent); }
+.sbtn:hover { background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.2); transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.25); }
+.sbtn svg { width:20px; height:20px; fill:#fff; flex-shrink:0; }
+.ssub  { font-size:.68rem; color:rgba(255,255,255,.38); text-align:left; }
+.snm   { font-family:'Cormorant Garamond',serif; font-size:.95rem; font-weight:600; color:#fff; }
+
+/* ─────────────────────────────────────────
+   FOOTER
+   ───────────────────────────────────────── */
+footer {
+  padding:58px 56px 32px;
+  border-top:1px solid var(--bl);
+  background:linear-gradient(160deg,#e4eff8,#dceaf5,#e8f2fb);
+}
+.footer-grid { display:grid; grid-template-columns:1.8fr 1fr 1fr 1fr; gap:40px; max-width:1100px; margin:0 auto 42px; }
+.fbrand { display:flex; flex-direction:column; gap:14px; }
+.flogo  { font-family:'Cormorant Garamond',serif; font-weight:600; font-size:1.4rem; color:var(--n1); }
+.flogo em {
+  font-style:italic;
+  background:linear-gradient(135deg, var(--n1) 0%, var(--n4) 25%, var(--steel) 45%, var(--sky) 60%, var(--n2) 80%, var(--n1) 100%);
+  background-size:300% 100%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textMetal 6s linear infinite;
+}
+.ftag { font-size:.85rem; color:var(--tx2); font-weight:300; line-height:1.6; max-width:210px; }
+.fnl  { display:flex; gap:8px; margin-top:6px; }
+.fnl input { flex:1; border:1px solid rgba(7,17,31,.14); border-radius:10px; padding:9px 14px; font-size:1rem; background:rgba(255,255,255,.7); color:var(--n1); font-family:'DM Sans',sans-serif; outline:none; transition:border-color .2s; }
+.fnl input:focus { border-color:rgba(26,54,104,.4); background:rgba(255,255,255,.92); }
+.fnl input::placeholder { color:var(--tx3); }
+.fnl button {
+  border:none; border-radius:10px; padding:9px 16px; font-size:.9rem; font-weight:700; cursor:pointer; color:#fff; font-family:'DM Sans',sans-serif;
+  background:linear-gradient(115deg, var(--n1), var(--n3), var(--steel), var(--n2));
+  background-size:300% 100%;
+  animation:metalSlide 6s linear infinite;
+  box-shadow:0 3px 12px rgba(7,17,31,.2),0 1px 0 rgba(255,255,255,.12) inset;
+  position:relative; overflow:hidden;
+  transition:transform .2s,box-shadow .2s;
+}
+.fnl button::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.38),transparent); }
+.fnl button:hover { transform:translateY(-1px); box-shadow:0 5px 18px rgba(7,17,31,.28); }
+.fcol h4  { font-size:.71rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--tx3); margin-bottom:16px; }
+.fcol a   { display:block; font-size:.85rem; color:var(--tx2); margin-bottom:10px; transition:color .2s; font-weight:300; }
+.fcol a:hover { color:var(--n1); }
+.fbot { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; padding-top:20px; border-top:1px solid var(--bl); }
+.fcopy { font-size:.77rem; color:var(--tx3); }
+.fsocs { display:flex; gap:9px; }
+.fsi {
+  width:30px; height:30px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.75rem; font-weight:700; color:rgba(255,255,255,.55);
+  position:relative; overflow:hidden;
+  background:linear-gradient(115deg, var(--n1), var(--n3), var(--steel), var(--n2));
+  background-size:300% 100%;
+  animation:metalSlide 7s linear infinite;
+  box-shadow:2px 2px 6px rgba(7,17,31,.14),0 1px 0 rgba(255,255,255,.1) inset;
+  border:1px solid rgba(255,255,255,.07); transition:transform .2s,box-shadow .2s;
+}
+.fsi::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent); }
+.fsi:hover { transform:translateY(-2px); box-shadow:4px 4px 12px rgba(7,17,31,.2); color:#fff; }
+@media(max-width:860px){ .footer-grid{grid-template-columns:1fr 1fr;gap:28px;} footer{padding:42px 22px 26px;} }
+@media(max-width:480px){ .footer-grid{grid-template-columns:1fr;} .fbot{flex-direction:column;gap:14px;text-align:center;} }
+
+/* ─────────────────────────────────────────
+   LIVE NOTIF
+   ───────────────────────────────────────── */
+.lnotif {
+  position:fixed; bottom:24px; left:24px; z-index:700;
+  border-radius:14px; padding:12px 16px; display:flex; align-items:center; gap:10px; min-width:240px;
+  transform:translateX(-120%); transition:transform .5s cubic-bezier(.34,1.56,.64,1);
+  background:linear-gradient(115deg, var(--n0) 0%, var(--n2) 25%, var(--n4) 50%, var(--n2) 75%, var(--n0) 100%);
+  background-size:300% 100%;
+  animation:metalSlide 6s linear infinite;
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:8px 8px 24px rgba(7,17,31,.32),0 1px 0 rgba(255,255,255,.1) inset;
+  overflow:hidden;
+}
+.lnotif::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent); }
+.lnotif.show { transform:translateX(0); }
+.lndot { width:7px; height:7px; border-radius:50%; background:var(--sky); flex-shrink:0; box-shadow:0 0 8px rgba(74,144,217,.7); animation:lnp 2s infinite; }
+@keyframes lnp { 0%,100%{opacity:1} 50%{opacity:.35} }
+.lnmain { font-size:.8rem; font-weight:500; color:#fff; position:relative; z-index:1; }
+.lnsub  { font-size:.71rem; color:rgba(168,208,240,.38); margin-top:1px; position:relative; z-index:1; }
+.lnx    { color:rgba(168,208,240,.3); font-size:.85rem; cursor:pointer; margin-left:4px; transition:color .2s; position:relative; z-index:1; }
+.lnx:hover { color:rgba(168,208,240,.7); }
+
+/* STICKY CTA */
+.sctabtn {
+  position:fixed; bottom:24px; right:24px; z-index:700;
+  color:#fff; padding:12px 22px; border-radius:100px;
+  font-size:.84rem; font-weight:600;
+  display:inline-flex; align-items:center; gap:8px;
+  background:linear-gradient(115deg, var(--n0) 0%, var(--n2) 20%, var(--n4) 40%, var(--steel) 55%, var(--n4) 70%, var(--n2) 85%, var(--n0) 100%);
+  background-size:300% 100%;
+  animation:metalSlide 6s linear infinite;
+  box-shadow:0 8px 28px rgba(7,17,31,.38),0 1px 0 rgba(255,255,255,.12) inset;
+  transform:translateY(100px); opacity:0; transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .4s;
+  overflow:hidden;
+}
+.sctabtn::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent); }
+.sctabtn::after  { content:''; position:absolute; inset:0; background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.08) 45%,rgba(255,255,255,.03) 55%,transparent 70%); animation:shimmerPass 3s ease infinite; }
+.sctabtn.show  { transform:translateY(0); opacity:1; }
+.sctabtn:hover { transform:translateY(-2px); box-shadow:0 12px 36px rgba(7,17,31,.45); }
+
+/* ─────────────────────────────────────────
+   REVEAL ANIMATION
+   ───────────────────────────────────────── */
+.rev { opacity:0; transform:translateY(30px); transition:opacity .68s ease,transform .68s ease; }
+.rev.vis { opacity:1; transform:translateY(0); }
+.rd1{transition-delay:.07s} .rd2{transition-delay:.14s} .rd3{transition-delay:.21s}
+.rd4{transition-delay:.28s} .rd5{transition-delay:.35s}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE FIXES COMPLETOS — Mobile, Tablet, iPhone, Safari
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Prevenir scroll horizontal global */
+html, body { max-width:100%; overflow-x:hidden; }
+
+/* iOS: Prevent tap highlight */
+* { -webkit-tap-highlight-color:transparent; }
+
+/* iOS: Better touch scrolling */
+body { -webkit-overflow-scrolling:touch; }
+
+/* ── TABLET (768–1024px) ────────────────────────────────────── */
+@media(max-width:1024px) {
+  nav { padding:14px 28px; }
+  .nav-links { gap:20px; }
+  .nav-links a { font-size:.82rem; }
+  
+  #hero { padding:110px 28px 70px; }
+  h1 { font-size:clamp(2.8rem,7vw,5.5rem); }
+  .hero-stats { gap:32px; margin-top:52px; }
+  .stat-n { font-size:2.2rem; }
+  
+  .wrap { padding:0 8px; }
+  
+  /* Sections padding tablet */
+  .sec-lt, .sec-lt2, .sec-wh, .sec-nv { padding:80px 28px; }
+  #screens { padding:80px 28px 100px; }
+  
+  /* Split → stack */
+  #split { grid-template-columns:1fr; min-height:auto; }
+  .sl { padding:60px 36px; border-right:none; border-bottom:1px solid var(--bl); }
+  .sr { min-height:320px; }
+  
+  /* Grids → 1 col */
+  .net-in, .met-in { grid-template-columns:1fr; gap:44px; }
+  .viral-grid { grid-template-columns:1fr; }
+  .vcell:nth-child(1) { border-right:none; border-bottom:1px solid rgba(255,255,255,.07); }
+  .vcell:nth-child(2) { border-bottom:1px solid rgba(255,255,255,.07); }
+  .vcell:nth-child(3) { border-right:none; border-bottom:1px solid rgba(255,255,255,.07); }
+  
+  /* Phones */
+  .phones-row { gap:14px; }
+  .phone { width:170px; }
+  .phone.mid { width:196px; transform:translateY(-16px); }
+  
+  /* Footer */
+  .footer-grid { grid-template-columns:1fr 1fr; gap:28px; }
+  footer { padding:44px 28px 26px; }
+}
+
+/* ── MOBILE (hasta 768px) ────────────────────────────────────── */
+@media(max-width:768px) {
+  /* NAV */
+  nav { padding:14px 18px; }
+  .nav-links { display:none; }
+  .nav-right { gap:8px; }
+  .nav-ghost { display:none; }
+  .btn-m { padding:10px 18px; font-size:.82rem; }
+  .btn-m::before { animation:none; } /* Save battery */
+  
+  /* HERO */
+  #hero { padding:100px 18px 60px; min-height:100dvh; }
+  h1 { font-size:clamp(2.6rem,10vw,4rem); letter-spacing:-.018em; }
+  .hero-sub { font-size:.95rem; max-width:100%; }
+  .hero-btns { flex-direction:column; align-items:stretch; gap:10px; }
+  .hero-btns .btn-m, .hero-btns .btn-m-lg { justify-content:center; padding:15px 24px; font-size:.95rem; border-radius:14px; }
+  .hero-btns .btn-g { justify-content:center; padding:14px 24px; font-size:.95rem; border-radius:14px; }
+  .hero-stats { gap:20px; margin-top:40px; flex-wrap:wrap; justify-content:center; }
+  .stat { min-width:70px; }
+  .stat-n { font-size:2rem; }
+  .stat-l { font-size:.65rem; }
+  .stat-div { display:none; }
+  .hero-blob { opacity:.25; } /* Menos pesado en mobile */
+  .hero-grid { display:none; } /* Quitar grid en mobile */
+  
+  /* PRESS BAR */
+  .press-bar { padding:16px 18px; }
+  .press-in { gap:14px; }
+  .press-logos { gap:14px; }
+  .press-logo { font-size:.8rem; }
+  
+  /* PHONES SECTION */
+  #screens { padding:72px 18px 80px; }
+  .phones-row { gap:10px; }
+  .phone { width:148px; border-radius:28px; }
+  .phone.mid { width:172px; transform:translateY(-14px); border-radius:30px; }
+  .phone:hover, .phone.mid:hover { transform:none; } /* No hover en touch */
+  .ptab { font-size:6px; }
+  .pcta { font-size:6.5px; padding:5px 6px; margin:0 6px 5px; }
+  .pplus { font-size:10px; }
+  .pni { font-size:10px; }
+  
+  /* VIRAL */
+  .sec-nv { padding:72px 18px; }
+  .viral-grid { margin-top:40px; border-radius:16px; }
+  .vcell { padding:36px 28px; }
+  .vcell-ti { font-size:1.3rem; }
+  .vquote { padding:28px 22px; margin-top:36px; border-radius:14px; }
+  .vquote-t { font-size:1.1rem; }
+  .vquote-bg { font-size:5rem; top:-10px; left:18px; }
+  
+  /* SPLIT */
+  #split { grid-template-columns:1fr; min-height:auto; }
+  .sl { padding:56px 18px; border-right:none; border-bottom:1px solid var(--bl); }
+  .sl-c { max-width:100%; }
+  .sl-ti { font-size:clamp(1.8rem,7vw,2.8rem); }
+  .sr { min-height:260px; padding:32px; }
+  .orb-w { width:220px; height:220px; }
+  .orb-r1 { width:110px; height:110px; margin:-55px; }
+  .orb-r2 { width:170px; height:170px; margin:-85px; }
+  .orb-r3 { width:220px; height:220px; margin:-110px; }
+  .orb-c { width:54px; height:54px; }
+  
+  /* HOW */
+  .sec-lt, .sec-lt2, .sec-wh { padding:72px 18px; }
+  .steps { gap:14px; }
+  .step { padding:28px 22px; }
+  .step-n { font-size:3rem; }
+  
+  /* NETWORKS */
+  #networks { padding:72px 18px; }
+  .net-in { grid-template-columns:1fr; gap:36px; }
+  .net-ti { font-size:clamp(1.8rem,7vw,2.8rem); }
+  .nets { gap:7px; }
+  .npill { padding:7px 12px; font-size:.76rem; }
+  .npill:hover { transform:none; animation:none; } /* No hover en touch */
+  
+  /* METRICS */
+  .met-in { grid-template-columns:1fr; gap:36px; }
+  .met-ti { font-size:clamp(1.8rem,7vw,2.8rem); }
+  
+  /* PRICING */
+  .price-grid { grid-template-columns:1fr; gap:14px; }
+  .pcard { padding:32px 26px; border-radius:18px; }
+  .pamt { font-size:3rem; }
+  
+  /* PROOF */
+  .proof-grid { grid-template-columns:1fr; gap:14px; }
+  .prf { padding:24px 20px; border-radius:16px; }
+  .stn { font-size:4rem; }
+  
+  /* FAQ */
+  .faq-list { margin-top:36px; }
+  .faq-q span { font-size:.88rem; }
+  .faq-a { font-size:.85rem; }
+  
+  /* CTA */
+  #cta { padding:100px 18px; }
+  .cta-h { font-size:clamp(2.4rem,10vw,4rem); }
+  .cta-s { font-size:.95rem; }
+  .cta-bt { flex-direction:column; align-items:center; }
+  .cta-bt .btn-m { width:100%; max-width:340px; justify-content:center; border-radius:14px; font-size:.95rem; padding:16px 24px; }
+  .store-row { gap:10px; }
+  .sbtn { padding:12px 16px; border-radius:12px; }
+  
+  /* FOOTER */
+  footer { padding:44px 18px 24px; }
+  .footer-grid { grid-template-columns:1fr 1fr; gap:24px; }
+  .fbot { flex-direction:column; gap:14px; text-align:center; }
+  
+  /* LIVE NOTIF — más pequeña y no interfiere con sticky */
+  .lnotif { min-width:200px; max-width:calc(100vw - 120px); bottom:80px; left:12px; padding:10px 12px; }
+  .lnmain { font-size:.76rem; }
+  .lnsub  { font-size:.68rem; }
+  
+  /* STICKY CTA — más compacto */
+  .sctabtn { bottom:14px; right:12px; padding:10px 16px; font-size:.8rem; border-radius:100px; }
+  
+  /* Scroll hint */
+  .scroll-hint { bottom:20px; }
+  
+  /* Headings */
+  .sh { font-size:clamp(1.9rem,7vw,3rem); }
+  .sp, .sp-lt { font-size:.95rem; margin-bottom:40px; }
+  .eyebrow { font-size:.68rem; }
+  
+  /* Sections generic */
+  .wrap { padding:0 4px; }
+}
+
+/* ── SMALL MOBILE — iPhone SE, 375px ─────────────────────────── */
+@media(max-width:390px) {
+  nav { padding:12px 14px; }
+  .btn-m { padding:9px 14px; font-size:.8rem; }
+  
+  h1 { font-size:clamp(2.2rem,11vw,3rem); letter-spacing:-.015em; }
+  .hero-sub { font-size:.9rem; }
+  
+  .phone { width:130px; border-radius:24px; }
+  .phone.mid { width:150px; }
+  
+  .orb-w { width:180px; height:180px; }
+  .orb-r1 { width:90px;  height:90px;  margin:-45px; }
+  .orb-r2 { width:140px; height:140px; margin:-70px; }
+  .orb-r3 { width:180px; height:180px; margin:-90px; }
+  
+  .hero-stats { gap:14px; }
+  .stat-n { font-size:1.7rem; }
+  
+  .vcell { padding:28px 20px; }
+  .vcell-ti { font-size:1.2rem; }
+  
+  .pcard { padding:26px 20px; }
+  .pamt { font-size:2.6rem; }
+  
+  .footer-grid { grid-template-columns:1fr; }
+  
+  .lnotif { max-width:calc(100vw - 100px); }
+  .sctabtn { font-size:.76rem; padding:9px 14px; }
+  
+  .cta-h { font-size:clamp(2rem,10vw,3rem); }
+  .hero-btns .btn-m, .hero-btns .btn-m-lg { font-size:.88rem; padding:13px 18px; }
+}
+
+/* ── SAFARI iOS ESPECÍFICO ───────────────────────────────────── */
+
+/* Fix safe area insets para iPhone con notch/Dynamic Island */
+#hero { padding-top:max(110px, calc(80px + env(safe-area-inset-top))); }
+nav { padding-top:max(14px, env(safe-area-inset-top)); padding-left:max(14px, env(safe-area-inset-left)); padding-right:max(14px, env(safe-area-inset-right)); }
+footer { padding-bottom:max(24px, env(safe-area-inset-bottom)); }
+.sctabtn { bottom:max(14px, env(safe-area-inset-bottom)); right:max(12px, env(safe-area-inset-right)); }
+.lnotif  { bottom:max(80px, calc(70px + env(safe-area-inset-bottom))); left:max(12px, env(safe-area-inset-left)); }
+
+/* Fix: animations pesadas reducidas en mobile para no quemar batería */
+@media(max-width:768px) {
+  .sec-nv {
+    background:linear-gradient(155deg, var(--n0) 0%, var(--n2) 30%, var(--n4) 58%, var(--n1) 100%);
+    animation:none; /* Quitar metalSlide en sección navy en mobile */
+  }
+  #cta {
+    background:linear-gradient(155deg, var(--n0) 0%, var(--n2) 30%, var(--n4) 58%, var(--n1) 100%);
+    animation:none;
+  }
+  /* Reducir shimmer en botones móvil */
+  .btn-m::before { animation-duration:6s; }
+  .pcta { animation-duration:8s; }
+  .pplus { animation-duration:10s; }
+}
+
+/* iOS: Fix backdrop-filter en Safari < 15 */
+@supports not (backdrop-filter: blur(1px)) {
+  nav { background:rgba(238,245,252,.97) !important; }
+  .press-bar { background:rgba(244,249,255,.96) !important; }
+}
+
+/* Fix: Prevent rubber-band overscroll bleed on iOS */
+#hero::before {
+  content:''; position:absolute;
+  top:-100px; left:0; right:0; height:100px;
+  background:linear-gradient(160deg, #eef5fc 0%, #f4f9ff 30%, #e0edf8 65%, #ebf3fb 100%);
+}
+
+/* iOS: Fix para el orbit que puede desbordarse */
+.sr { overflow:hidden; }
+
+/* Fix: Press logos overflow en mobile */
+.press-logos { overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none; }
+.press-logos::-webkit-scrollbar { display:none; }
+
+/* Fix: Texto que puede quedar partido en mobile */
+h1, .sh, .cta-h, .vcell-ti, .sh-lt, .net-ti, .met-ti { word-break:break-word; overflow-wrap:break-word; }
+
+/* Fix: Inputs iOS - eliminar estilos nativos problemáticos */
+input[type="email"] {
+  -webkit-appearance:none; -moz-appearance:none; appearance:none;
+  border-radius:10px;
+  font-size:1rem !important; /* Fuerza 16px → previene zoom iOS */
+}
+
+/* Fix: Buttons iOS - eliminar estilos nativos */  
+button { -webkit-appearance:none; border:none; }
+
+/* Fix: position:fixed en iOS Safari con transform padres */
+.lnotif, .sctabtn { will-change:transform; }
+
+/* Fix: Scroll suave en iOS */
+html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
+
+/* Fix: Prueba de imagen de orbit dots en muy pequeño */
+@media(max-width:390px) {
+  .orb-dot { width:22px; height:22px; top:-11px; margin-left:-11px; }
+  .orb-dot svg { width:10px; height:10px; }
+}
+
+/* Mejora accesibilidad touch - targets mínimo 44px */
+.nav-links a { min-height:44px; display:flex; align-items:center; }
+.faq-q { min-height:56px; }
+.npill { cursor:default; user-select:none; }
+.sbtn { min-height:54px; }
+
+/* Fix: hero badge no se corta en mobile pequeño */
+.hero-badge { flex-wrap:nowrap; white-space:nowrap; }
+@media(max-width:390px) { .hero-badge { font-size:.65rem; padding:6px 12px; } }
+
+
+/* Touch action para mejor scroll en iOS */
+.phones-row { touch-action:pan-y; }
+.nets { touch-action:pan-y pan-x; }
+.faq-list { touch-action:pan-y; }
+.proof-grid { touch-action:pan-y; }
+
+
+/* Desactivar hover effects en dispositivos touch */
+.is-touch .npill:hover,
+.is-touch .step:hover,
+.is-touch .prf:hover,
+.is-touch .pcard:hover,
+.is-touch .sbtn:hover,
+.is-touch .btn-m:hover,
+.is-touch .phone:hover,
+.is-touch .phone.mid:hover { transform:none !important; }
+
+.is-touch .vcell:hover { background:linear-gradient(145deg, rgba(11,26,48,.97), rgba(7,17,31,.93)) !important; }
+
+</style>
+</head>
+<body>
+
+<!-- LIVE NOTIF -->
+<div class="lnotif" id="lnotif">
+  <div class="lndot"></div>
+  <div style="position:relative;z-index:1">
+    <div class="lnmain" id="lnmain">@laura_m consiguió 14 clientes nuevos</div>
+    <div class="lnsub"  id="lnsub">hace 2 min · Ximvid</div>
+  </div>
+  <div class="lnx" onclick="this.parentElement.classList.remove('show')">✕</div>
+</div>
+
+<!-- STICKY CTA -->
+<a href="#cta" class="sctabtn" id="sctabtn">Empieza gratis →</a>
+
+<!-- ══ NAV ══ -->
+<nav id="mainnav">
+  <a href="#" class="logo">xim<em>vid</em></a>
+  <div class="nav-links">
+    <a href="#viral">Por qué funciona</a>
+    <a href="#networks">Redes</a>
+    <a href="#pricing">Precio</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center">
+    <a href="#" class="nav-ghost">Iniciar sesión</a>
+    <a href="#cta" class="btn-m">Empieza gratis</a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section id="hero">
+  <div class="hero-blob bA"></div>
+  <div class="hero-blob bB"></div>
+  <div class="hero-blob bC"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-badge">
+    <span class="bdot"></span>
+    Viralidad desde el primer video
+  </div>
+
+  <h1>
+    Un video.<br>
+    <span class="hg">Crecimiento</span><br>
+    <span class="hdim">exponencial.</span>
+  </h1>
+
+  <p class="hero-sub">
+    Cada video que publicas hace crecer <strong>todas tus redes al mismo tiempo.</strong>
+    Tus espectadores se convierten en seguidores de Instagram, clientes de tu tienda
+    y contactos de WhatsApp. <strong>Con un solo toque.</strong>
+  </p>
+
+  <div class="hero-btns">
+    <a href="#cta" class="btn-m btn-m-lg">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9L5 21V3z"/></svg>
+      Empieza gratis — sin tarjeta
+    </a>
+    <a href="#viral" class="btn-g">
+      ¿Cómo funciona?
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-n">29</span><span class="stat-l">Redes conectadas</span></div>
+    <div class="stat-div"></div>
+    <div class="stat"><span class="stat-n">1</span><span class="stat-l">Solo un toque</span></div>
+    <div class="stat-div"></div>
+    <div class="stat"><span class="stat-n">12×</span><span class="stat-l">Más conversión</span></div>
+    <div class="stat-div"></div>
+    <div class="stat"><span class="stat-n">0€</span><span class="stat-l">Para empezar</span></div>
+  </div>
+
+  <div class="scroll-hint"><div class="scroll-bar"></div><span>Scroll</span></div>
+</section>
+
+<!-- PRESS BAR -->
+<div class="press-bar rev">
+  <div class="press-in">
+    <span class="press-lbl">Creadores desde</span>
+    <div class="press-logos">
+      <span class="press-logo">Instagram</span>
+      <span class="press-logo">TikTok</span>
+      <span class="press-logo">YouTube</span>
+      <span class="press-logo">LinkedIn</span>
+      <span class="press-logo">Spotify</span>
+      <span class="press-logo">Etsy</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PHONES ══ -->
+<section id="screens">
+  <div class="wrap" style="text-align:center">
+    <span class="eyebrow rev">El feed</span>
+    <h2 class="sh rev rd1" style="text-align:center;max-width:680px;margin:0 auto 14px">Donde cada video se convierte<br>en <em>negocio en tiempo real</em></h2>
+    <p class="sp rev rd2" style="margin:0 auto;text-align:center">El único feed donde el botón de venta y tus 29 redes están dentro del propio video.</p>
+  </div>
+  <div class="phones-row">
+
+    <!-- Phone 1 -->
+    <div class="phone-wrap rev rd1">
+      <div class="phone">
+        <div class="pscreen">
+          <div class="pvid"></div><div class="pglow"></div><div class="pgrid"></div>
+          <div class="ptabs"><span class="ptab">Para ti</span><span class="ptab on">Siguiendo</span><span class="ptab">Cerca</span></div>
+          <div class="pright">
+            <div class="pav"></div>
+            <div><div class="pic"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg></div><div class="pnum">12K</div></div>
+            <div><div class="pic"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.19a8.12 8.12 0 004.85 1.56V6.3a4.85 4.85 0 01-1.08-.39z"/></svg></div><div class="pnum">8.4K</div></div>
+            <div><div class="pic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="pnum">Wa</div></div>
+          </div>
+          <div class="pcreator"><div class="pcname">@maria.diseño</div><div class="pcrole">Diseñadora freelance · Madrid</div></div>
+          <div class="pbottom">
+            <div class="pcta">✦ Ver mi portfolio →</div>
+            <div class="pnav"><span class="pni on">⌂</span><span class="pni">⌕</span><span class="pplus">+</span><span class="pni">◻</span><span class="pni">◯</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-caption">Feed principal</div>
+    </div>
+
+    <!-- Phone 2 MID -->
+    <div class="phone-wrap rev rd2">
+      <div class="phone mid">
+        <div class="pscreen">
+          <div class="pvid" style="background:linear-gradient(165deg,#0c1c38,#080f1e,#10182c)"></div><div class="pglow"></div><div class="pgrid"></div>
+          <div class="ptabs"><span class="ptab on">Para ti</span><span class="ptab">Siguiendo</span><span class="ptab">Cerca</span></div>
+          <div class="pright" style="gap:7px">
+            <div class="pav"></div>
+            <div><div class="pic"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg></div><div class="pnum">45K</div></div>
+            <div><div class="pic"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.19a8.12 8.12 0 004.85 1.56V6.3a4.85 4.85 0 01-1.08-.39z"/></svg></div><div class="pnum">28K</div></div>
+            <div><div class="pic"><svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div class="pnum">80K</div></div>
+            <div><div class="pic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="pnum">Wa</div></div>
+            <div><div class="pic"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></div><div class="pnum">15K</div></div>
+          </div>
+          <div class="pcreator"><div class="pcname">@coach.sara</div><div class="pcrole">Coach · 29 redes activas</div></div>
+          <div class="pbottom">
+            <div class="pcta">⭐ Reserva tu sesión →</div>
+            <div class="pnav"><span class="pni on">⌂</span><span class="pni">⌕</span><span class="pplus">+</span><span class="pni">◻</span><span class="pni">◯</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-caption">29 redes en un video</div>
+    </div>
+
+    <!-- Phone 3: Stats -->
+    <div class="phone-wrap rev rd3">
+      <div class="phone">
+        <div class="pscreen">
+          <div class="pgrid"></div>
+          <div style="background:linear-gradient(165deg,#0c1624,#08111e,#101828);width:100%;height:100%;display:flex;flex-direction:column;padding:12px 10px;gap:8px;position:relative">
+            <div style="font-size:7px;color:rgba(100,170,230,.38);letter-spacing:.08em;text-transform:uppercase;text-align:center;padding-bottom:7px;border-bottom:1px solid rgba(74,144,217,.1);position:relative;z-index:2">Estadísticas · semana</div>
+            <div style="text-align:center;padding:8px 0 4px;position:relative;z-index:2">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;line-height:1;background:linear-gradient(135deg,#fff,#c8e4f8,#60a8e8);background-size:200% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:textMetal 4s linear infinite">12.4<span style="font-size:.9rem">%</span></div>
+              <div style="font-size:6px;color:rgba(100,170,230,.35);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Tasa de conversión</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px;position:relative;z-index:2">
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:6.5px;color:rgba(120,180,240,.55)">Instagram</span><span style="font-size:6.5px;color:rgba(180,220,255,.8)">247</span></div><div style="height:2.5px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden"><div style="height:100%;width:82%;background:linear-gradient(90deg,#0b1a30,#1a3668,#2258a8,#4a90d9);background-size:200% 100%;animation:barShimmer 3s linear infinite;border-radius:2px;box-shadow:0 0 4px rgba(74,144,217,.5)"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:6.5px;color:rgba(120,180,240,.55)">WhatsApp</span><span style="font-size:6.5px;color:rgba(180,220,255,.8)">184</span></div><div style="height:2.5px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden"><div style="height:100%;width:70%;background:linear-gradient(90deg,#0b1a30,#1a3668,#2258a8,#4a90d9);background-size:200% 100%;animation:barShimmer 3.5s linear infinite;border-radius:2px;box-shadow:0 0 4px rgba(74,144,217,.5)"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:6.5px;color:rgba(120,180,240,.55)">TikTok</span><span style="font-size:6.5px;color:rgba(180,220,255,.8)">139</span></div><div style="height:2.5px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden"><div style="height:100%;width:56%;background:linear-gradient(90deg,#0b1a30,#1a3668,#2258a8,#4a90d9);background-size:200% 100%;animation:barShimmer 4s linear infinite;border-radius:2px;box-shadow:0 0 4px rgba(74,144,217,.5)"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:6.5px;color:rgba(120,180,240,.55)">YouTube</span><span style="font-size:6.5px;color:rgba(180,220,255,.8)">98</span></div><div style="height:2.5px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden"><div style="height:100%;width:40%;background:linear-gradient(90deg,#0b1a30,#1a3668,#2258a8,#4a90d9);background-size:200% 100%;animation:barShimmer 2.8s linear infinite;border-radius:2px;box-shadow:0 0 4px rgba(74,144,217,.5)"></div></div></div>
+            </div>
+            <div style="display:flex;gap:5px;margin-top:3px;position:relative;z-index:2">
+              <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(74,144,217,.14);border-radius:7px;padding:6px 4px;text-align:center;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)"></div><div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:#fff;line-height:1">48K</div><div style="font-size:5.5px;color:rgba(120,180,240,.35);margin-top:2px">Visualiz.</div></div>
+              <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(74,144,217,.14);border-radius:7px;padding:6px 4px;text-align:center;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)"></div><div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:#fff;line-height:1">+234</div><div style="font-size:5.5px;color:rgba(120,180,240,.35);margin-top:2px">Seguidores</div></div>
+              <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(74,144,217,.14);border-radius:7px;padding:6px 4px;text-align:center;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)"></div><div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:#fff;line-height:1">14</div><div style="font-size:5.5px;color:rgba(120,180,240,.35);margin-top:2px">Clientes</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-caption">Estadísticas reales</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ VIRAL ══ -->
+<section id="viral" class="sec-nv">
+  <div class="wrap">
+    <span class="eyebrow eyebrow-lt rev">Por qué funciona</span>
+    <h2 class="sh sh-lt rev rd1" style="max-width:680px">La única app donde un video<br>hace crecer <em>todas tus redes</em></h2>
+    <p class="sp-lt rev rd2">En TikTok acumulas seguidores solo ahí. En Ximvid, cada persona que ve tu video puede seguirte en las 29 redes a la vez. Crecimiento simultáneo. Viralidad real.</p>
+    <div class="viral-grid">
+      <div class="vcell"><span class="vcell-n">01</span><span class="vcell-i">⚡</span><div class="vcell-ti">Un toque. <em>29 redes.</em></div><p class="vcell-p">Tu espectador pulsa tu icono de Instagram y va directo a tu perfil. Sin redireccionamientos, sin bios, sin pasos intermedios. Un toque.</p></div>
+      <div class="vcell"><span class="vcell-n">02</span><span class="vcell-i">📈</span><div class="vcell-ti">Crecimiento <em>simultáneo</em></div><p class="vcell-p">Mientras tu video se reproduce, tus seguidores de YouTube, Instagram y TikTok crecen al mismo tiempo. Sin hacer nada extra.</p></div>
+      <div class="vcell"><span class="vcell-n">03</span><span class="vcell-i">🎯</span><div class="vcell-ti">Venta directa <em>en el video</em></div><p class="vcell-p">El botón de compra está dentro del propio video. No en la bio. Mientras alguien te ve, puede comprar o reservar sin interrumpir.</p></div>
+      <div class="vcell"><span class="vcell-n">04</span><span class="vcell-i">🔥</span><div class="vcell-ti">Viralidad <em>orgánica</em></div><p class="vcell-p">Cuando alguien comparte tu video, quien lo recibe ve todos tus botones activos. Cada share genera nuevas descargas orgánicas.</p></div>
+    </div>
+    <div class="vquote rev">
+      <div class="vquote-bg">"</div>
+      <div class="vquote-t">En TikTok acumulas vistas. En Ximvid acumulas <em>clientes, seguidores y ventas</em> al mismo tiempo.</div>
+      <div class="vquote-s">LA DIFERENCIA QUE LO CAMBIA TODO</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SPLIT / ORBIT ══ -->
+<section id="split">
+  <div class="sl">
+    <div class="sl-c">
+      <span class="eyebrow">Un solo video</span>
+      <div class="sl-ti">Importa desde TikTok.<br><em>Crece en todas partes.</em></div>
+      <p class="sl-p">Pega el link de tu video de TikTok o Instagram. Ximvid lo importa con todos tus botones activos. El mismo esfuerzo. 29 veces el resultado.</p>
+      <a href="#cta" class="btn-m" style="font-size:.9rem;padding:13px 28px">Pruébalo gratis →</a>
+    </div>
+  </div>
+  <div class="sr">
+    <div class="orb-w">
+      <div class="orb-c"><span>X</span></div>
+      <div class="orb-ring orb-r1">
+        <div class="orb-dot" style="background:linear-gradient(135deg,#e1306c,#833ab4)"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg></div>
+      </div>
+      <div class="orb-ring orb-r2">
+        <div class="orb-dot" style="background:#111"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.19a8.12 8.12 0 004.85 1.56V6.3a4.85 4.85 0 01-1.08-.39z"/></svg></div>
+        <div class="orb-dot" style="background:#25d366;top:auto;bottom:-14px;left:50%;margin-left:-14px"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
+      </div>
+      <div class="orb-ring orb-r3">
+        <div class="orb-dot" style="background:#ff0000"><svg viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg></div>
+        <div class="orb-dot" style="background:#0a66c2;top:auto;bottom:-14px;left:50%;margin-left:-14px"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOW ══ -->
+<section class="sec-lt2" id="how">
+  <div class="wrap">
+    <span class="eyebrow rev">El proceso</span>
+    <h2 class="sh rev rd1">Tres pasos. <em>Crecimiento infinito.</em></h2>
+    <p class="sp rev rd2">Sin curva de aprendizaje. Sin esfuerzo extra. Sin volver a grabar nada.</p>
+    <div class="steps">
+      <div class="step rev rd1"><div class="step-n">01</div><div class="step-ti">Sube o importa</div><p class="step-p">Pega el link de tu TikTok o sube tu video. Ximvid lo procesa en segundos. El mismo video que ya tienes funciona aquí.</p></div>
+      <div class="step rev rd2"><div class="step-n">02</div><div class="step-ti">Conecta tus 29 redes</div><p class="step-p">Añade todos tus perfiles. Cada visitante puede seguirte en todas tus redes o comprarte directamente. Un solo toque.</p></div>
+      <div class="step rev rd3"><div class="step-n">03</div><div class="step-ti">Crece en todas partes</div><p class="step-p">Mientras tu video se reproduce, tus seguidores de Instagram, TikTok y YouTube crecen simultáneamente.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ NETWORKS ══ -->
+<section id="networks">
+  <div class="net-in wrap">
+    <div>
+      <span class="eyebrow rev">Las 29 redes</span>
+      <div class="net-ti rev rd1">Cada red que tienes.<br><em>Conectada en un video.</em></div>
+      <p class="net-p rev rd2">Si tienes presencia en Instagram, TikTok, YouTube, WhatsApp o en tu tienda de Etsy, Ximvid la conecta directamente al video.</p>
+      <div class="nbadge rev rd3">
+        <span class="nbadge-ico">⚡</span>
+        <div class="nbadge-tx"><strong>Un toque directo</strong><span>Sin pasos intermedios. Sin popups. Sin bios.</span></div>
+      </div>
+    </div>
+    <div class="rev rd2">
+      <div class="nets">
+        <div class="npill"><span class="ndot"></span>Instagram</div>
+        <div class="npill"><span class="ndot"></span>TikTok</div>
+        <div class="npill"><span class="ndot"></span>YouTube</div>
+        <div class="npill"><span class="ndot"></span>WhatsApp</div>
+        <div class="npill"><span class="ndot"></span>LinkedIn</div>
+        <div class="npill"><span class="ndot"></span>Telegram</div>
+        <div class="npill"><span class="ndot"></span>Spotify</div>
+        <div class="npill"><span class="ndot"></span>Twitch</div>
+        <div class="npill"><span class="ndot"></span>Facebook</div>
+        <div class="npill"><span class="ndot"></span>Pinterest</div>
+        <div class="npill"><span class="ndot"></span>Etsy</div>
+        <div class="npill"><span class="ndot"></span>Calendly</div>
+        <div class="npill"><span class="ndot"></span>PayPal</div>
+        <div class="npill"><span class="ndot"></span>Amazon</div>
+        <div class="npill"><span class="ndot"></span>Bizum</div>
+        <div class="npill"><span class="ndot"></span>Patreon</div>
+        <div class="npill"><span class="ndot"></span>Discord</div>
+        <div class="npill"><span class="ndot"></span>SoundCloud</div>
+        <div class="npill"><span class="ndot"></span>Behance</div>
+        <div class="npill"><span class="ndot"></span>Wallapop</div>
+        <div class="npill"><span class="ndot"></span>Vimeo</div>
+        <div class="npill"><span class="ndot"></span>X / Twitter</div>
+        <div class="npill"><span class="ndot"></span>Snapchat</div>
+        <div class="npill"><span class="ndot"></span>Reddit</div>
+        <div class="npill"><span class="ndot"></span>Web propia</div>
+        <div class="npill"><span class="ndot"></span>Tienda online</div>
+        <div class="npill"><span class="ndot"></span>Email directo</div>
+        <div class="npill"><span class="ndot"></span>Teléfono</div>
+        <div class="npill"><span class="ndot"></span>Tumblr</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ METRICS ══ -->
+<section id="metrics" class="sec-nv">
+  <div class="met-in wrap">
+    <div>
+      <span class="eyebrow eyebrow-lt rev">Datos reales</span>
+      <div class="met-ti sh-lt rev rd1">El dato que<br>ninguna plataforma<br><em>te da.</em></div>
+      <p class="met-p rev rd2">Tasa de conversión real por video. El porcentaje exacto que te dice qué contenido vende y cuál no.</p>
+      <div class="nbadge rev rd3" style="margin-bottom:0">
+        <span class="nbadge-ico">📊</span>
+        <div class="nbadge-tx"><strong>12× más conversión que TikTok</strong><span>0.8% medio en redes vs 12.4% en Ximvid</span></div>
+      </div>
+    </div>
+    <div class="rev rd2">
+      <div class="bar-item"><div class="bar-head"><span class="bar-lbl">Instagram</span><span class="bar-score">247 clics</span></div><div class="bar-track"><div class="bar-fill" data-w="82"></div></div></div>
+      <div class="bar-item"><div class="bar-head"><span class="bar-lbl">WhatsApp directo</span><span class="bar-score">184 chats</span></div><div class="bar-track"><div class="bar-fill" data-w="70"></div></div></div>
+      <div class="bar-item"><div class="bar-head"><span class="bar-lbl">TikTok</span><span class="bar-score">139 seguidores</span></div><div class="bar-track"><div class="bar-fill" data-w="55"></div></div></div>
+      <div class="bar-item"><div class="bar-head"><span class="bar-lbl">Botón de venta CTA</span><span class="bar-score">118 clics</span></div><div class="bar-track"><div class="bar-fill" data-w="46"></div></div></div>
+      <div class="bar-item"><div class="bar-head"><span class="bar-lbl">YouTube</span><span class="bar-score">98 subs</span></div><div class="bar-track"><div class="bar-fill" data-w="40"></div></div></div>
+      <div class="bar-item"><div class="bar-head"><span class="bar-lbl">LinkedIn</span><span class="bar-score">67 conexiones</span></div><div class="bar-track"><div class="bar-fill" data-w="28"></div></div></div>
+      <div class="met-foot"><span>📅</span><div class="met-foot-t"><strong>Resumen semanal automático</strong> cada viernes en tu email con todas las métricas.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PRICING ══ -->
+<section id="pricing" class="sec-lt">
+  <div class="wrap" style="text-align:center">
+    <span class="eyebrow rev">Planes</span>
+    <h2 class="sh rev rd1" style="text-align:center">Empieza gratis. <em>Escala con Premium.</em></h2>
+    <p class="sp rev rd2" style="margin:0 auto;text-align:center">Sin permanencias. Cancela cuando quieras.</p>
+    <div class="price-grid">
+      <div class="pcard rev rd1">
+        <div class="pname lt">Gratuito</div>
+        <div class="pamt lt">0€</div>
+        <div class="pper lt">para siempre</div>
+        <div class="pdiv lt"></div>
+        <div class="pfeats">
+          <div class="pfeat lt"><div class="pchk lt"><svg viewBox="0 0 10 10" fill="none" stroke="var(--steel)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Videos ilimitados</div>
+          <div class="pfeat lt"><div class="pchk lt"><svg viewBox="0 0 10 10" fill="none" stroke="var(--steel)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>29 redes sociales</div>
+          <div class="pfeat lt"><div class="pchk lt"><svg viewBox="0 0 10 10" fill="none" stroke="var(--steel)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Tasa de conversión por video</div>
+          <div class="pfeat lt"><div class="pchk lt"><svg viewBox="0 0 10 10" fill="none" stroke="var(--steel)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>URL personal ximvid.com/ti</div>
+          <div class="pfeat lt"><div class="pchk lt"><svg viewBox="0 0 10 10" fill="none" stroke="var(--steel)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Importar desde TikTok</div>
+        </div>
+        <a href="#cta" class="btn-outline-nv">Empezar gratis</a>
+      </div>
+      <div class="pcard pro rev rd2">
+        <div class="pbadge">⭐ Premium</div>
+        <div class="pname dk">Premium</div>
+        <div class="pamt dk">9.99€</div>
+        <div class="pper dk">al mes · cancela cuando quieras</div>
+        <div class="pdiv dk"></div>
+        <div class="pfeats">
+          <div class="pfeat dk"><div class="pchk dk"><svg viewBox="0 0 10 10" fill="none" stroke="rgba(74,144,217,.9)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Todo lo de Gratuito</div>
+          <div class="pfeat dk"><div class="pchk dk"><svg viewBox="0 0 10 10" fill="none" stroke="rgba(74,144,217,.9)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div><strong style="color:#fff">Mayor visibilidad en el feed</strong></div>
+          <div class="pfeat dk"><div class="pchk dk"><svg viewBox="0 0 10 10" fill="none" stroke="rgba(74,144,217,.9)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Badge ⭐ en perfil y videos</div>
+          <div class="pfeat dk"><div class="pchk dk"><svg viewBox="0 0 10 10" fill="none" stroke="rgba(74,144,217,.9)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Estadísticas avanzadas</div>
+          <div class="pfeat dk"><div class="pchk dk"><svg viewBox="0 0 10 10" fill="none" stroke="rgba(74,144,217,.9)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Notificaciones WhatsApp</div>
+        </div>
+        <a href="#cta" class="btn-m">Activar Premium</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PROOF ══ -->
+<section id="proof" class="sec-lt2">
+  <div class="wrap" style="text-align:center">
+    <span class="eyebrow rev">Casos reales</span>
+    <h2 class="sh rev rd1" style="text-align:center">Creadores que ya <em>crecen exponencialmente</em></h2>
+    <div class="proof-grid">
+      <div class="prf rev rd1"><div class="prf-q">"</div><p class="prf-t">Pasé de 0 a 14 clientes nuevos en mi primer mes. El mismo video de TikTok sin editar nada. Al día siguiente tenía consultas en WhatsApp y 200 nuevos seguidores en Instagram.</p><div class="prf-ft"><div class="prf-av">LM</div><div><div class="prf-nm">Laura M.</div><div class="prf-ro">Diseñadora freelance</div><div class="prf-st">★★★★★</div></div></div></div>
+      <div class="prf stat rev rd2">
+        <div><div style="font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:12px">Conversión real</div><div class="stn">78<span style="font-size:2.5rem">%</span></div><div style="font-size:.88rem;font-weight:500;color:var(--n1);margin:8px 0 5px">Retención en feed</div><div style="font-size:.86rem;color:var(--tx2);font-weight:300;line-height:1.65">De los visitantes que ven un video de Ximvid acaban pulsando al menos un botón.</div></div>
+        <div><div class="stbar"><div class="stfil"></div></div><div class="stcmp"><span>TikTok bio: 0.8%</span><strong>Ximvid: 12.4%</strong></div></div>
+      </div>
+      <div class="prf rev rd3"><div class="prf-q">"</div><p class="prf-t">Tenía 40K en TikTok y vendía poco. Con Ximvid mis espectadores pueden seguirme en todas mis redes desde el propio video. Las reservas subieron un 340% en dos meses.</p><div class="prf-ft"><div class="prf-av">SC</div><div><div class="prf-nm">Sara C.</div><div class="prf-ro">Coach de productividad</div><div class="prf-st">★★★★★</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAQ ══ -->
+<section id="faq" class="sec-wh">
+  <div class="wrap" style="text-align:center">
+    <span class="eyebrow rev">FAQ</span>
+    <h2 class="sh rev rd1" style="text-align:center">Lo que todos <em>nos preguntan</em></h2>
+    <div class="faq-list">
+      <div class="faq-item rev rd1"><div class="faq-q" onclick="faqT(this)"><span>¿Cómo consigo seguidores en todas mis redes con un solo video?</span><div class="faq-ico">+</div></div><div class="faq-body"><div class="faq-a">En Ximvid cada video muestra todos tus iconos de redes directamente en pantalla. Tu espectador pulsa Instagram, TikTok o WhatsApp en un toque y llega directo a tu perfil. Sin salir del video, sin ir a la bio. El crecimiento es simultáneo en todas tus redes.</div></div></div>
+      <div class="faq-item rev rd2"><div class="faq-q" onclick="faqT(this)"><span>¿Tengo que grabar videos nuevos o sirven los que ya tengo?</span><div class="faq-ico">+</div></div><div class="faq-body"><div class="faq-a">Sirven exactamente los que ya tienes. Pega el link de tu TikTok o Instagram y Ximvid lo importa automáticamente con todos tus botones de redes y venta. Cero esfuerzo extra.</div></div></div>
+      <div class="faq-item rev rd3"><div class="faq-q" onclick="faqT(this)"><span>¿Qué redes sociales puedo conectar?</span><div class="faq-ico">+</div></div><div class="faq-body"><div class="faq-a">Las 29 disponibles: Instagram, TikTok, YouTube, Facebook, LinkedIn, Pinterest, Twitch, Spotify, SoundCloud, Behance, Vimeo, Discord, Patreon, X/Twitter, Snapchat, Reddit, Tumblr, WhatsApp, Telegram, Email, Teléfono, Web propia, Tienda online, Etsy, Amazon, Wallapop, Calendly, PayPal y Bizum.</div></div></div>
+      <div class="faq-item rev rd4"><div class="faq-q" onclick="faqT(this)"><span>¿En qué se diferencia de Linktree o de la bio de TikTok?</span><div class="faq-ico">+</div></div><div class="faq-body"><div class="faq-a">Linktree es una página de links sin video. La bio de TikTok solo tiene un link. En Ximvid el botón de seguirte o comprarte está dentro del propio video mientras se reproduce. La conversión es 12 veces mayor precisamente por eso.</div></div></div>
+      <div class="faq-item rev rd5"><div class="faq-q" onclick="faqT(this)"><span>¿Es realmente gratis?</span><div class="faq-ico">+</div></div><div class="faq-body"><div class="faq-a">Sí, totalmente gratis. Videos ilimitados, 29 redes y estadísticas de conversión sin pagar nada. El Plan Premium (9.99€/mes, cancela cuando quieras) añade mayor visibilidad en el feed y estadísticas avanzadas.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FINAL CTA ══ -->
+<section id="cta">
+  <div class="wrap" style="text-align:center;position:relative;z-index:2">
+    <h2 class="cta-h">Un video.<br><em>Todo el mundo</em><br><span style="font-size:.6em;color:rgba(255,255,255,.25);font-weight:300">en cada red.</span></h2>
+    <p class="cta-s">Disponible en iOS y Android. Gratis para siempre.</p>
+    <div class="cta-bt">
+      <a href="#" class="btn-m btn-m-lg">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9L5 21V3z"/></svg>
+        Empieza gratis — sin tarjeta
+      </a>
+    </div>
+    <div class="store-row">
+      <a href="#" class="sbtn"><svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg><div><div class="ssub">Disponible en</div><div class="snm">App Store</div></div></a>
+      <a href="#" class="sbtn"><svg viewBox="0 0 24 24"><path d="M3.18 23.76c.3.17.64.22.98.16l.06-.03 11.2-6.47-2.44-2.44-9.8 8.78zm-1.04-19.9a2 2 0 00-.14.72v18.84c0 .26.05.5.14.72l.07.07 10.55-10.55v-.25L2.21 3.79l-.07.07zM19.66 10.3l-2.4-1.38-2.71 2.71 2.71 2.71 2.42-1.4c.69-.4.69-1.05-.02-1.64zm-16.5 12.17l.07-.04 11.88-6.87-2.44-2.43-9.51 9.34z"/></svg><div><div class="ssub">Disponible en</div><div class="snm">Google Play</div></div></a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="fbrand">
+      <div class="flogo">xim<em>vid</em></div>
+      <div class="ftag">Un video. Todas tus redes. Todos tus clientes. Al mismo tiempo.</div>
+      <div class="fnl"><input type="email" placeholder="tu@email.com" aria-label="Newsletter"><button type="button">→</button></div>
+    </div>
+    <div class="fcol"><h4>Producto</h4><a href="#">Cómo funciona</a><a href="#">Las 29 redes</a><a href="#">Plan Premium</a><a href="#">Estadísticas</a><a href="#">Importar TikTok</a></div>
+    <div class="fcol"><h4>Empresa</h4><a href="#">Acerca de</a><a href="#">Blog</a><a href="#">Prensa</a><a href="#">Afiliados</a><a href="#">Contacto</a></div>
+    <div class="fcol"><h4>Legal</h4><a href="https://app.ximvid.com/privacy">Privacidad</a><a href="https://app.ximvid.com/terms">Términos</a><a href="#">Cookies</a><a href="#">GDPR</a><a href="#">Eliminar cuenta</a></div>
+  </div>
+  <div class="fbot"><div class="fcopy">© 2026 Ximvid. Todos los derechos reservados.</div><div class="fsocs"><a href="#" class="fsi">ig</a><a href="#" class="fsi">tk</a><a href="#" class="fsi">yt</a><a href="#" class="fsi">in</a></div></div>
+</footer>
+
+<script>
+/* NAV + STICKY */
+const nav=document.getElementById('mainnav'), sticky=document.getElementById('sctabtn');
+window.addEventListener('scroll',()=>{
+  const s=window.scrollY;
+  nav.classList.toggle('solid',s>50);
+  sticky.classList.toggle('show',s>400);
+},{passive:true});
+
+/* REVEAL */
+const obs=new IntersectionObserver(e=>{
+  e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('vis');obs.unobserve(x.target);}});
+},{threshold:.1});
+document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
+
+/* BAR ANIMATE */
+const barObs=new IntersectionObserver(e=>{
+  e.forEach(x=>{
+    if(x.isIntersecting){
+      x.target.querySelectorAll('.bar-fill').forEach(b=>{
+        const w=b.dataset.w||'60';
+        setTimeout(()=>{ b.style.width=w+'%'; },200);
+      });
+      barObs.unobserve(x.target);
+    }
+  });
+},{threshold:.3});
+const metSec=document.getElementById('metrics');
+if(metSec) barObs.observe(metSec);
+
+/* FAQ */
+function faqT(el){
+  const item=el.parentElement;
+  const was=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+  if(!was) item.classList.add('open');
+}
+
+/* LIVE NOTIF */
+const msgs=[
+  ['@laura_m consiguió 14 clientes nuevos','hace 2 min · Ximvid'],
+  ['@marcos_art: +200 seguidores en IG','hace 5 min · Ximvid'],
+  ['@coach_sara cerró 3 reservas hoy','hace 8 min · Ximvid'],
+  ['@tienda_eco creció en 4 redes a la vez','hace 11 min · Ximvid'],
+  ['@foto_juan: +80 subs en YouTube','hace 14 min · Ximvid'],
+];
+let ni=0;
+function showN(){
+  const el=document.getElementById('lnotif');
+  const[m,s]=msgs[ni%msgs.length]; ni++;
+  document.getElementById('lnmain').textContent=m;
+  document.getElementById('lnsub').textContent=s;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),5000);
+}
+setTimeout(()=>{ showN(); setInterval(showN,9000); },3500);
+
+/* ── TOUCH DETECTION ── */
+// Deshabilitar hover states en dispositivos touch
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+  document.body.classList.add('is-touch');
+}
+
+/* ── iOS SAFE AREA ── */
+// Fix para iPhone con Dynamic Island / notch
+document.documentElement.style.setProperty(
+  '--safe-top', `${window.screen.height - window.innerHeight}px`
+);
+
+/* ── PERFORMANCE: Pause heavy animations when not visible ── */
+document.addEventListener('visibilitychange', () => {
+  const animated = document.querySelectorAll('.sec-nv, #cta, .btn-m, .pplus, .pcta');
+  animated.forEach(el => {
+    el.style.animationPlayState = document.hidden ? 'paused' : 'running';
+  });
+});
+
+/* ── iOS: Fix 100vh bug con la barra de Safari ── */
+function setVh() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+setVh();
+window.addEventListener('resize', setVh, { passive: true });
+window.addEventListener('orientationchange', () => setTimeout(setVh, 200), { passive: true });
+
+/* ── PREVENT horizontal scroll ── */
+document.addEventListener('touchmove', (e) => {
+  // Solo prevenir scroll horizontal no intencionado
+}, { passive: true });
+
+/* ── REVEAL: usar también para iOS donde IntersectionObserver puede ser lento ── */
+// Ya está manejado arriba con el observer
+
+</script>
+</body>
+</html>
