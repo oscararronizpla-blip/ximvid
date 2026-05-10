@@ -1360,7 +1360,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
   </div>
   <div style="display:flex;gap:12px;align-items:center">
     <a href="#" class="nav-ghost">Iniciar sesión</a>
-    <a href="#cta" class="btn-m">Empieza gratis</a>
+    <a href="#" onclick="openAuth('register');return false;" class="btn-m btn-cta-auth">Empieza gratis</a>
   </div>
 </nav>
 
@@ -1389,7 +1389,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
   </p>
 
   <div class="hero-btns">
-    <a href="#cta" class="btn-m btn-m-lg">
+    <a href="#" onclick="openAuth('register');return false;" class="btn-m btn-m-lg btn-cta-auth">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9L5 21V3z"/></svg>
       Empieza gratis — sin tarjeta
     </a>
@@ -1540,7 +1540,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
       <span class="eyebrow">Un solo video</span>
       <div class="sl-ti">Importa desde TikTok.<br><em>Crece en todas partes.</em></div>
       <p class="sl-p">Pega el link de tu video de TikTok o Instagram. Ximvid lo importa con todos tus botones activos. El mismo esfuerzo. 29 veces el resultado.</p>
-      <a href="#cta" class="btn-m" style="font-size:.9rem;padding:13px 28px">Pruébalo gratis →</a>
+      <a href="#" onclick="openAuth('register');return false;" class="btn-m btn-cta-auth" style="font-size:.9rem;padding:13px 28px">Pruébalo gratis →</a>
     </div>
   </div>
   <div class="sr">
@@ -1681,7 +1681,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
           <div class="pfeat dk"><div class="pchk dk"><svg viewBox="0 0 10 10" fill="none" stroke="rgba(74,144,217,.9)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Estadísticas avanzadas</div>
           <div class="pfeat dk"><div class="pchk dk"><svg viewBox="0 0 10 10" fill="none" stroke="rgba(74,144,217,.9)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Notificaciones WhatsApp</div>
         </div>
-        <a href="#cta" class="btn-m">Activar Premium</a>
+        <a href="#" onclick="openAuth('register');return false;" class="btn-m btn-cta-auth">Activar Premium</a>
       </div>
     </div>
   </div>
@@ -1846,5 +1846,173 @@ document.addEventListener('touchmove', (e) => {
 // Ya está manejado arriba con el observer
 
 </script>
+<!-- ═══════════════════════════════════════════
+     XIMVID AUTH MODAL + SCRIPTS
+     Pegar justo antes de </body>
+     ═══════════════════════════════════════════ -->
+
+<!-- MODAL AUTH -->
+<div id="ximvid-auth-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(6,16,30,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:linear-gradient(145deg,#0f2040,#0b1a30);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:40px 36px;width:100%;max-width:420px;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.6);">
+    
+    <!-- Close -->
+    <button onclick="closeAuth()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:rgba(255,255,255,.35);font-size:1.3rem;cursor:pointer;line-height:1;">✕</button>
+    
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;color:#fff;letter-spacing:.04em;">xim<em style="font-style:italic;background:linear-gradient(135deg,#0b1a30,#2258a8,#4a90d9,#2258a8,#0b1a30);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">vid</em></div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;background:rgba(255,255,255,.04);border-radius:12px;padding:3px;margin-bottom:28px;">
+      <button id="tab-login" onclick="switchAuthTab('login')" style="flex:1;padding:10px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,#0b1a30,#1a3668);color:#fff;">Iniciar sesión</button>
+      <button id="tab-register" onclick="switchAuthTab('register')" style="flex:1;padding:10px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;transition:all .2s;background:transparent;color:rgba(255,255,255,.4);">Registrarse</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="auth-form-login">
+      <input id="login-email" type="email" placeholder="tu@email.com" autocomplete="email" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:13px 16px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;margin-bottom:12px;box-sizing:border-box;">
+      <input id="login-pass" type="password" placeholder="Contraseña" autocomplete="current-password" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:13px 16px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;margin-bottom:18px;box-sizing:border-box;">
+      <button onclick="doLogin()" id="btn-login" style="width:100%;padding:14px;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;color:#fff;margin-bottom:10px;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 5s linear infinite;position:relative;overflow:hidden;">Entrar →</button>
+      <button onclick="doGoogleLogin()" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:14px;font-family:'DM Sans',sans-serif;font-size:.9rem;cursor:pointer;color:rgba(255,255,255,.7);background:rgba(255,255,255,.04);">🔵 Continuar con Google</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="auth-form-register" style="display:none;">
+      <input id="reg-name" type="text" placeholder="Tu nombre o marca" autocomplete="name" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:13px 16px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;margin-bottom:12px;box-sizing:border-box;">
+      <input id="reg-email" type="email" placeholder="tu@email.com" autocomplete="email" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:13px 16px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;margin-bottom:12px;box-sizing:border-box;">
+      <input id="reg-pass" type="password" placeholder="Contraseña (mín. 6 caracteres)" autocomplete="new-password" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:13px 16px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;margin-bottom:18px;box-sizing:border-box;">
+      <button onclick="doRegister()" style="width:100%;padding:14px;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;color:#fff;margin-bottom:10px;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 5s linear infinite;">Crear cuenta →</button>
+      <button onclick="doGoogleLogin()" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:14px;font-family:'DM Sans',sans-serif;font-size:.9rem;cursor:pointer;color:rgba(255,255,255,.7);background:rgba(255,255,255,.04);">🔵 Continuar con Google</button>
+    </div>
+
+    <!-- Error -->
+    <div id="auth-error" style="display:none;margin-top:14px;color:#ff6680;font-size:.85rem;text-align:center;padding:10px;background:rgba(255,45,85,.08);border-radius:10px;"></div>
+  </div>
+</div>
+
+<!-- FIREBASE AUTH MODULE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+  authDomain:"ximvid-c8627.firebaseapp.com",
+  projectId:"ximvid-c8627",
+  storageBucket:"ximvid-c8627.firebasestorage.app",
+  messagingSenderId:"278931359476",
+  appId:"1:278931359476:web:30fef5be9d11890bef80a1"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
+const gp = new GoogleAuthProvider();
+
+window._fbAuth = auth;
+window._fbDb = db;
+window._fbGp = gp;
+window._fbFns = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, signInWithPopup, doc, setDoc, getDoc, serverTimestamp };
+
+onAuthStateChanged(auth, (user) => {
+  const modal = document.getElementById('ximvid-auth-modal');
+  if (user) {
+    if (modal) modal.style.display = 'none';
+    document.querySelectorAll('.btn-cta-auth').forEach(b => { b.textContent = '→ Mi perfil'; });
+  }
+});
+</script>
+
+<!-- AUTH FUNCTIONS -->
+<script>
+function openAuth(tab) {
+  const m = document.getElementById('ximvid-auth-modal');
+  m.style.display = 'flex';
+  switchAuthTab(tab || 'login');
+}
+function closeAuth() {
+  document.getElementById('ximvid-auth-modal').style.display = 'none';
+}
+function switchAuthTab(tab) {
+  document.getElementById('auth-form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('auth-form-register').style.display = tab === 'register' ? 'block' : 'none';
+  const tl = document.getElementById('tab-login');
+  const tr = document.getElementById('tab-register');
+  tl.style.background = tab === 'login' ? 'linear-gradient(135deg,#0b1a30,#1a3668)' : 'transparent';
+  tl.style.color = tab === 'login' ? '#fff' : 'rgba(255,255,255,.4)';
+  tr.style.background = tab === 'register' ? 'linear-gradient(135deg,#0b1a30,#1a3668)' : 'transparent';
+  tr.style.color = tab === 'register' ? '#fff' : 'rgba(255,255,255,.4)';
+  hideAuthError();
+}
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideAuthError() {
+  document.getElementById('auth-error').style.display = 'none';
+}
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!email || !pass) { showAuthError('Rellena todos los campos'); return; }
+  const btn = document.getElementById('btn-login');
+  btn.textContent = 'Entrando...'; btn.disabled = true;
+  try {
+    await window._fbFns.signInWithEmailAndPassword(window._fbAuth, email, pass);
+    closeAuth();
+  } catch(e) {
+    const msgs = { 'auth/user-not-found':'Email no registrado', 'auth/wrong-password':'Contraseña incorrecta', 'auth/invalid-email':'Email inválido', 'auth/invalid-credential':'Email o contraseña incorrectos' };
+    showAuthError(msgs[e.code] || 'Error al iniciar sesión');
+    btn.textContent = 'Entrar →'; btn.disabled = false;
+  }
+}
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  if (!name || !email || !pass) { showAuthError('Rellena todos los campos'); return; }
+  if (pass.length < 6) { showAuthError('La contraseña debe tener mínimo 6 caracteres'); return; }
+  try {
+    const cred = await window._fbFns.createUserWithEmailAndPassword(window._fbAuth, email, pass);
+    await window._fbFns.setDoc(window._fbFns.doc(window._fbDb, 'users', cred.user.uid), {
+      uid: cred.user.uid, email, name,
+      createdAt: window._fbFns.serverTimestamp(),
+      isPremium: false,
+      language: (navigator.language || 'es').substring(0,2)
+    });
+    closeAuth();
+    alert('¡Bienvenido a Ximvid, ' + name + '! 🎉');
+  } catch(e) {
+    const msgs = { 'auth/email-already-in-use':'Este email ya está registrado', 'auth/invalid-email':'Email inválido', 'auth/weak-password':'Contraseña demasiado débil' };
+    showAuthError(msgs[e.code] || 'Error al crear la cuenta');
+  }
+}
+async function doGoogleLogin() {
+  try {
+    const cred = await window._fbFns.signInWithPopup(window._fbAuth, window._fbGp);
+    const ref = window._fbFns.doc(window._fbDb, 'users', cred.user.uid);
+    const snap = await window._fbFns.getDoc(ref);
+    if (!snap.exists()) {
+      await window._fbFns.setDoc(ref, {
+        uid: cred.user.uid, email: cred.user.email,
+        name: cred.user.displayName || '',
+        photo: cred.user.photoURL || '',
+        createdAt: window._fbFns.serverTimestamp(),
+        isPremium: false,
+        language: (navigator.language || 'es').substring(0,2)
+      });
+    }
+    closeAuth();
+  } catch(e) {
+    showAuthError('Error con Google. Inténtalo de nuevo.');
+  }
+}
+// Cerrar al hacer click fuera del modal
+document.getElementById('ximvid-auth-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAuth();
+});
+</script>
+
 </body>
 </html>
