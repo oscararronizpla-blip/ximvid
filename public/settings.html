@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Configuración</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;padding-bottom:40px;overflow-x:hidden;}
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+.loading{position:fixed;inset:0;background:#06101e;display:flex;align-items:center;justify-content:center;z-index:500;}
+.spinner{width:32px;height:32px;border:3px solid rgba(74,144,217,.2);border-top-color:#4a90d9;border-radius:50%;animation:spin 1s linear infinite;}
+
+.top-header{padding:max(52px,calc(44px + env(safe-area-inset-top))) 20px 20px;display:flex;align-items:center;gap:12px;}
+.back-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.65);font-size:1rem;text-decoration:none;flex-shrink:0;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;}
+
+.section{margin:0 16px 20px;}
+.section-title{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(168,208,240,.35);margin-bottom:10px;padding-left:4px;}
+.card{background:linear-gradient(145deg,rgba(15,32,64,.9),rgba(11,26,48,.86));border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;position:relative;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);}
+
+/* LANGUAGE GRID */
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.lang-item{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.05);border-right:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .2s;}
+.lang-item:nth-child(even){border-right:none;}
+.lang-item:nth-last-child(-n+2){border-bottom:none;}
+.lang-item:hover{background:rgba(255,255,255,.04);}
+.lang-item.selected{background:rgba(74,144,217,.08);border-color:rgba(74,144,217,.15);}
+.lang-flag{font-size:1.2rem;}
+.lang-name{font-size:.85rem;color:rgba(255,255,255,.75);font-weight:400;}
+.lang-check{margin-left:auto;font-size:.8rem;color:#4a90d9;display:none;}
+.lang-item.selected .lang-check{display:block;}
+
+/* TOGGLE ITEM */
+.toggle-item{display:flex;align-items:center;gap:12px;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.05);}
+.toggle-item:last-child{border-bottom:none;}
+.toggle-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);}
+.toggle-text{flex:1;}
+.toggle-text strong{display:block;font-size:.9rem;font-weight:500;color:#fff;}
+.toggle-text span{font-size:.75rem;color:rgba(255,255,255,.3);}
+.toggle{width:44px;height:26px;border-radius:13px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);position:relative;cursor:pointer;transition:all .25s;flex-shrink:0;}
+.toggle.on{background:linear-gradient(90deg,#1a3668,#2258a8);border-color:rgba(74,144,217,.4);}
+.toggle-dot{position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.toggle.on .toggle-dot{transform:translateX(18px);}
+
+/* SIMPLE ITEM */
+.simple-item{display:flex;align-items:center;gap:12px;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .2s;}
+.simple-item:last-child{border-bottom:none;}
+.simple-item:hover{background:rgba(255,255,255,.04);}
+.si-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);}
+.si-text{flex:1;}
+.si-text strong{display:block;font-size:.9rem;font-weight:500;color:#fff;}
+.si-text span{font-size:.75rem;color:rgba(255,255,255,.3);}
+.si-arrow{color:rgba(255,255,255,.2);}
+
+/* PASSWORD FORM */
+.pass-form{padding:16px;display:none;}
+.pass-form.show{display:block;}
+.pass-field{margin-bottom:12px;}
+.pass-field label{display:block;font-size:.72rem;font-weight:500;color:rgba(168,208,240,.45);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;}
+.pass-field input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;-webkit-appearance:none;}
+.pass-field input:focus{border-color:rgba(74,144,217,.4);}
+.btn-save{width:100%;padding:13px;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;color:#fff;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 5s linear infinite;position:relative;overflow:hidden;}
+.btn-save::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);}
+
+/* WHATSAPP FIELD */
+.wa-field{padding:16px;display:none;}
+.wa-field.show{display:block;}
+.wa-field input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;-webkit-appearance:none;margin-bottom:10px;}
+.wa-field input:focus{border-color:rgba(74,144,217,.4);}
+
+/* DANGER */
+.btn-danger{margin:20px 16px 0;width:calc(100% - 32px);padding:13px;border:1px solid rgba(255,45,85,.25);border-radius:14px;background:rgba(255,45,85,.06);font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:500;color:rgba(255,100,120,.8);cursor:pointer;}
+.btn-danger:hover{background:rgba(255,45,85,.12);}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading"><div class="spinner"></div></div>
+
+<div id="content" style="display:none">
+
+  <div class="top-header">
+    <a href="/profile.html" class="back-btn">←</a>
+    <div class="page-title">Configuración</div>
+  </div>
+
+  <!-- IDIOMA -->
+  <div class="section">
+    <div class="section-title">Idioma de la interfaz</div>
+    <div class="card">
+      <div class="lang-grid" id="lang-grid">
+        <div class="lang-item" data-lang="es" onclick="setLang('es',this)"><span class="lang-flag">🇪🇸</span><span class="lang-name">Español</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="en" onclick="setLang('en',this)"><span class="lang-flag">🇬🇧</span><span class="lang-name">English</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="pt" onclick="setLang('pt',this)"><span class="lang-flag">🇧🇷</span><span class="lang-name">Português</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="fr" onclick="setLang('fr',this)"><span class="lang-flag">🇫🇷</span><span class="lang-name">Français</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="de" onclick="setLang('de',this)"><span class="lang-flag">🇩🇪</span><span class="lang-name">Deutsch</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="zh" onclick="setLang('zh',this)"><span class="lang-flag">🇨🇳</span><span class="lang-name">中文</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="hi" onclick="setLang('hi',this)"><span class="lang-flag">🇮🇳</span><span class="lang-name">हिन्दी</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="ar" onclick="setLang('ar',this)"><span class="lang-flag">🇸🇦</span><span class="lang-name">العربية</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="ru" onclick="setLang('ru',this)"><span class="lang-flag">🇷🇺</span><span class="lang-name">Русский</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="ja" onclick="setLang('ja',this)"><span class="lang-flag">🇯🇵</span><span class="lang-name">日本語</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="ko" onclick="setLang('ko',this)"><span class="lang-flag">🇰🇷</span><span class="lang-name">한국어</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="it" onclick="setLang('it',this)"><span class="lang-flag">🇮🇹</span><span class="lang-name">Italiano</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="tr" onclick="setLang('tr',this)"><span class="lang-flag">🇹🇷</span><span class="lang-name">Türkçe</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="vi" onclick="setLang('vi',this)"><span class="lang-flag">🇻🇳</span><span class="lang-name">Tiếng Việt</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="pl" onclick="setLang('pl',this)"><span class="lang-flag">🇵🇱</span><span class="lang-name">Polski</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="nl" onclick="setLang('nl',this)"><span class="lang-flag">🇳🇱</span><span class="lang-name">Nederlands</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="sv" onclick="setLang('sv',this)"><span class="lang-flag">🇸🇪</span><span class="lang-name">Svenska</span><span class="lang-check">✓</span></div>
+        <div class="lang-item" data-lang="no" onclick="setLang('no',this)"><span class="lang-flag">🇳🇴</span><span class="lang-name">Norsk</span><span class="lang-check">✓</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICACIONES -->
+  <div class="section">
+    <div class="section-title">Notificaciones</div>
+    <div class="card">
+      <div class="toggle-item">
+        <div class="toggle-icon">📧</div>
+        <div class="toggle-text"><strong>Notificaciones por email</strong><span>Clics, seguidores, resumen semanal</span></div>
+        <div class="toggle" id="toggle-email" onclick="toggleNotif('email')"><div class="toggle-dot"></div></div>
+      </div>
+      <div class="toggle-item">
+        <div class="toggle-icon">💬</div>
+        <div class="toggle-text"><strong>Notificaciones por WhatsApp</strong><span>Las mismas notificaciones por WhatsApp</span></div>
+        <div class="toggle" id="toggle-wa" onclick="toggleNotif('whatsapp')"><div class="toggle-dot"></div></div>
+      </div>
+      <div class="wa-field" id="wa-field">
+        <input type="tel" id="wa-number" placeholder="+34 600 000 000" autocomplete="tel">
+        <button class="btn-save" onclick="saveWaNumber()">Guardar número</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRASEÑA -->
+  <div class="section">
+    <div class="section-title">Seguridad</div>
+    <div class="card">
+      <div class="simple-item" onclick="togglePassForm()">
+        <div class="si-icon">🔒</div>
+        <div class="si-text"><strong>Cambiar contraseña</strong><span>Actualiza tu contraseña de acceso</span></div>
+        <div class="si-arrow">›</div>
+      </div>
+      <div class="pass-form" id="pass-form">
+        <div class="pass-field"><label>Contraseña actual</label><input type="password" id="pass-current" placeholder="Tu contraseña actual"></div>
+        <div class="pass-field"><label>Nueva contraseña</label><input type="password" id="pass-new" placeholder="Mínimo 6 caracteres"></div>
+        <div class="pass-field"><label>Confirmar nueva contraseña</label><input type="password" id="pass-confirm" placeholder="Repite la nueva contraseña"></div>
+        <button class="btn-save" onclick="changePassword()">Cambiar contraseña</button>
+      </div>
+      <div class="simple-item" onclick="showPrivacy()">
+        <div class="si-icon">🛡️</div>
+        <div class="si-text"><strong>Privacidad</strong><span>Gestiona tus datos personales</span></div>
+        <div class="si-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUENTA -->
+  <div class="section">
+    <div class="section-title">Cuenta</div>
+    <div class="card">
+      <div class="simple-item" onclick="window.location.href='/privacy.html'">
+        <div class="si-icon">📄</div>
+        <div class="si-text"><strong>Política de privacidad</strong><span></span></div>
+        <div class="si-arrow">›</div>
+      </div>
+      <div class="simple-item" onclick="window.location.href='/terms.html'">
+        <div class="si-icon">📋</div>
+        <div class="si-text"><strong>Términos de uso</strong><span></span></div>
+        <div class="si-arrow">›</div>
+      </div>
+      <div class="simple-item" onclick="deleteAccount()">
+        <div class="si-icon" style="background:rgba(255,45,85,.08);border-color:rgba(255,45,85,.15);">🗑️</div>
+        <div class="si-text"><strong style="color:rgba(255,100,120,.8)">Eliminar cuenta</strong><span>Esta acción es irreversible</span></div>
+        <div class="si-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+  authDomain:"ximvid-c8627.firebaseapp.com",
+  projectId:"ximvid-c8627",
+  storageBucket:"ximvid-c8627.firebasestorage.app",
+  messagingSenderId:"278931359476",
+  appId:"1:278931359476:web:30fef5be9d11890bef80a1"
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+window._auth = auth; window._db = db;
+window._fb = { doc, getDoc, updateDoc, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser };
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = '/welcome.html'; return; }
+  window._currentUser = user;
+
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      window._userData = data;
+
+      // Idioma activo
+      const lang = data.language || localStorage.getItem('ximvid_lang') || 'es';
+      markLang(lang);
+
+      // Notificaciones
+      if (data.notifEmail !== false) document.getElementById('toggle-email').classList.add('on');
+      if (data.notifWhatsapp) {
+        document.getElementById('toggle-wa').classList.add('on');
+        document.getElementById('wa-field').classList.add('show');
+        if (data.whatsappNumber) document.getElementById('wa-number').value = data.whatsappNumber;
+      }
+    }
+  } catch(e) {}
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+
+  // Check URL params
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('tab') === 'password') togglePassForm();
+});
+</script>
+
+<script>
+function markLang(lang) {
+  document.querySelectorAll('.lang-item').forEach(el => {
+    el.classList.toggle('selected', el.dataset.lang === lang);
+  });
+}
+
+async function setLang(lang, el) {
+  markLang(lang);
+  localStorage.setItem('ximvid_lang', lang);
+  try {
+    const user = window._currentUser;
+    if (user) await window._fb.updateDoc(window._fb.doc(window._db,'users',user.uid), { language: lang });
+  } catch(e) {}
+}
+
+function toggleNotif(type) {
+  const toggle = document.getElementById('toggle-' + (type === 'whatsapp' ? 'wa' : 'email'));
+  const isOn = toggle.classList.toggle('on');
+  if (type === 'whatsapp') {
+    document.getElementById('wa-field').classList.toggle('show', isOn);
+  }
+  const update = type === 'email' ? { notifEmail: isOn } : { notifWhatsapp: isOn };
+  const user = window._currentUser;
+  if (user) window._fb.updateDoc(window._fb.doc(window._db,'users',user.uid), update).catch(()=>{});
+}
+
+async function saveWaNumber() {
+  const num = document.getElementById('wa-number').value.trim();
+  if (!num) return;
+  const user = window._currentUser;
+  if (!user) return;
+  try {
+    await window._fb.updateDoc(window._fb.doc(window._db,'users',user.uid), { whatsappNumber: num });
+    alert('Número guardado ✅');
+  } catch(e) { alert('Error al guardar.'); }
+}
+
+function togglePassForm() {
+  document.getElementById('pass-form').classList.toggle('show');
+}
+
+async function changePassword() {
+  const current = document.getElementById('pass-current').value;
+  const newPass = document.getElementById('pass-new').value;
+  const confirm = document.getElementById('pass-confirm').value;
+  if (!current || !newPass || !confirm) { alert('Rellena todos los campos'); return; }
+  if (newPass !== confirm) { alert('Las contraseñas no coinciden'); return; }
+  if (newPass.length < 6) { alert('La contraseña debe tener mínimo 6 caracteres'); return; }
+  try {
+    const user = window._currentUser;
+    const cred = window._fb.EmailAuthProvider.credential(user.email, current);
+    await window._fb.reauthenticateWithCredential(user, cred);
+    await window._fb.updatePassword(user, newPass);
+    alert('Contraseña cambiada correctamente ✅');
+    togglePassForm();
+  } catch(e) {
+    if (e.code === 'auth/wrong-password') alert('La contraseña actual es incorrecta');
+    else alert('Error al cambiar la contraseña');
+  }
+}
+
+function showPrivacy() { window.location.href = '/privacy.html'; }
+
+async function deleteAccount() {
+  if (!confirm('¿Seguro que quieres eliminar tu cuenta? Esta acción es irreversible y perderás todos tus videos y datos.')) return;
+  const pass = prompt('Introduce tu contraseña para confirmar:');
+  if (!pass) return;
+  try {
+    const user = window._currentUser;
+    const cred = window._fb.EmailAuthProvider.credential(user.email, pass);
+    await window._fb.reauthenticateWithCredential(user, cred);
+    await window._fb.deleteUser(user);
+    localStorage.clear();
+    window.location.href = '/welcome.html';
+  } catch(e) {
+    if (e.code === 'auth/wrong-password') alert('Contraseña incorrecta');
+    else alert('Error al eliminar la cuenta');
+  }
+}
+</script>
+</body>
+</html>

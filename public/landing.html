@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;overflow-x:hidden;}
+
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── LOADING ── */
+.loading{position:fixed;inset:0;background:#06101e;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:500;}
+.loading-spinner{width:32px;height:32px;border:3px solid rgba(74,144,217,.2);border-top-color:#4a90d9;border-radius:50%;animation:spin 1s linear infinite;}
+.loading-text{font-size:.82rem;color:rgba(255,255,255,.3);}
+
+/* ── BACK BTN ── */
+.back-bar{position:fixed;top:0;left:0;right:0;z-index:100;padding:max(14px,env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(6,16,30,.85),transparent);pointer-events:none;}
+.back-btn{width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.4);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.8);font-size:1rem;text-decoration:none;pointer-events:auto;transition:all .2s;}
+.back-btn:hover{background:rgba(0,0,0,.6);}
+.ximvid-logo{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.04em;pointer-events:auto;}
+.ximvid-logo em{font-style:italic;background:linear-gradient(135deg,#fff,#a8d0f0,#4a90d9,#a8d0f0,#fff);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:metalSlide 5s linear infinite;}
+
+/* ── BANNER ── */
+.banner{width:100%;height:240px;position:relative;overflow:hidden;background:linear-gradient(145deg,#0f2040,#0b1a30);}
+.banner img{width:100%;height:100%;object-fit:cover;}
+.banner-gradient{position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,rgba(6,16,30,1),transparent);}
+.banner-placeholder{position:absolute;inset:0;background:linear-gradient(145deg,#0b1a30,#0f2040,#1a3668,#0f2040,#0b1a30);background-size:300% 100%;animation:metalSlide 8s linear infinite;}
+
+/* ── PROFILE HEADER ── */
+.profile-header{padding:0 20px;margin-top:-48px;position:relative;z-index:10;display:flex;align-items:flex-end;gap:14px;margin-bottom:16px;}
+.profile-av{width:88px;height:88px;border-radius:50%;border:3px solid rgba(255,255,255,.9);background:linear-gradient(135deg,#0b1a30,#2258a8,#4a90d9);flex-shrink:0;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.profile-av img{width:100%;height:100%;object-fit:cover;}
+.profile-av-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;color:rgba(255,255,255,.6);}
+.profile-meta{flex:1;padding-bottom:8px;}
+.profile-name{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:#fff;line-height:1.1;margin-bottom:2px;}
+.profile-username{font-size:.82rem;color:rgba(255,255,255,.45);font-weight:300;}
+.profile-category{display:inline-flex;align-items:center;gap:5px;background:rgba(74,144,217,.12);border:1px solid rgba(74,144,217,.25);border-radius:100px;padding:3px 10px;font-size:.72rem;color:rgba(168,208,240,.8);margin-top:4px;}
+
+/* ── CONTENT SECTIONS ── */
+.section{padding:0 20px;margin-bottom:24px;}
+.section-title{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(168,208,240,.4);margin-bottom:12px;}
+
+/* Bio */
+.bio-text{font-size:.95rem;color:rgba(255,255,255,.65);font-weight:300;line-height:1.7;}
+
+/* ── CTA BUTTON ── */
+.cta-section{padding:0 20px;margin-bottom:24px;}
+.cta-btn{
+  width:100%;padding:16px;border:none;border-radius:16px;
+  font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;
+  cursor:pointer;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);
+  background-size:300% 100%;animation:metalSlide 5s linear infinite;
+  box-shadow:0 6px 24px rgba(34,88,168,.4),0 1px 0 rgba(255,255,255,.12) inset;
+  text-align:center;
+}
+.cta-btn::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
+.cta-btn:active{transform:scale(.97)}
+
+/* ── PHOTO GALLERY ── */
+.photos-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.photo-item{aspect-ratio:1;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:transform .2s;}
+.photo-item:hover{transform:scale(.97)}
+.photo-item img{width:100%;height:100%;object-fit:cover;}
+.photo-item-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:rgba(255,255,255,.15);}
+
+/* ── SOCIAL LINKS ── */
+.social-grid{display:flex;flex-wrap:wrap;gap:10px;}
+.social-btn{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:10px 14px;cursor:pointer;
+  transition:all .2s;text-decoration:none;
+}
+.social-btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);transform:translateY(-2px);}
+.social-btn:active{transform:scale(.95)}
+.social-icon{font-size:1.1rem;}
+.social-info{display:flex;flex-direction:column;}
+.social-name{font-size:.8rem;font-weight:500;color:#fff;}
+.social-followers{font-size:.68rem;color:rgba(255,255,255,.35);}
+
+/* ── VIDEOS GALLERY ── */
+.videos-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.video-thumb{aspect-ratio:9/16;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);cursor:pointer;position:relative;transition:transform .2s;}
+.video-thumb:hover{transform:scale(.97)}
+.video-thumb video{width:100%;height:100%;object-fit:cover;}
+.video-thumb-overlay{position:absolute;inset:0;background:rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;}
+.video-play{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+.video-views{position:absolute;bottom:6px;left:6px;font-size:.65rem;color:rgba(255,255,255,.8);text-shadow:0 1px 3px rgba(0,0,0,.8);}
+
+/* ── DOWNLOAD BANNER ── */
+.download-banner{
+  margin:8px 20px 40px;
+  background:linear-gradient(145deg,rgba(15,32,64,.95),rgba(11,26,48,.92));
+  border:1px solid rgba(255,255,255,.1);border-radius:20px;
+  padding:24px 20px;text-align:center;position:relative;overflow:hidden;
+}
+.download-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);}
+.download-icon{font-size:2.5rem;margin-bottom:10px;}
+.download-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;margin-bottom:6px;}
+.download-sub{font-size:.82rem;color:rgba(255,255,255,.38);font-weight:300;margin-bottom:16px;line-height:1.5;}
+.download-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.download-btn{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;padding:10px 16px;cursor:pointer;transition:all .2s;
+}
+.download-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);}
+.download-btn svg{width:18px;height:18px;fill:#fff;flex-shrink:0;}
+.download-btn-text{text-align:left;}
+.download-btn-sub{font-size:.65rem;color:rgba(255,255,255,.38);}
+.download-btn-name{font-size:.85rem;font-weight:500;color:#fff;}
+
+/* ── NOT FOUND ── */
+.not-found{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:40px;}
+.not-found-icon{font-size:3rem;}
+.not-found-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;}
+.not-found-sub{font-size:.88rem;color:rgba(255,255,255,.38);font-weight:300;}
+
+/* ── LIGHTBOX ── */
+.lightbox{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:20px;}
+.lightbox.open{display:flex;}
+.lightbox img,.lightbox video{max-width:100%;max-height:90vh;border-radius:12px;object-fit:contain;}
+.lightbox-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.1);border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Cargando perfil...</div>
+</div>
+
+<!-- BACK BAR -->
+<div class="back-bar">
+  <a href="javascript:history.back()" class="back-btn">←</a>
+  <div class="ximvid-logo">xim<em>vid</em></div>
+  <div style="width:36px"></div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main-content" style="display:none">
+
+  <!-- BANNER -->
+  <div class="banner" id="banner">
+    <div class="banner-placeholder" id="banner-placeholder"></div>
+    <img id="banner-img" style="display:none" alt="Banner">
+    <div class="banner-gradient"></div>
+  </div>
+
+  <!-- PROFILE HEADER -->
+  <div class="profile-header">
+    <div class="profile-av" id="profile-av">
+      <div class="profile-av-placeholder">👤</div>
+    </div>
+    <div class="profile-meta">
+      <div class="profile-name" id="profile-name"></div>
+      <div class="profile-username" id="profile-username"></div>
+      <div class="profile-category" id="profile-category" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- BIO -->
+  <div class="section" id="bio-section" style="display:none">
+    <div class="bio-text" id="bio-text"></div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section" id="cta-section" style="display:none">
+    <button class="cta-btn" id="cta-btn" onclick="openCTA()"></button>
+  </div>
+
+  <!-- FOTOS PERSONALES -->
+  <div class="section" id="photos-section" style="display:none">
+    <div class="section-title">Galería</div>
+    <div class="photos-grid" id="photos-grid"></div>
+  </div>
+
+  <!-- REDES SOCIALES -->
+  <div class="section" id="social-section" style="display:none">
+    <div class="section-title">Sígueme en</div>
+    <div class="social-grid" id="social-grid"></div>
+  </div>
+
+  <!-- VIDEOS -->
+  <div class="section" id="videos-section" style="display:none">
+    <div class="section-title">Mis últimos videos</div>
+    <div class="videos-grid" id="videos-grid"></div>
+  </div>
+
+  <!-- DOWNLOAD BANNER -->
+  <div class="download-banner">
+    <div class="download-icon">📱</div>
+    <div class="download-title">Descarga Ximvid</div>
+    <div class="download-sub">Sigue a creadores, descubre productos y contacta directamente. Todo en un toque.</div>
+    <div class="download-btns">
+      <div class="download-btn">
+        <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        <div class="download-btn-text"><div class="download-btn-sub">Disponible en</div><div class="download-btn-name">App Store</div></div>
+      </div>
+      <div class="download-btn">
+        <svg viewBox="0 0 24 24"><path d="M3.18 23.76c.3.17.64.22.98.16l11.26-11.25-2.44-2.44L3.18 23.76zm16.48-13.46l-2.4-1.38-2.71 2.71 2.71 2.71 2.42-1.4c.69-.4.69-1.05-.02-1.64zM3.25.28C2.91.1 2.52.13 2.22.34L13.47 11.6l2.44-2.44L3.25.28zm.93 11.64l9.51 9.51 2.44-2.44L6.87 9.85l-2.69 2.07z"/></svg>
+        <div class="download-btn-text"><div class="download-btn-sub">Disponible en</div><div class="download-btn-name">Google Play</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NOT FOUND -->
+<div id="not-found" style="display:none">
+  <div class="not-found">
+    <div class="not-found-icon">🔍</div>
+    <div class="not-found-title">Perfil no encontrado</div>
+    <div class="not-found-sub">Este usuario no existe o ha eliminado su cuenta.</div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <div id="lightbox-content"></div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+  authDomain:"ximvid-c8627.firebaseapp.com",
+  projectId:"ximvid-c8627",
+  storageBucket:"ximvid-c8627.firebasestorage.app",
+  messagingSenderId:"278931359476",
+  appId:"1:278931359476:web:30fef5be9d11890bef80a1"
+});
+
+const db = getFirestore(app);
+window._db = db;
+window._fb = { collection, query, where, getDocs, orderBy, limit };
+
+// Obtener username de la URL: /oscar → username = "oscar"
+const pathParts = window.location.pathname.split('/').filter(Boolean);
+const username = pathParts[0];
+
+if (!username) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('not-found').style.display = 'block';
+} else {
+  loadProfile(username);
+}
+
+async function loadProfile(username) {
+  try {
+    // Buscar usuario por username
+    const q = window._fb.query(
+      window._fb.collection(db, 'users'),
+      window._fb.where('username', '==', username)
+    );
+    const snap = await window._fb.getDocs(q);
+
+    if (snap.empty) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('not-found').style.display = 'block';
+      return;
+    }
+
+    const userData = snap.docs[0].data();
+
+    // Si tiene landing externa, redirigir
+    if (userData.landingType === 'external' && userData.externalLandingURL) {
+      window.location.href = userData.externalLandingURL;
+      return;
+    }
+
+    // Renderizar landing interna
+    renderProfile(userData);
+
+    // Cargar videos
+    const vq = window._fb.query(
+      window._fb.collection(db, 'videos'),
+      window._fb.where('userId', '==', userData.uid),
+      window._fb.where('isActive', '==', true),
+      window._fb.orderBy('createdAt', 'desc'),
+      window._fb.limit(6)
+    );
+    const vSnap = await window._fb.getDocs(vq);
+    const videos = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (videos.length > 0) renderVideos(videos);
+
+  } catch(e) {
+    console.error(e);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('not-found').style.display = 'block';
+  }
+}
+
+function renderProfile(user) {
+  // Título de la página
+  document.title = (user.name || user.username) + ' — Ximvid';
+
+  // Banner
+  if (user.bannerPhoto) {
+    const img = document.getElementById('banner-img');
+    img.src = user.bannerPhoto;
+    img.style.display = 'block';
+    document.getElementById('banner-placeholder').style.display = 'none';
+  }
+
+  // Avatar
+  const av = document.getElementById('profile-av');
+  if (user.profilePhoto) {
+    av.innerHTML = `<img src="${user.profilePhoto}" alt="${user.name}">`;
+  } else {
+    av.innerHTML = `<div class="profile-av-placeholder">${user.name ? user.name.charAt(0).toUpperCase() : '👤'}</div>`;
+  }
+
+  // Info
+  document.getElementById('profile-name').textContent = user.name || '';
+  document.getElementById('profile-username').textContent = '@' + (user.username || '');
+
+  // Categoría
+  const catMap = { selling_product:'🛍️ Vende productos', selling_service:'🎯 Ofrece servicios', sharing_content:'🎨 Comparte contenido', discovering:'🔍 Descubridor' };
+  if (user.userType) {
+    const catEl = document.getElementById('profile-category');
+    catEl.textContent = catMap[user.userType] || '';
+    catEl.style.display = 'inline-flex';
+  }
+
+  // Bio
+  if (user.shortDescription) {
+    document.getElementById('bio-text').textContent = user.shortDescription;
+    document.getElementById('bio-section').style.display = 'block';
+  }
+
+  // CTA
+  if (user.actionButtonText && user.actionButtonURL) {
+    document.getElementById('cta-btn').textContent = user.actionButtonText;
+    document.getElementById('cta-btn').dataset.url = user.actionButtonURL;
+    document.getElementById('cta-section').style.display = 'block';
+  }
+
+  // Fotos personales
+  const photos = user.galleryPhotos || [];
+  if (photos.length > 0) {
+    const grid = document.getElementById('photos-grid');
+    photos.forEach((url, i) => {
+      const div = document.createElement('div');
+      div.className = 'photo-item';
+      div.onclick = () => openLightboxImg(url);
+      div.innerHTML = `<img src="${url}" alt="Foto ${i+1}" loading="lazy">`;
+      grid.appendChild(div);
+    });
+    document.getElementById('photos-section').style.display = 'block';
+  }
+
+  // Redes sociales
+  const links = (user.socialLinks || []).filter(l => l.url);
+  if (links.length > 0) {
+    const grid = document.getElementById('social-grid');
+    links.forEach(link => {
+      const a = document.createElement('a');
+      a.className = 'social-btn';
+      a.href = link.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.innerHTML = `
+        <span class="social-icon">${link.icon || '🔗'}</span>
+        <div class="social-info">
+          <span class="social-name">${link.name}</span>
+          ${link.followers ? `<span class="social-followers">${link.followers} seguidores</span>` : ''}
+        </div>`;
+      grid.appendChild(a);
+    });
+    document.getElementById('social-section').style.display = 'block';
+  }
+
+  // Mostrar contenido
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+}
+
+function renderVideos(videos) {
+  const grid = document.getElementById('videos-grid');
+  videos.forEach(video => {
+    const div = document.createElement('div');
+    div.className = 'video-thumb';
+    div.onclick = () => window.location.href = '/feed.html?video=' + video.id;
+    div.innerHTML = `
+      <video src="${video.videoURL}" muted playsinline preload="metadata"></video>
+      <div class="video-thumb-overlay">
+        <div class="video-play">▶</div>
+      </div>
+      ${video.views ? `<div class="video-views">👁 ${video.views}</div>` : ''}`;
+    grid.appendChild(div);
+  });
+  document.getElementById('videos-section').style.display = 'block';
+}
+</script>
+
+<script>
+function openCTA() {
+  const url = document.getElementById('cta-btn').dataset.url;
+  if (url) window.open(url, '_blank');
+}
+function openLightboxImg(url) {
+  document.getElementById('lightbox-content').innerHTML = `<img src="${url}" alt="Foto">`;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-content').innerHTML = '';
+}
+</script>
+</body>
+</html>

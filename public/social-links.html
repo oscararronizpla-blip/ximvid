@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Tus redes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;display:flex;flex-direction:column;align-items:center;padding:0 20px 100px;position:relative;overflow-x:hidden;}
+.bg-grid{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(74,144,217,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(74,144,217,.04) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%);-webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%);}
+.orb{position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;opacity:.35}
+.orb1{width:500px;height:500px;background:rgba(34,88,168,.18);top:-150px;right:-100px}
+.orb2{width:350px;height:350px;background:rgba(10,22,40,.3);bottom:-80px;left:-60px}
+
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+.header{width:100%;max-width:520px;display:flex;align-items:center;justify-content:center;padding:52px 0 28px;position:relative;z-index:5;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;letter-spacing:.04em}
+.logo em{font-style:italic;background:linear-gradient(135deg,#fff 0%,#a8d0f0 25%,#4a90d9 50%,#a8d0f0 75%,#fff 100%);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:metalSlide 5s linear infinite;}
+
+.progress{width:100%;max-width:520px;display:flex;gap:6px;margin-bottom:32px;position:relative;z-index:5;}
+.progress-step{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.08);}
+.progress-step.done{background:linear-gradient(90deg,#1a3668,#2258a8,#4a90d9);background-size:200% 100%;animation:metalSlide 3s linear infinite;}
+.progress-step.active{background:rgba(74,144,217,.4);}
+
+.content{width:100%;max-width:520px;position:relative;z-index:5;}
+.step-label{font-size:.72rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:rgba(168,208,240,.45);margin-bottom:10px;}
+.title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,6vw,2.4rem);font-weight:300;line-height:1.1;margin-bottom:6px;}
+.title strong{font-weight:600}
+.subtitle{font-size:.88rem;font-weight:300;color:rgba(255,255,255,.38);margin-bottom:28px;line-height:1.6;}
+
+/* ── GROUP ── */
+.group{margin-bottom:18px;}
+.group-title{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(168,208,240,.4);margin-bottom:10px;padding-left:2px;}
+
+/* ── NETWORK ITEM ── */
+.net-item{
+  background:linear-gradient(145deg,rgba(15,32,64,.88),rgba(11,26,48,.84));
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;margin-bottom:8px;overflow:hidden;
+  transition:border-color .2s;
+}
+.net-item.active{border-color:rgba(74,144,217,.35);}
+.net-header{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;cursor:pointer;
+}
+.net-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;background:rgba(255,255,255,.06);}
+.net-info{flex:1;min-width:0;}
+.net-name{font-size:.9rem;font-weight:500;color:#fff;}
+.net-preview{font-size:.75rem;color:rgba(255,255,255,.28);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.net-toggle{
+  width:44px;height:26px;border-radius:13px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);
+  position:relative;cursor:pointer;transition:all .25s;flex-shrink:0;
+}
+.net-item.active .net-toggle{background:linear-gradient(90deg,#1a3668,#2258a8);border-color:rgba(74,144,217,.4);}
+.net-toggle-dot{position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.net-item.active .net-toggle-dot{transform:translateX(18px);}
+
+/* ── EXPANDED FIELDS ── */
+.net-fields{display:none;padding:0 16px 16px;animation:slideDown .2s ease;}
+.net-item.active .net-fields{display:block;}
+.net-field{margin-bottom:10px;}
+.net-field:last-child{margin-bottom:0;}
+.net-field label{display:block;font-size:.72rem;font-weight:500;color:rgba(168,208,240,.45);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;}
+.net-field input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.net-field input::placeholder{color:rgba(255,255,255,.2)}
+.net-field input:focus{border-color:rgba(74,144,217,.4);background:rgba(74,144,217,.04)}
+.net-field-row{display:flex;gap:8px;}
+.net-field-row .net-field{flex:1;}
+.net-field-row .net-field.small{flex:0 0 110px;}
+
+/* ── BOTTOM FIXED ── */
+.bottom-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:linear-gradient(to top,rgba(6,16,30,.98),rgba(6,16,30,.85));
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  padding:16px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom));
+  border-top:1px solid rgba(255,255,255,.07);
+}
+.bottom-bar-inner{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:8px;}
+.btn-submit{width:100%;padding:15px;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;color:#fff;position:relative;overflow:hidden;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 6s linear infinite;box-shadow:0 6px 24px rgba(34,88,168,.35),0 1px 0 rgba(255,255,255,.12) inset;}
+.btn-submit::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
+.btn-submit:active{transform:scale(.98)}
+.btn-skip{background:none;border:none;font-family:'DM Sans',sans-serif;font-size:.84rem;color:rgba(255,255,255,.25);cursor:pointer;text-align:center;padding:4px;text-decoration:underline;}
+.btn-skip:hover{color:rgba(255,255,255,.45);}
+
+/* Active count badge */
+.active-count{text-align:center;font-size:.78rem;color:rgba(168,208,240,.45);padding:2px 0;}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="header"><div class="logo">xim<em>vid</em></div></div>
+
+<div class="progress">
+  <div class="progress-step done"></div>
+  <div class="progress-step done"></div>
+  <div class="progress-step active"></div>
+</div>
+
+<div class="content">
+  <div class="step-label">Paso 3 de 3</div>
+  <h1 class="title"><strong>Tus redes</strong><br>y contacto</h1>
+  <p class="subtitle">Activa solo las que tienes. Aparecerán en todos tus videos. Un toque y tu espectador llega directo a tu perfil.</p>
+
+  <!-- REDES SOCIALES -->
+  <div class="group">
+    <div class="group-title">Redes sociales</div>
+    <div id="group-social"></div>
+  </div>
+
+  <!-- CONTACTO DIRECTO -->
+  <div class="group">
+    <div class="group-title">Contacto directo</div>
+    <div id="group-contact"></div>
+  </div>
+
+  <!-- VENTA Y ENLACES -->
+  <div class="group">
+    <div class="group-title">Venta y enlaces</div>
+    <div id="group-links"></div>
+  </div>
+
+  <!-- MÚSICA Y CREATIVOS -->
+  <div class="group">
+    <div class="group-title">Música y creativos</div>
+    <div id="group-creative"></div>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bottom-bar-inner">
+    <div class="active-count" id="active-count">0 redes activadas</div>
+    <button class="btn-submit" onclick="doSave()">Guardar y entrar al feed →</button>
+    <button class="btn-skip" onclick="doSkip()">Completar más tarde</button>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+  authDomain:"ximvid-c8627.firebaseapp.com",
+  projectId:"ximvid-c8627",
+  storageBucket:"ximvid-c8627.firebasestorage.app",
+  messagingSenderId:"278931359476",
+  appId:"1:278931359476:web:30fef5be9d11890bef80a1"
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+window._auth = auth;
+window._db = db;
+window._fb = { doc, updateDoc };
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) window.location.href = '/welcome.html';
+});
+</script>
+
+<script>
+// ── DEFINICIÓN DE REDES ───────────────────────────────────────
+const NETWORKS = {
+  social: [
+    { id:'instagram', name:'Instagram', icon:'📸', placeholder:'instagram.com/tuperfil' },
+    { id:'tiktok',    name:'TikTok',    icon:'🎵', placeholder:'tiktok.com/@tuperfil' },
+    { id:'youtube',   name:'YouTube',   icon:'▶️', placeholder:'youtube.com/@tucanal' },
+    { id:'facebook',  name:'Facebook',  icon:'👥', placeholder:'facebook.com/tupagina' },
+    { id:'twitter',   name:'X / Twitter', icon:'🐦', placeholder:'x.com/tunombre' },
+    { id:'linkedin',  name:'LinkedIn',  icon:'💼', placeholder:'linkedin.com/in/tunombre' },
+    { id:'pinterest', name:'Pinterest', icon:'📌', placeholder:'pinterest.com/tunombre' },
+    { id:'snapchat',  name:'Snapchat',  icon:'👻', placeholder:'snapchat.com/add/tunombre' },
+    { id:'twitch',    name:'Twitch',    icon:'🎮', placeholder:'twitch.tv/tunombre' },
+    { id:'reddit',    name:'Reddit',    icon:'🤖', placeholder:'reddit.com/u/tunombre' },
+    { id:'tumblr',    name:'Tumblr',    icon:'✏️', placeholder:'tunombre.tumblr.com' },
+  ],
+  contact: [
+    { id:'whatsapp',  name:'WhatsApp',  icon:'💬', placeholder:'+34 600 000 000', type:'tel', followersLabel: false },
+    { id:'telegram',  name:'Telegram',  icon:'✈️', placeholder:'t.me/tunombre', followersLabel: false },
+    { id:'email',     name:'Email directo', icon:'📧', placeholder:'tu@email.com', type:'email', followersLabel: false },
+    { id:'phone',     name:'Teléfono',  icon:'📞', placeholder:'+34 600 000 000', type:'tel', followersLabel: false },
+  ],
+  links: [
+    { id:'web',       name:'Web propia',    icon:'🌐', placeholder:'tuweb.com', followersLabel: false },
+    { id:'shop',      name:'Tienda online', icon:'🛒', placeholder:'tutienda.com', followersLabel: false },
+    { id:'etsy',      name:'Etsy',          icon:'🏪', placeholder:'etsy.com/shop/tunombre' },
+    { id:'amazon',    name:'Amazon',        icon:'📦', placeholder:'amazon.es/tienda/tunombre', followersLabel: false },
+    { id:'wallapop',  name:'Wallapop',      icon:'🔄', placeholder:'wallapop.com/u/tunombre', followersLabel: false },
+    { id:'paypal',    name:'PayPal',        icon:'💳', placeholder:'paypal.me/tunombre', followersLabel: false },
+    { id:'bizum',     name:'Bizum',         icon:'💰', placeholder:'Número de teléfono', type:'tel', followersLabel: false },
+    { id:'patreon',   name:'Patreon',       icon:'🎁', placeholder:'patreon.com/tunombre' },
+    { id:'calendly',  name:'Calendly',      icon:'📅', placeholder:'calendly.com/tunombre', followersLabel: false },
+  ],
+  creative: [
+    { id:'spotify',    name:'Spotify',    icon:'🎧', placeholder:'open.spotify.com/artist/...' },
+    { id:'soundcloud', name:'SoundCloud', icon:'🎼', placeholder:'soundcloud.com/tunombre' },
+    { id:'vimeo',      name:'Vimeo',      icon:'🎬', placeholder:'vimeo.com/tunombre' },
+    { id:'behance',    name:'Behance',    icon:'🎨', placeholder:'behance.net/tunombre' },
+    { id:'discord',    name:'Discord',    icon:'🎲', placeholder:'discord.gg/tuservidor', followersLabel: false },
+  ]
+};
+
+const activeNets = {};
+
+// ── RENDER ────────────────────────────────────────────────────
+function renderGroup(groupId, networks) {
+  const container = document.getElementById('group-' + groupId);
+  networks.forEach(net => {
+    const showFollowers = net.followersLabel !== false;
+    container.innerHTML += `
+      <div class="net-item" id="item-${net.id}">
+        <div class="net-header" onclick="toggleNet('${net.id}')">
+          <div class="net-icon">${net.icon}</div>
+          <div class="net-info">
+            <div class="net-name">${net.name}</div>
+            <div class="net-preview" id="preview-${net.id}">Toca para activar</div>
+          </div>
+          <div class="net-toggle" id="toggle-${net.id}">
+            <div class="net-toggle-dot"></div>
+          </div>
+        </div>
+        <div class="net-fields">
+          <div class="${showFollowers ? 'net-field-row' : ''}">
+            <div class="net-field ${showFollowers ? '' : ''}">
+              <label>URL o ${net.type === 'tel' ? 'teléfono' : net.type === 'email' ? 'email' : 'enlace'}</label>
+              <input type="${net.type || 'url'}"
+                id="url-${net.id}"
+                placeholder="${net.placeholder}"
+                autocapitalize="none" autocorrect="off"
+                oninput="updatePreview('${net.id}')">
+            </div>
+            ${showFollowers ? `
+            <div class="net-field small">
+              <label>Seguidores</label>
+              <input type="text" id="followers-${net.id}" placeholder="Ej: 12K">
+            </div>` : ''}
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+renderGroup('social', NETWORKS.social);
+renderGroup('contact', NETWORKS.contact);
+renderGroup('links', NETWORKS.links);
+renderGroup('creative', NETWORKS.creative);
+
+// ── TOGGLE ────────────────────────────────────────────────────
+function toggleNet(id) {
+  const item = document.getElementById('item-' + id);
+  const isActive = item.classList.contains('active');
+  if (isActive) {
+    item.classList.remove('active');
+    delete activeNets[id];
+    document.getElementById('preview-' + id).textContent = 'Toca para activar';
+  } else {
+    item.classList.add('active');
+    activeNets[id] = true;
+    document.getElementById('url-' + id)?.focus();
+  }
+  updateCount();
+}
+
+function updatePreview(id) {
+  const val = document.getElementById('url-' + id)?.value.trim();
+  const preview = document.getElementById('preview-' + id);
+  if (val) preview.textContent = val;
+  else preview.textContent = 'Toca para activar';
+}
+
+function updateCount() {
+  const count = Object.keys(activeNets).length;
+  const el = document.getElementById('active-count');
+  el.textContent = count === 0 ? '0 redes activadas' :
+    count === 1 ? '1 red activada ✅' : count + ' redes activadas ✅';
+}
+
+// ── SAVE ──────────────────────────────────────────────────────
+async function doSave() {
+  const user = window._auth.currentUser;
+  if (!user) { window.location.href = '/welcome.html'; return; }
+
+  // Recoger todas las redes activas
+  const allNets = [...NETWORKS.social, ...NETWORKS.contact, ...NETWORKS.links, ...NETWORKS.creative];
+  const socialLinks = [];
+
+  allNets.forEach((net, idx) => {
+    if (!activeNets[net.id]) return;
+    const urlEl = document.getElementById('url-' + net.id);
+    const followersEl = document.getElementById('followers-' + net.id);
+    const url = urlEl?.value.trim();
+    if (!url) return;
+
+    // Normalizar URL
+    let finalUrl = url;
+    if (net.type === 'tel') {
+      finalUrl = 'tel:' + url.replace(/\s/g, '');
+    } else if (net.type === 'email') {
+      finalUrl = 'mailto:' + url;
+    } else if (!url.startsWith('http')) {
+      finalUrl = 'https://' + url;
+    }
+
+    socialLinks.push({
+      network: net.id,
+      name: net.name,
+      icon: net.icon,
+      url: finalUrl,
+      followers: followersEl?.value.trim() || '',
+      order: idx
+    });
+  });
+
+  try {
+    await window._fb.updateDoc(
+      window._fb.doc(window._db, 'users', user.uid),
+      { socialLinks, socialLinksSetupDone: true }
+    );
+    window.location.href = '/feed.html';
+  } catch(e) {
+    alert('Error al guardar. Inténtalo de nuevo.');
+  }
+}
+
+function doSkip() {
+  window.location.href = '/feed.html';
+}
+</script>
+</body>
+</html>

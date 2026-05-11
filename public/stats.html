@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Estadísticas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;padding-bottom:90px;overflow-x:hidden;}
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes barGrow{from{width:0%}to{width:var(--w)}}
+
+.loading{position:fixed;inset:0;background:#06101e;display:flex;align-items:center;justify-content:center;z-index:500;}
+.spinner{width:32px;height:32px;border:3px solid rgba(74,144,217,.2);border-top-color:#4a90d9;border-radius:50%;animation:spin 1s linear infinite;}
+
+.top-header{padding:max(52px,calc(44px + env(safe-area-inset-top))) 20px 16px;display:flex;align-items:center;gap:12px;}
+.back-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.65);font-size:1rem;text-decoration:none;transition:all .2s;flex-shrink:0;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;}
+
+/* PERIOD SELECTOR */
+.period-scroll{display:flex;gap:8px;padding:0 20px 20px;overflow-x:auto;scrollbar-width:none;}
+.period-scroll::-webkit-scrollbar{display:none}
+.period-btn{flex-shrink:0;padding:8px 18px;border-radius:100px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);font-family:'DM Sans',sans-serif;font-size:.82rem;color:rgba(255,255,255,.5);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.period-btn.active{background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 5s linear infinite;color:#fff;border-color:rgba(74,144,217,.3);box-shadow:0 2px 12px rgba(34,88,168,.3);}
+
+/* BIG METRICS */
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:20px;}
+.metric-card{background:linear-gradient(145deg,rgba(15,32,64,.92),rgba(11,26,48,.88));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px;position:relative;overflow:hidden;}
+.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);}
+.metric-icon{font-size:1.3rem;margin-bottom:8px;}
+.metric-value{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;line-height:1;display:block;background:linear-gradient(135deg,#fff,#a8d0f0,#4a90d9,#a8d0f0,#fff);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:metalSlide 5s linear infinite;}
+.metric-label{font-size:.72rem;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;}
+.metric-trend{font-size:.72rem;margin-top:6px;font-weight:500;}
+.metric-trend.up{color:#34c759;}
+.metric-trend.down{color:#ff4444;}
+.metric-trend.neutral{color:rgba(255,255,255,.25);}
+
+/* CONVERSION RATE — destacado */
+.conversion-card{margin:0 16px 20px;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 7s linear infinite;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:20px;position:relative;overflow:hidden;text-align:center;}
+.conversion-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);}
+.conversion-value{font-family:'Cormorant Garamond',serif;font-size:3.5rem;font-weight:600;color:#fff;line-height:1;}
+.conversion-label{font-size:.78rem;color:rgba(255,255,255,.45);margin-top:6px;}
+.conversion-sub{font-size:.72rem;color:rgba(255,255,255,.25);margin-top:4px;}
+
+/* SECTION */
+.section{margin:0 16px 20px;}
+.section-title{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(168,208,240,.4);margin-bottom:12px;}
+.card{background:linear-gradient(145deg,rgba(15,32,64,.9),rgba(11,26,48,.86));border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;position:relative;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);}
+
+/* NETWORK BARS */
+.net-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.05);}
+.net-row:last-child{border-bottom:none;}
+.net-icon{font-size:1.1rem;flex-shrink:0;width:24px;text-align:center;}
+.net-name{font-size:.88rem;font-weight:400;color:#fff;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.net-bar-wrap{flex:2;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.net-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#1a3668,#2258a8,#4a90d9);background-size:200% 100%;animation:metalSlide 3s linear infinite;box-shadow:0 0 8px rgba(74,144,217,.4);transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.net-count{font-size:.82rem;font-weight:600;color:rgba(255,255,255,.7);min-width:32px;text-align:right;}
+
+/* VIDEO LIST */
+.video-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .2s;}
+.video-row:last-child{border-bottom:none;}
+.video-row:hover{background:rgba(255,255,255,.03);}
+.video-thumb-sm{width:44px;height:78px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.06);flex-shrink:0;}
+.video-info{flex:1;min-width:0;}
+.video-info-title{font-size:.85rem;font-weight:500;color:#fff;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.video-info-stats{display:flex;gap:10px;flex-wrap:wrap;}
+.video-info-stat{font-size:.72rem;color:rgba(255,255,255,.35);}
+.video-conversion{text-align:right;flex-shrink:0;}
+.video-conv-value{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;display:block;background:linear-gradient(135deg,#fff,#a8d0f0,#4a90d9);background-size:200% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:metalSlide 4s linear infinite;}
+.video-conv-label{font-size:.62rem;color:rgba(255,255,255,.25);}
+
+/* EMPTY */
+.empty{padding:40px 20px;text-align:center;color:rgba(255,255,255,.25);}
+.empty-icon{font-size:2.5rem;margin-bottom:10px;}
+.empty-text{font-size:.85rem;}
+
+/* BOTTOM NAV */
+.botnav{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:10px 0;padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(0,0,0,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-around;align-items:center;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 14px;}
+.nav-ico{font-size:1.3rem;line-height:1;}
+.nav-lbl{font-size:.6rem;color:rgba(255,255,255,.45);}
+.nav-item.active .nav-lbl{color:rgba(255,255,255,.85);}
+.nav-plus{width:48px;height:32px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:#fff;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 5s linear infinite;box-shadow:0 2px 12px rgba(34,88,168,.45);}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading"><div class="spinner"></div></div>
+
+<div id="content" style="display:none">
+
+  <div class="top-header">
+    <a href="/profile.html" class="back-btn">←</a>
+    <div class="page-title">Mis estadísticas</div>
+  </div>
+
+  <!-- PERIOD -->
+  <div class="period-scroll">
+    <button class="period-btn" onclick="setPeriod('today',this)">Hoy</button>
+    <button class="period-btn active" onclick="setPeriod('week',this)">Esta semana</button>
+    <button class="period-btn" onclick="setPeriod('month',this)">Este mes</button>
+    <button class="period-btn" onclick="setPeriod('3months',this)">Últimos 3 meses</button>
+  </div>
+
+  <!-- CONVERSION RATE -->
+  <div class="conversion-card">
+    <div class="conversion-value" id="conv-rate">—</div>
+    <div class="conversion-label">Tasa de conversión</div>
+    <div class="conversion-sub">% de espectadores que pulsaron algún botón</div>
+  </div>
+
+  <!-- 4 METRICS -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon">👁</div>
+      <span class="metric-value" id="m-views">0</span>
+      <div class="metric-label">Visualizaciones</div>
+      <div class="metric-trend neutral" id="t-views">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">👆</div>
+      <span class="metric-value" id="m-clicks">0</span>
+      <div class="metric-label">Clics CTA</div>
+      <div class="metric-trend neutral" id="t-clicks">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">🔗</div>
+      <span class="metric-value" id="m-social">0</span>
+      <div class="metric-label">Clics en redes</div>
+      <div class="metric-trend neutral" id="t-social">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">👥</div>
+      <span class="metric-value" id="m-followers">0</span>
+      <div class="metric-label">Nuevos seguidores</div>
+      <div class="metric-trend neutral" id="t-followers">—</div>
+    </div>
+  </div>
+
+  <!-- POR RED SOCIAL -->
+  <div class="section">
+    <div class="section-title">Clics por red social</div>
+    <div class="card" id="social-bars">
+      <div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Sin datos aún</div></div>
+    </div>
+  </div>
+
+  <!-- POR VIDEO -->
+  <div class="section">
+    <div class="section-title">Rendimiento por video</div>
+    <div class="card" id="video-list">
+      <div class="empty"><div class="empty-icon">🎬</div><div class="empty-text">Sin videos aún</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="botnav">
+  <div class="nav-item" onclick="window.location.href='/feed.html'"><div class="nav-ico">🏠</div><div class="nav-lbl">Inicio</div></div>
+  <div class="nav-item" onclick="window.location.href='/search.html'"><div class="nav-ico">🔍</div><div class="nav-lbl">Buscar</div></div>
+  <button class="nav-plus" onclick="window.location.href='/upload.html'">+</button>
+  <div class="nav-item" onclick="window.location.href='/notifications.html'"><div class="nav-ico">🔔</div><div class="nav-lbl">Avisos</div></div>
+  <div class="nav-item" onclick="window.location.href='/profile.html'"><div class="nav-ico">👤</div><div class="nav-lbl">Perfil</div></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+  authDomain:"ximvid-c8627.firebaseapp.com",
+  projectId:"ximvid-c8627",
+  storageBucket:"ximvid-c8627.firebasestorage.app",
+  messagingSenderId:"278931359476",
+  appId:"1:278931359476:web:30fef5be9d11890bef80a1"
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+window._auth = auth; window._db = db;
+window._fb = { collection, query, where, getDocs, orderBy };
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = '/welcome.html'; return; }
+  window._uid = user.uid;
+  await loadStats('week');
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+});
+</script>
+
+<script>
+let currentPeriod = 'week';
+
+function setPeriod(period, el) {
+  currentPeriod = period;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  loadStats(period);
+}
+
+function getDateRange(period) {
+  const now = new Date();
+  const start = new Date();
+  if (period === 'today') start.setHours(0,0,0,0);
+  else if (period === 'week') start.setDate(now.getDate() - 7);
+  else if (period === 'month') start.setDate(now.getDate() - 30);
+  else if (period === '3months') start.setDate(now.getDate() - 90);
+  return start;
+}
+
+async function loadStats(period) {
+  const uid = window._uid;
+  if (!uid) return;
+
+  try {
+    // Cargar todos los videos del usuario
+    const vq = window._fb.query(
+      window._fb.collection(window._db, 'videos'),
+      window._fb.where('userId', '==', uid),
+      window._fb.where('isActive', '==', true)
+    );
+    const vSnap = await window._fb.getDocs(vq);
+    const videos = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Calcular totales
+    let totalViews = 0, totalClicks = 0;
+    videos.forEach(v => {
+      totalViews += v.views || 0;
+      totalClicks += v.actionClicks || 0;
+    });
+
+    // Cargar clicks en redes sociales
+    let socialClicks = {};
+    try {
+      const scq = window._fb.query(
+        window._fb.collection(window._db, 'socialClicks'),
+        window._fb.where('videoOwnerId', '==', uid)
+      );
+      const scSnap = await window._fb.getDocs(scq);
+      let totalSocial = 0;
+      scSnap.docs.forEach(d => {
+        const data = d.data();
+        socialClicks[data.network] = (socialClicks[data.network] || 0) + 1;
+        totalSocial++;
+      });
+      document.getElementById('m-social').textContent = formatNum(totalSocial);
+    } catch(e) {}
+
+    // Mostrar métricas
+    document.getElementById('m-views').textContent = formatNum(totalViews);
+    document.getElementById('m-clicks').textContent = formatNum(totalClicks);
+    document.getElementById('m-followers').textContent = '—';
+
+    // Tasa de conversión
+    const convRate = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : '0.0';
+    document.getElementById('conv-rate').textContent = convRate + '%';
+
+    // Barras por red social
+    renderSocialBars(socialClicks);
+
+    // Lista de videos
+    renderVideoList(videos);
+
+  } catch(e) { console.error(e); }
+}
+
+function renderSocialBars(socialClicks) {
+  const container = document.getElementById('social-bars');
+  const entries = Object.entries(socialClicks).sort((a,b) => b[1]-a[1]);
+  if (entries.length === 0) { container.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Sin clics en redes aún</div></div>'; return; }
+  const max = entries[0][1];
+  const icons = { instagram:'📸',tiktok:'🎵',youtube:'▶️',whatsapp:'💬',telegram:'✈️',linkedin:'💼',facebook:'👥',twitter:'🐦',spotify:'🎧',email:'📧' };
+  container.innerHTML = entries.map(([net, count]) => `
+    <div class="net-row">
+      <span class="net-icon">${icons[net] || '🔗'}</span>
+      <span class="net-name">${net.charAt(0).toUpperCase() + net.slice(1)}</span>
+      <div class="net-bar-wrap"><div class="net-bar" style="width:${(count/max*100).toFixed(0)}%"></div></div>
+      <span class="net-count">${count}</span>
+    </div>`).join('');
+}
+
+function renderVideoList(videos) {
+  const container = document.getElementById('video-list');
+  if (videos.length === 0) { container.innerHTML = '<div class="empty"><div class="empty-icon">🎬</div><div class="empty-text">Sin videos aún</div></div>'; return; }
+  const sorted = [...videos].sort((a,b) => {
+    const convA = (a.views||0) > 0 ? (a.actionClicks||0)/(a.views||1) : 0;
+    const convB = (b.views||0) > 0 ? (b.actionClicks||0)/(b.views||1) : 0;
+    return convB - convA;
+  });
+  container.innerHTML = sorted.map(v => {
+    const conv = (v.views||0) > 0 ? (((v.actionClicks||0)/(v.views||1))*100).toFixed(1) : '0.0';
+    return `<div class="video-row" onclick="window.location.href='/feed.html?video=${v.id}'">
+      <video class="video-thumb-sm" src="${v.videoURL}" muted playsinline preload="metadata"></video>
+      <div class="video-info">
+        <div class="video-info-title">${v.description || v.hashtags?.map(h=>'#'+h).join(' ') || 'Video'}</div>
+        <div class="video-info-stats">
+          <span class="video-info-stat">👁 ${formatNum(v.views||0)}</span>
+          <span class="video-info-stat">👆 ${formatNum(v.actionClicks||0)}</span>
+        </div>
+      </div>
+      <div class="video-conversion">
+        <span class="video-conv-value">${conv}%</span>
+        <span class="video-conv-label">conversión</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function formatNum(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(1)+'K';
+  return n.toString();
+}
+</script>
+</body>
+</html>

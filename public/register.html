@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Registro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);
+  color:#fff;min-height:100%;
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 20px 40px;position:relative;overflow-x:hidden;
+}
+.bg-grid{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(74,144,217,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(74,144,217,.04) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%);-webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%);}
+.orb{position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;opacity:.35}
+.orb1{width:500px;height:500px;background:rgba(34,88,168,.18);top:-150px;right:-100px}
+.orb2{width:350px;height:350px;background:rgba(10,22,40,.3);bottom:-80px;left:-60px}
+
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.header{width:100%;max-width:420px;display:flex;align-items:center;justify-content:space-between;padding:52px 0 24px;position:relative;z-index:5;animation:fadeUp .6s ease both;}
+.back-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.65);font-size:1.1rem;transition:all .2s;text-decoration:none;}
+.back-btn:hover{background:rgba(255,255,255,.1)}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;letter-spacing:.04em}
+.logo em{font-style:italic;background:linear-gradient(135deg,#fff 0%,#a8d0f0 25%,#4a90d9 50%,#a8d0f0 75%,#fff 100%);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:metalSlide 5s linear infinite;}
+.header-spacer{width:38px}
+
+.card{width:100%;max-width:420px;background:linear-gradient(145deg,rgba(15,32,64,.95),rgba(11,26,48,.92));border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:32px 28px;position:relative;z-index:5;box-shadow:0 24px 64px rgba(0,0,0,.5);animation:fadeUp .7s .08s ease both;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);border-radius:24px 24px 0 0;}
+
+.tabs{display:flex;background:rgba(255,255,255,.04);border-radius:12px;padding:3px;margin-bottom:28px;}
+.tab{flex:1;padding:10px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;transition:all .25s;}
+.tab.active{background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 5s linear infinite;color:#fff;box-shadow:0 2px 10px rgba(34,88,168,.3);position:relative;overflow:hidden;}
+.tab.active::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);}
+.tab.inactive{background:transparent;color:rgba(255,255,255,.38);}
+
+.form-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;margin-bottom:6px;color:#fff}
+.form-title strong{font-weight:600}
+.form-subtitle{font-size:.82rem;color:rgba(255,255,255,.38);margin-bottom:24px;font-weight:300}
+
+.field{margin-bottom:14px;position:relative}
+.field label{display:block;font-size:.76rem;font-weight:500;color:rgba(168,208,240,.6);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+
+/* Username field especial */
+.username-wrap{position:relative}
+.username-prefix{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.35);font-size:.9rem;pointer-events:none;font-family:'DM Sans',sans-serif;}
+.username-input{padding-left:32px !important}
+.username-status{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:.85rem;font-weight:600;}
+.username-hint{font-size:.72rem;color:rgba(255,255,255,.25);margin-top:5px;font-weight:300;}
+
+.field input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 16px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;transition:border-color .2s,background .2s;-webkit-appearance:none;appearance:none;}
+.field input::placeholder{color:rgba(255,255,255,.25)}
+.field input:focus{border-color:rgba(74,144,217,.5);background:rgba(74,144,217,.06)}
+.field input.error{border-color:rgba(255,102,128,.5) !important;background:rgba(255,45,85,.04) !important}
+.field input.ok{border-color:rgba(52,199,89,.4) !important}
+
+.error-msg{display:none;background:rgba(255,45,85,.08);border:1px solid rgba(255,45,85,.2);border-radius:10px;padding:10px 14px;font-size:.82rem;color:#ff8099;margin-bottom:14px;}
+.error-msg.show{display:flex;align-items:center;gap:8px}
+
+.pass-strength{height:3px;border-radius:2px;background:rgba(255,255,255,.06);margin-top:6px;overflow:hidden}
+.pass-strength-fill{height:100%;border-radius:2px;width:0%;transition:width .3s,background .3s}
+
+.btn-submit{width:100%;padding:15px;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;color:#fff;margin-top:4px;margin-bottom:12px;position:relative;overflow:hidden;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 6s linear infinite;box-shadow:0 6px 24px rgba(34,88,168,.35),0 1px 0 rgba(255,255,255,.12) inset;transition:transform .2s,box-shadow .2s;}
+.btn-submit::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;animation:none}
+.btn-submit:active:not(:disabled){transform:scale(.98)}
+
+.divider{display:flex;align-items:center;gap:12px;margin:4px 0 12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
+.divider span{font-size:.75rem;color:rgba(255,255,255,.25)}
+
+.btn-google{width:100%;padding:13px;border:1px solid rgba(255,255,255,.12);border-radius:14px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:400;cursor:pointer;color:rgba(255,255,255,.72);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;}
+.btn-google:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
+.btn-google:active{transform:scale(.98)}
+.google-icon{width:18px;height:18px;flex-shrink:0}
+
+.terms-text{font-size:.72rem;color:rgba(255,255,255,.22);text-align:center;margin-top:16px;line-height:1.5;}
+.terms-text a{color:rgba(168,208,240,.45);text-decoration:underline}
+
+.success-screen{display:none;text-align:center;padding:16px 0;}
+.success-icon{font-size:3rem;margin-bottom:16px;animation:bounceIn .6s ease}
+@keyframes bounceIn{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.success-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;margin-bottom:8px}
+.success-sub{font-size:.88rem;color:rgba(255,255,255,.48);font-weight:300}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="header">
+  <a href="/welcome.html" class="back-btn">←</a>
+  <div class="logo">xim<em>vid</em></div>
+  <div class="header-spacer"></div>
+</div>
+
+<div class="card">
+  <div class="tabs">
+    <button class="tab active" id="tab-register" onclick="switchTab('register')">Crear cuenta</button>
+    <button class="tab inactive" id="tab-login" onclick="switchTab('login')">Iniciar sesión</button>
+  </div>
+
+  <div class="error-msg" id="error-msg">
+    <span>⚠️</span><span id="error-text"></span>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="form-register">
+    <div class="form-title"><strong>Empieza</strong> gratis</div>
+    <div class="form-subtitle">Crea tu cuenta y empieza a crecer hoy</div>
+
+    <div class="field">
+      <label>Nombre o marca</label>
+      <input type="text" id="reg-name" placeholder="Ej: Laura Diseño, Tienda Eco..." autocomplete="name" autocapitalize="words">
+    </div>
+
+    <div class="field">
+      <label>Tu @usuario único</label>
+      <div class="username-wrap">
+        <span class="username-prefix">@</span>
+        <input type="text" id="reg-username" class="username-input" placeholder="tunombre" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="checkUsername(this.value)" maxlength="30">
+        <span class="username-status" id="username-status"></span>
+      </div>
+      <div class="username-hint">Solo letras, números y guiones. Tu URL: app.ximvid.com/<span id="username-preview">tunombre</span></div>
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="email">
+    </div>
+
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" autocomplete="new-password" oninput="checkPassStrength(this.value)">
+      <div class="pass-strength"><div class="pass-strength-fill" id="pass-fill"></div></div>
+    </div>
+
+    <button class="btn-submit" id="btn-reg-submit" onclick="doRegister()">Crear cuenta gratis →</button>
+    <div class="divider"><span>o continúa con</span></div>
+    <button class="btn-google" onclick="doGoogleAuth()">
+      <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continuar con Google
+    </button>
+    <div class="terms-text">Al crear tu cuenta aceptas los <a href="/terms.html">Términos de uso</a> y la <a href="/privacy.html">Política de privacidad</a></div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="form-login" style="display:none">
+    <div class="form-title"><strong>Bienvenido</strong> de nuevo</div>
+    <div class="form-subtitle">Inicia sesión en tu cuenta</div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="Tu contraseña" autocomplete="current-password">
+    </div>
+    <button class="btn-submit" id="btn-login-submit" onclick="doLogin()">Entrar →</button>
+    <div class="divider"><span>o continúa con</span></div>
+    <button class="btn-google" onclick="doGoogleAuth()">
+      <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continuar con Google
+    </button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">¡Bienvenido!</div>
+    <div class="success-sub">Preparando tu perfil...</div>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, query, collection, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+  authDomain:"ximvid-c8627.firebaseapp.com",
+  projectId:"ximvid-c8627",
+  storageBucket:"ximvid-c8627.firebasestorage.app",
+  messagingSenderId:"278931359476",
+  appId:"1:278931359476:web:30fef5be9d11890bef80a1"
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+const gp = new GoogleAuthProvider();
+
+window._auth = auth;
+window._db = db;
+window._gp = gp;
+window._fb = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, doc, setDoc, getDoc, query, collection, where, getDocs, serverTimestamp };
+
+// Si ya está logado redirigir
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists() && snap.data()?.userType) {
+        window.location.href = '/feed.html';
+      } else if (snap.exists()) {
+        window.location.href = '/usertype.html';
+      }
+    } catch(e) {}
+  }
+});
+</script>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('tab') === 'login') switchTab('login');
+
+function switchTab(tab) {
+  const isR = tab === 'register';
+  document.getElementById('form-register').style.display = isR ? 'block' : 'none';
+  document.getElementById('form-login').style.display = isR ? 'none' : 'block';
+  document.getElementById('tab-register').className = 'tab ' + (isR ? 'active' : 'inactive');
+  document.getElementById('tab-login').className = 'tab ' + (isR ? 'inactive' : 'active');
+  hideError();
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  document.getElementById('error-text').textContent = msg;
+  el.classList.add('show');
+}
+function hideError() {
+  document.getElementById('error-msg').classList.remove('show');
+  document.querySelectorAll('input').forEach(i => i.classList.remove('error','ok'));
+}
+
+function checkPassStrength(val) {
+  const fill = document.getElementById('pass-fill');
+  if (!val.length) { fill.style.width='0%'; return; }
+  if (val.length < 6) { fill.style.width='25%'; fill.style.background='#ff4444'; return; }
+  if (val.length < 10) { fill.style.width='60%'; fill.style.background='#ffaa00'; return; }
+  fill.style.width='100%'; fill.style.background='#34c759';
+}
+
+// Sanitizar username: solo letras, números y guiones, sin espacios, minúsculas
+function sanitizeUsername(val) {
+  return val.toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/--+/g,'-').replace(/^-|-$/g,'');
+}
+
+// Reserved usernames que no se pueden usar
+const RESERVED = ['admin','ximvid','support','help','feed','login','register','welcome','profile','settings','privacy','terms','api','app','www','mail','info','contact','about','blog','news'];
+
+let usernameTimer = null;
+let usernameAvailable = false;
+
+async function checkUsername(raw) {
+  const val = sanitizeUsername(raw);
+  const input = document.getElementById('reg-username');
+  const status = document.getElementById('username-status');
+  const preview = document.getElementById('username-preview');
+
+  // Actualizar el input con el valor sanitizado
+  if (val !== raw) { input.value = val; }
+  preview.textContent = val || 'tunombre';
+
+  if (!val || val.length < 3) {
+    status.textContent = '';
+    input.classList.remove('ok','error');
+    usernameAvailable = false;
+    return;
+  }
+
+  if (val.length > 30) {
+    status.textContent = '❌';
+    input.classList.add('error'); input.classList.remove('ok');
+    usernameAvailable = false;
+    return;
+  }
+
+  // Comprobar reservados
+  if (RESERVED.includes(val)) {
+    status.textContent = '❌';
+    input.classList.add('error'); input.classList.remove('ok');
+    usernameAvailable = false;
+    return;
+  }
+
+  // Debounce la consulta a Firestore
+  status.textContent = '⏳';
+  clearTimeout(usernameTimer);
+  usernameTimer = setTimeout(async () => {
+    try {
+      const q = window._fb.query(
+        window._fb.collection(window._db, 'users'),
+        window._fb.where('username', '==', val)
+      );
+      const snap = await window._fb.getDocs(q);
+      if (snap.empty) {
+        status.textContent = '✅';
+        input.classList.add('ok'); input.classList.remove('error');
+        usernameAvailable = true;
+      } else {
+        status.textContent = '❌';
+        input.classList.add('error'); input.classList.remove('ok');
+        usernameAvailable = false;
+      }
+    } catch(e) {
+      status.textContent = '';
+      usernameAvailable = false;
+    }
+  }, 600);
+}
+
+async function doRegister() {
+  hideError();
+  const name = document.getElementById('reg-name').value.trim();
+  const username = sanitizeUsername(document.getElementById('reg-username').value);
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+
+  if (!name) { showError('Escribe tu nombre o marca'); document.getElementById('reg-name').classList.add('error'); return; }
+  if (!username || username.length < 3) { showError('El usuario debe tener mínimo 3 caracteres'); document.getElementById('reg-username').classList.add('error'); return; }
+  if (!usernameAvailable) { showError('Este usuario no está disponible. Elige otro.'); document.getElementById('reg-username').classList.add('error'); return; }
+  if (!email) { showError('Escribe tu email'); document.getElementById('reg-email').classList.add('error'); return; }
+  if (!pass || pass.length < 6) { showError('La contraseña debe tener mínimo 6 caracteres'); document.getElementById('reg-pass').classList.add('error'); return; }
+
+  const btn = document.getElementById('btn-reg-submit');
+  btn.textContent = 'Creando cuenta...'; btn.disabled = true;
+
+  try {
+    // Doble verificación username antes de crear
+    const qCheck = window._fb.query(window._fb.collection(window._db,'users'), window._fb.where('username','==',username));
+    const checkSnap = await window._fb.getDocs(qCheck);
+    if (!checkSnap.empty) { showError('Este usuario ya fue tomado. Elige otro.'); btn.textContent='Crear cuenta gratis →'; btn.disabled=false; return; }
+
+    const cred = await window._fb.createUserWithEmailAndPassword(window._auth, email, pass);
+    await window._fb.setDoc(window._fb.doc(window._db,'users',cred.user.uid), {
+      uid: cred.user.uid,
+      email,
+      name,
+      username,
+      language: localStorage.getItem('ximvid_lang') || 'es',
+      isPremium: false,
+      userType: null,
+      createdAt: window._fb.serverTimestamp()
+    });
+
+    document.querySelector('.tabs').style.display = 'none';
+    document.getElementById('form-register').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    setTimeout(() => { window.location.href = '/usertype.html'; }, 1500);
+
+  } catch(e) {
+    const msgs = {
+      'auth/email-already-in-use':'Este email ya está registrado. ¿Quieres iniciar sesión?',
+      'auth/invalid-email':'El formato del email no es válido',
+      'auth/weak-password':'La contraseña es demasiado débil'
+    };
+    showError(msgs[e.code] || 'Error al crear la cuenta. Inténtalo de nuevo.');
+    btn.textContent = 'Crear cuenta gratis →'; btn.disabled = false;
+  }
+}
+
+async function doLogin() {
+  hideError();
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!email) { showError('Escribe tu email'); document.getElementById('login-email').classList.add('error'); return; }
+  if (!pass) { showError('Escribe tu contraseña'); document.getElementById('login-pass').classList.add('error'); return; }
+
+  const btn = document.getElementById('btn-login-submit');
+  btn.textContent = 'Entrando...'; btn.disabled = true;
+
+  try {
+    const cred = await window._fb.signInWithEmailAndPassword(window._auth, email, pass);
+    const snap = await window._fb.getDoc(window._fb.doc(window._db,'users',cred.user.uid));
+    window.location.href = snap.data()?.userType ? '/feed.html' : '/usertype.html';
+  } catch(e) {
+    const msgs = {
+      'auth/user-not-found':'No existe ninguna cuenta con este email',
+      'auth/wrong-password':'Contraseña incorrecta',
+      'auth/invalid-credential':'Email o contraseña incorrectos',
+      'auth/too-many-requests':'Demasiados intentos. Espera unos minutos.'
+    };
+    showError(msgs[e.code] || 'Error al iniciar sesión');
+    btn.textContent = 'Entrar →'; btn.disabled = false;
+  }
+}
+
+async function doGoogleAuth() {
+  try {
+    const cred = await window._fb.signInWithPopup(window._auth, window._gp);
+    const ref = window._fb.doc(window._db,'users',cred.user.uid);
+    const snap = await window._fb.getDoc(ref);
+    if (!snap.exists()) {
+      // Usuario nuevo con Google — necesita elegir username
+      localStorage.setItem('ximvid_google_user', JSON.stringify({
+        uid: cred.user.uid,
+        email: cred.user.email,
+        name: cred.user.displayName || '',
+        photo: cred.user.photoURL || ''
+      }));
+      window.location.href = '/register.html?tab=username';
+    } else {
+      window.location.href = snap.data()?.userType ? '/feed.html' : '/usertype.html';
+    }
+  } catch(e) {
+    showError('Error con Google. Inténtalo de nuevo.');
+  }
+}
+
+// Manejar usuario Google que necesita elegir username
+if (urlParams.get('tab') === 'username') {
+  const googleUser = JSON.parse(localStorage.getItem('ximvid_google_user') || '{}');
+  if (googleUser.name) {
+    document.getElementById('reg-name').value = googleUser.name;
+  }
+  switchTab('register');
+}
+</script>
+</body>
+</html>

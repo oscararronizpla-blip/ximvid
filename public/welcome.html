@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Bienvenido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);
+  color:#fff;
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+
+/* Background grid */
+.bg-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(74,144,217,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(74,144,217,.04) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%);
+  -webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%);
+}
+/* Orbs */
+.orb{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;opacity:.45}
+.orb1{width:500px;height:500px;background:rgba(34,88,168,.18);top:-150px;right:-100px;animation:ob1 12s ease-in-out infinite}
+.orb2{width:350px;height:350px;background:rgba(10,22,40,.3);bottom:-80px;left:-60px;animation:ob2 15s ease-in-out infinite}
+@keyframes ob1{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,25px)}}
+@keyframes ob2{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-30px)}}
+
+/* Metal animation */
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+
+/* ── LANGUAGE BAR ── */
+.lang-bar{
+  position:relative;z-index:10;
+  padding:12px 16px 0;
+  flex-shrink:0;
+}
+.lang-bar-label{
+  font-size:.68rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(168,208,240,.45);margin-bottom:8px;text-align:center;
+}
+.lang-scroll{
+  display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;
+  scrollbar-width:none;-ms-overflow-style:none;
+  -webkit-overflow-scrolling:touch;
+}
+.lang-scroll::-webkit-scrollbar{display:none}
+.lang-pill{
+  flex-shrink:0;
+  display:flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:100px;
+  font-size:.75rem;font-weight:400;color:rgba(255,255,255,.55);
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.lang-pill:hover,.lang-pill.active{
+  background:linear-gradient(135deg,rgba(11,26,48,.9),rgba(26,54,104,.8));
+  border-color:rgba(74,144,217,.4);color:#fff;
+}
+.lang-pill.active{
+  background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);
+  background-size:300% 100%;animation:metalSlide 5s linear infinite;
+  border-color:rgba(74,144,217,.5);color:#fff;
+  box-shadow:0 2px 12px rgba(34,88,168,.3);
+}
+
+/* ── MAIN CONTENT ── */
+.main{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px 28px 32px;text-align:center;position:relative;z-index:5;
+}
+
+/* Logo */
+.logo{
+  font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:600;
+  letter-spacing:.06em;margin-bottom:28px;
+  animation:fadeUp .7s ease both;
+}
+.logo em{
+  font-style:italic;
+  background:linear-gradient(135deg,#fff 0%,#a8d0f0 25%,#4a90d9 50%,#a8d0f0 75%,#fff 100%);
+  background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;animation:metalSlide 5s linear infinite;
+}
+
+/* Badge */
+.badge{
+  display:inline-flex;align-items:center;gap:7px;
+  border:1px solid rgba(74,144,217,.3);background:rgba(74,144,217,.08);
+  color:rgba(168,208,240,.85);font-size:.72rem;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:6px 16px;border-radius:100px;
+  margin-bottom:24px;
+  animation:fadeUp .8s .1s ease both;
+}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:#4a90d9;animation:bdot 2s infinite}
+@keyframes bdot{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Headline */
+.headline{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2rem,7vw,3.2rem);font-weight:300;
+  line-height:1.05;letter-spacing:-.015em;
+  margin-bottom:20px;
+  animation:fadeUp .85s .15s ease both;
+}
+.headline strong{font-weight:600}
+.headline em{
+  font-style:italic;
+  background:linear-gradient(135deg,#fff 0%,#a8d0f0 30%,#4a90d9 55%,#a8d0f0 80%,#fff 100%);
+  background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;animation:metalSlide 5s linear infinite;
+}
+
+/* Subtext */
+.subtext{
+  font-size:clamp(.85rem,3vw,1rem);font-weight:300;
+  color:rgba(255,255,255,.52);line-height:1.7;
+  max-width:360px;margin:0 auto 32px;
+  animation:fadeUp .9s .2s ease both;
+}
+
+/* Language suggestion */
+.lang-suggest{
+  display:none;
+  background:rgba(34,88,168,.12);border:1px solid rgba(74,144,217,.25);
+  border-radius:12px;padding:10px 16px;
+  font-size:.82rem;color:rgba(168,208,240,.8);
+  margin-bottom:20px;max-width:340px;
+  animation:fadeUp .9s .25s ease both;
+}
+.lang-suggest.show{display:flex;align-items:center;gap:8px}
+.lang-suggest button{
+  background:none;border:none;color:#4a90d9;font-size:.82rem;
+  font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;
+  text-decoration:underline;
+}
+
+/* Buttons */
+.btns{
+  display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px;
+  animation:fadeUp .9s .28s ease both;
+}
+.btn-primary{
+  padding:16px;border:none;border-radius:16px;
+  font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;
+  cursor:pointer;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);
+  background-size:300% 100%;animation:metalSlide 6s linear infinite;
+  box-shadow:0 6px 24px rgba(34,88,168,.35),0 1px 0 rgba(255,255,255,.12) inset;
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-primary::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+}
+.btn-primary:active{transform:scale(.98)}
+.btn-secondary{
+  padding:15px;border:1px solid rgba(255,255,255,.15);border-radius:16px;
+  font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:400;
+  cursor:pointer;color:rgba(255,255,255,.75);
+  background:rgba(255,255,255,.04);
+  transition:all .2s;
+}
+.btn-secondary:active{background:rgba(255,255,255,.08)}
+
+/* Terms */
+.terms{
+  margin-top:16px;font-size:.72rem;color:rgba(255,255,255,.22);
+  line-height:1.5;animation:fadeUp 1s .35s ease both;
+}
+.terms a{color:rgba(168,208,240,.45);text-decoration:underline}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- LANGUAGE BAR -->
+<div class="lang-bar">
+  <div class="lang-bar-label" id="langBarLabel">Elige tu idioma · Choose your language</div>
+  <div class="lang-scroll" id="langScroll">
+    <div class="lang-pill active" onclick="setLang('es')" data-lang="es">🇪🇸 Español</div>
+    <div class="lang-pill" onclick="setLang('en')" data-lang="en">🇬🇧 English</div>
+    <div class="lang-pill" onclick="setLang('pt')" data-lang="pt">🇧🇷 Português</div>
+    <div class="lang-pill" onclick="setLang('fr')" data-lang="fr">🇫🇷 Français</div>
+    <div class="lang-pill" onclick="setLang('de')" data-lang="de">🇩🇪 Deutsch</div>
+    <div class="lang-pill" onclick="setLang('zh')" data-lang="zh">🇨🇳 中文</div>
+    <div class="lang-pill" onclick="setLang('hi')" data-lang="hi">🇮🇳 हिन्दी</div>
+    <div class="lang-pill" onclick="setLang('ar')" data-lang="ar">🇸🇦 العربية</div>
+    <div class="lang-pill" onclick="setLang('ru')" data-lang="ru">🇷🇺 Русский</div>
+    <div class="lang-pill" onclick="setLang('ja')" data-lang="ja">🇯🇵 日本語</div>
+    <div class="lang-pill" onclick="setLang('ko')" data-lang="ko">🇰🇷 한국어</div>
+    <div class="lang-pill" onclick="setLang('it')" data-lang="it">🇮🇹 Italiano</div>
+    <div class="lang-pill" onclick="setLang('tr')" data-lang="tr">🇹🇷 Türkçe</div>
+    <div class="lang-pill" onclick="setLang('vi')" data-lang="vi">🇻🇳 Tiếng Việt</div>
+    <div class="lang-pill" onclick="setLang('pl')" data-lang="pl">🇵🇱 Polski</div>
+    <div class="lang-pill" onclick="setLang('nl')" data-lang="nl">🇳🇱 Nederlands</div>
+    <div class="lang-pill" onclick="setLang('th')" data-lang="th">🇹🇭 ภาษาไทย</div>
+    <div class="lang-pill" onclick="setLang('id')" data-lang="id">🇮🇩 Indonesia</div>
+    <div class="lang-pill" onclick="setLang('ms')" data-lang="ms">🇲🇾 Melayu</div>
+    <div class="lang-pill" onclick="setLang('el')" data-lang="el">🇬🇷 Ελληνικά</div>
+    <div class="lang-pill" onclick="setLang('he')" data-lang="he">🇮🇱 עברית</div>
+    <div class="lang-pill" onclick="setLang('ro')" data-lang="ro">🇷🇴 Română</div>
+    <div class="lang-pill" onclick="setLang('hu')" data-lang="hu">🇭🇺 Magyar</div>
+    <div class="lang-pill" onclick="setLang('cs')" data-lang="cs">🇨🇿 Čeština</div>
+    <div class="lang-pill" onclick="setLang('sv')" data-lang="sv">🇸🇪 Svenska</div>
+    <div class="lang-pill" onclick="setLang('no')" data-lang="no">🇳🇴 Norsk</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="logo">xim<em>vid</em></div>
+
+  <div class="badge">
+    <span class="badge-dot"></span>
+    <span id="badge-text">Crecimiento exponencial</span>
+  </div>
+
+  <!-- Language suggestion -->
+  <div class="lang-suggest" id="langSuggest">
+    <span>💡</span>
+    <span id="suggestText">Hemos detectado tu dispositivo en <strong id="suggestLang"></strong>.</span>
+    <button onclick="acceptSuggest()">Cambiar</button>
+  </div>
+
+  <h1 class="headline" id="headline">
+    Un video.<br>
+    <strong>Todas tus redes.</strong><br>
+    <em>Al mismo tiempo.</em>
+  </h1>
+
+  <p class="subtext" id="subtext">
+    Sube tus videos una vez o replícalos de otras plataformas consiguiendo seguidores en todas tus redes y clientes directos al mismo tiempo.
+  </p>
+
+  <div class="btns">
+    <button class="btn-primary" onclick="goRegister()" id="btn-register">
+      Crear cuenta gratis →
+    </button>
+    <button class="btn-secondary" onclick="goLogin()" id="btn-login">
+      Ya tengo cuenta
+    </button>
+  </div>
+
+  <div class="terms">
+    <span id="terms-text">Al continuar aceptas los</span>
+    <a href="/terms.html" id="terms-link"> Términos de uso</a>
+    <span> y la </span>
+    <a href="/privacy.html" id="privacy-link">Política de privacidad</a>
+  </div>
+</div>
+
+<script>
+// ── TRADUCCIONES ─────────────────────────────────────────────
+const T = {
+  es: {
+    badge:'Crecimiento exponencial',
+    headline:'Un video.<br><strong>Todas tus redes.</strong><br><em>Al mismo tiempo.</em>',
+    subtext:'Sube tus videos una vez o replícalos de otras plataformas consiguiendo seguidores en todas tus redes y clientes directos al mismo tiempo.',
+    register:'Crear cuenta gratis →',
+    login:'Ya tengo cuenta',
+    terms:'Al continuar aceptas los',
+    termsLink:'Términos de uso',
+    privacyLink:'Política de privacidad',
+    suggest:'Hemos detectado tu dispositivo en',
+    suggestBtn:'Cambiar'
+  },
+  en: {
+    badge:'Exponential growth',
+    headline:'One video.<br><strong>All your networks.</strong><br><em>At the same time.</em>',
+    subtext:'Upload your videos once or replicate them from other platforms, gaining followers on all your networks and direct clients at the same time.',
+    register:'Create free account →',
+    login:'I already have an account',
+    terms:'By continuing you accept the',
+    termsLink:'Terms of use',
+    privacyLink:'Privacy policy',
+    suggest:'We detected your device is in',
+    suggestBtn:'Switch'
+  },
+  pt: {
+    badge:'Crescimento exponencial',
+    headline:'Um vídeo.<br><strong>Todas as suas redes.</strong><br><em>Ao mesmo tempo.</em>',
+    subtext:'Faça upload dos seus vídeos uma vez ou replique-os de outras plataformas, ganhando seguidores em todas as suas redes e clientes diretos ao mesmo tempo.',
+    register:'Criar conta grátis →',
+    login:'Já tenho uma conta',
+    terms:'Ao continuar você aceita os',
+    termsLink:'Termos de uso',
+    privacyLink:'Política de privacidade',
+    suggest:'Detectamos que o seu dispositivo está em',
+    suggestBtn:'Mudar'
+  },
+  fr: {
+    badge:'Croissance exponentielle',
+    headline:'Une vidéo.<br><strong>Tous vos réseaux.</strong><br><em>En même temps.</em>',
+    subtext:'Téléchargez vos vidéos une fois ou répliquez-les depuis d\'autres plateformes, gagnant des abonnés sur tous vos réseaux et des clients directs en même temps.',
+    register:'Créer un compte gratuit →',
+    login:'J\'ai déjà un compte',
+    terms:'En continuant vous acceptez les',
+    termsLink:'Conditions d\'utilisation',
+    privacyLink:'Politique de confidentialité',
+    suggest:'Nous avons détecté que votre appareil est en',
+    suggestBtn:'Changer'
+  },
+  de: {
+    badge:'Exponentielles Wachstum',
+    headline:'Ein Video.<br><strong>Alle deine Netzwerke.</strong><br><em>Gleichzeitig.</em>',
+    subtext:'Lade deine Videos einmal hoch oder repliziere sie von anderen Plattformen und gewinne gleichzeitig Follower in allen deinen Netzwerken und direkte Kunden.',
+    register:'Kostenloses Konto erstellen →',
+    login:'Ich habe bereits ein Konto',
+    terms:'Mit dem Fortfahren akzeptierst du die',
+    termsLink:'Nutzungsbedingungen',
+    privacyLink:'Datenschutzrichtlinie',
+    suggest:'Wir haben erkannt, dass dein Gerät auf',
+    suggestBtn:'Wechseln'
+  }
+};
+
+// Default para idiomas sin traducción completa
+const DEFAULT = T.en;
+
+// ── IDIOMA ACTIVO ─────────────────────────────────────────────
+let currentLang = localStorage.getItem('ximvid_lang') || 'es';
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('ximvid_lang', lang);
+
+  // Actualizar pills
+  document.querySelectorAll('.lang-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.lang === lang);
+  });
+
+  // Scroll pill activo al centro
+  const activePill = document.querySelector(`.lang-pill[data-lang="${lang}"]`);
+  if (activePill) activePill.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+
+  // Actualizar textos
+  const t = T[lang] || DEFAULT;
+  document.getElementById('badge-text').textContent = t.badge;
+  document.getElementById('headline').innerHTML = t.headline;
+  document.getElementById('subtext').textContent = t.subtext;
+  document.getElementById('btn-register').textContent = t.register;
+  document.getElementById('btn-login').textContent = t.login;
+  document.getElementById('terms-text').textContent = t.terms;
+  document.getElementById('terms-link').textContent = t.termsLink;
+  document.getElementById('privacy-link').textContent = t.privacyLink;
+
+  // RTL para árabe y hebreo
+  document.documentElement.dir = (lang === 'ar' || lang === 'he') ? 'rtl' : 'ltr';
+}
+
+// ── DETECCIÓN DE IDIOMA DEL DISPOSITIVO ──────────────────────
+function detectDeviceLang() {
+  const deviceLang = (navigator.language || navigator.userLanguage || 'en').substring(0,2).toLowerCase();
+  const supported = ['es','en','pt','fr','de','zh','hi','ar','ru','ja','ko','it','tr','vi','pl','nl','th','id','ms','el','he','ro','hu','cs','sv','no'];
+  
+  if (supported.includes(deviceLang) && deviceLang !== currentLang) {
+    const langNames = {es:'Español',en:'English',pt:'Português',fr:'Français',de:'Deutsch',zh:'中文',hi:'हिन्दी',ar:'العربية',ru:'Русский',ja:'日本語',ko:'한국어',it:'Italiano',tr:'Türkçe',vi:'Tiếng Việt',pl:'Polski',nl:'Nederlands',th:'ภาษาไทย',id:'Indonesia',ms:'Melayu',el:'Ελληνικά',he:'עברית',ro:'Română',hu:'Magyar',cs:'Čeština',sv:'Svenska',no:'Norsk'};
+    document.getElementById('suggestLang').textContent = langNames[deviceLang] || deviceLang;
+    document.getElementById('langSuggest').classList.add('show');
+    window._suggestedLang = deviceLang;
+  }
+}
+
+function acceptSuggest() {
+  if (window._suggestedLang) {
+    setLang(window._suggestedLang);
+    document.getElementById('langSuggest').classList.remove('show');
+  }
+}
+
+// ── NAVEGACIÓN ────────────────────────────────────────────────
+function goRegister() {
+  localStorage.setItem('ximvid_lang', currentLang);
+  window.location.href = '/register.html';
+}
+
+function goLogin() {
+  localStorage.setItem('ximvid_lang', currentLang);
+  window.location.href = '/register.html?tab=login';
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+setLang(currentLang);
+setTimeout(detectDeviceLang, 800);
+</script>
+</body>
+</html>

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>Ximvid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans-serif;color:#fff;}
+
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes panelUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+/* ── FEED CONTAINER ── */
+#feed{
+  position:fixed;inset:0;
+  overflow-y:scroll;scroll-snap-type:y mandatory;
+  scrollbar-width:none;-ms-overflow-style:none;
+  -webkit-overflow-scrolling:touch;
+}
+#feed::-webkit-scrollbar{display:none}
+
+/* ── VIDEO SLIDE ── */
+.slide{
+  width:100%;height:100vh;height:100dvh;
+  position:relative;overflow:hidden;
+  scroll-snap-align:start;scroll-snap-stop:always;
+  background:#000;flex-shrink:0;
+}
+.slide-video{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;background:#000;
+}
+/* Gradientes sobre el video */
+.slide-gradient-top{position:absolute;top:0;left:0;right:0;height:180px;background:linear-gradient(to bottom,rgba(0,0,0,.55),transparent);z-index:2;pointer-events:none;}
+.slide-gradient-bottom{position:absolute;bottom:0;left:0;right:0;height:280px;background:linear-gradient(to top,rgba(0,0,0,.75),transparent);z-index:2;pointer-events:none;}
+
+/* ── TOP BAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:max(14px,env(safe-area-inset-top)) 16px 10px;
+  display:flex;justify-content:center;
+}
+.tabs{display:flex;gap:6px;background:rgba(0,0,0,.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:100px;padding:4px;}
+.tab{
+  padding:7px 16px;border-radius:100px;border:none;background:transparent;
+  color:rgba(255,255,255,.5);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:400;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.tab.active{background:rgba(255,255,255,.15);color:#fff;font-weight:500;}
+
+/* ── RIGHT COLUMN ── */
+.right-col{
+  position:fixed;right:10px;
+  bottom:calc(72px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  z-index:50;
+}
+/* Avatar fijo */
+.creator-av{
+  width:44px;height:44px;border-radius:50%;
+  border:2.5px solid rgba(255,255,255,.85);
+  object-fit:cover;cursor:pointer;
+  background:linear-gradient(135deg,#0b1a30,#2258a8,#4a90d9);
+  box-shadow:0 2px 12px rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;overflow:hidden;flex-shrink:0;
+  margin-bottom:8px;
+}
+.creator-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+
+/* Scroll container para iconos */
+.icons-scroll{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  max-height:calc(100dvh - 280px);
+  overflow-y:auto;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  padding:2px 0;
+  /* Fade abajo indicando más */
+  -webkit-mask-image:linear-gradient(to bottom,black 70%,transparent 100%);
+  mask-image:linear-gradient(to bottom,black 70%,transparent 100%);
+}
+.icons-scroll::-webkit-scrollbar{display:none}
+
+.net-btn{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  cursor:pointer;padding:4px;
+  transition:transform .2s;
+}
+.net-btn:active{transform:scale(.88)}
+.net-icon-wrap{
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(255,255,255,.12);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;
+  box-shadow:0 3px 10px rgba(0,0,0,.4);
+  border:1px solid rgba(255,255,255,.15);
+  position:relative;overflow:hidden;
+}
+.net-icon-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:rgba(255,255,255,.2);}
+.net-followers{font-size:.62rem;color:rgba(255,255,255,.75);text-shadow:0 1px 3px rgba(0,0,0,.8);font-weight:400;line-height:1;}
+
+/* Share btn */
+.share-btn{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  cursor:pointer;padding:4px;margin-top:4px;
+  transition:transform .2s;
+}
+.share-btn:active{transform:scale(.88)}
+.share-icon{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 3px 10px rgba(0,0,0,.4);}
+.share-label{font-size:.62rem;color:rgba(255,255,255,.6);text-shadow:0 1px 3px rgba(0,0,0,.8);}
+
+/* ── CREATOR INFO (bottom left) ── */
+.creator-info{
+  position:fixed;left:14px;right:64px;
+  bottom:calc(80px + env(safe-area-inset-bottom));
+  z-index:50;pointer-events:none;
+}
+.creator-name{
+  font-size:.95rem;font-weight:600;color:#fff;
+  text-shadow:0 1px 6px rgba(0,0,0,.9),0 0 20px rgba(0,0,0,.5);
+  margin-bottom:4px;display:flex;align-items:center;gap:6px;
+}
+.creator-desc{
+  font-size:.8rem;font-weight:300;color:rgba(255,255,255,.82);
+  text-shadow:0 1px 4px rgba(0,0,0,.9);
+  line-height:1.45;margin-bottom:6px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.hashtags{display:flex;flex-wrap:wrap;gap:5px;pointer-events:auto;}
+.hashtag{
+  font-size:.75rem;color:rgba(180,220,255,.9);
+  text-shadow:0 1px 4px rgba(0,0,0,.9);
+  cursor:pointer;font-weight:400;
+}
+.hashtag:hover{color:#fff;}
+
+/* ── CTA BUTTON ── */
+.cta-wrap{
+  position:fixed;left:14px;right:64px;
+  bottom:calc(58px + env(safe-area-inset-bottom));
+  z-index:60;
+}
+.cta-btn{
+  width:100%;padding:13px 20px;border:none;border-radius:14px;
+  font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;
+  cursor:pointer;color:#fff;text-align:center;
+  position:relative;overflow:hidden;
+  background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);
+  background-size:300% 100%;animation:metalSlide 5s linear infinite;
+  box-shadow:0 4px 20px rgba(10,22,40,.6),0 1px 0 rgba(255,255,255,.12) inset;
+}
+.cta-btn::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
+.cta-btn:active{transform:scale(.97)}
+
+/* ── BOTTOM NAV ── */
+.botnav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  padding:10px 0;padding-bottom:max(10px,env(safe-area-inset-bottom));
+  background:rgba(0,0,0,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,.08);
+  display:flex;justify-content:space-around;align-items:center;
+}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 14px;transition:opacity .2s;}
+.nav-item:active{opacity:.6}
+.nav-ico{font-size:1.3rem;line-height:1;}
+.nav-lbl{font-size:.6rem;color:rgba(255,255,255,.45);font-weight:400;letter-spacing:.04em;}
+.nav-item.active .nav-ico{opacity:1}
+.nav-item.active .nav-lbl{color:rgba(255,255,255,.85)}
+.nav-plus{
+  width:48px;height:32px;border-radius:10px;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;font-weight:700;color:#fff;
+  background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);
+  background-size:300% 100%;animation:metalSlide 5s linear infinite;
+  box-shadow:0 2px 12px rgba(34,88,168,.45),0 1px 0 rgba(255,255,255,.12) inset;
+  position:relative;overflow:hidden;
+}
+.nav-plus::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
+
+/* ── PRODUCT PANEL ── */
+.product-panel{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:linear-gradient(145deg,rgba(10,22,40,.98),rgba(6,16,30,.96));
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid rgba(255,255,255,.12);
+  border-radius:24px 24px 0 0;
+  padding:20px 20px max(24px,env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:transform .38s cubic-bezier(.34,1.2,.64,1);
+}
+.product-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);border-radius:24px 24px 0 0;}
+.product-panel.open{transform:translateY(0);}
+.panel-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 18px;}
+.panel-content{display:flex;gap:16px;align-items:flex-start;margin-bottom:18px;}
+.panel-img{width:88px;height:88px;border-radius:14px;object-fit:cover;background:rgba(255,255,255,.08);flex-shrink:0;border:1px solid rgba(255,255,255,.1);}
+.panel-img-placeholder{width:88px;height:88px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;}
+.panel-info{flex:1;min-width:0;}
+.panel-name{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:#fff;margin-bottom:4px;line-height:1.2;}
+.panel-price{font-size:1.5rem;font-weight:600;color:#fff;margin-bottom:6px;
+  background:linear-gradient(135deg,#fff,#a8d0f0,#4a90d9,#a8d0f0,#fff);
+  background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;animation:metalSlide 4s linear infinite;
+}
+.panel-desc{font-size:.82rem;color:rgba(255,255,255,.45);font-weight:300;line-height:1.5;}
+.panel-buy{
+  width:100%;padding:16px;border:none;border-radius:16px;
+  font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;
+  cursor:pointer;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);
+  background-size:300% 100%;animation:metalSlide 5s linear infinite;
+  box-shadow:0 6px 24px rgba(34,88,168,.45),0 1px 0 rgba(255,255,255,.12) inset;
+}
+.panel-buy::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
+.panel-buy:active{transform:scale(.98)}
+.panel-overlay{position:fixed;inset:0;z-index:190;background:rgba(0,0,0,.4);display:none;}
+.panel-overlay.show{display:block;}
+.panel-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:28px;height:28px;color:rgba(255,255,255,.5);font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* ── LOADING ── */
+.feed-loading{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:300;flex-direction:column;gap:14px;}
+.feed-spinner{width:32px;height:32px;border:3px solid rgba(74,144,217,.2);border-top-color:#4a90d9;border-radius:50%;animation:spin 1s linear infinite;}
+.feed-loading-text{font-size:.82rem;color:rgba(255,255,255,.3);}
+
+/* ── EMPTY ── */
+.feed-empty{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:40px;}
+.feed-empty-icon{font-size:3rem;}
+.feed-empty-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;}
+.feed-empty-sub{font-size:.88rem;color:rgba(255,255,255,.4);font-weight:300;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="feed-loading" id="feed-loading">
+  <div class="feed-spinner"></div>
+  <div class="feed-loading-text">Cargando feed...</div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar" id="topbar-wrap" style="display:none">
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('foryou',this)">Para ti</button>
+    <button class="tab" onclick="setTab('following',this)">Siguiendo</button>
+    <button class="tab" onclick="setTab('categories',this)">Categorías</button>
+    <button class="tab" onclick="setTab('nearby',this)">Cerca</button>
+  </div>
+</div>
+
+<!-- FEED -->
+<div id="feed"></div>
+
+<!-- RIGHT COLUMN -->
+<div class="right-col" id="right-col" style="display:none">
+  <div class="creator-av" id="creator-av" onclick="goLanding()">👤</div>
+  <div class="icons-scroll" id="icons-scroll"></div>
+  <div class="share-btn" onclick="shareVideo()">
+    <div class="share-icon">↗️</div>
+    <div class="share-label">Compartir</div>
+  </div>
+</div>
+
+<!-- CREATOR INFO -->
+<div class="creator-info" id="creator-info" style="display:none">
+  <div class="creator-name" id="creator-name"></div>
+  <div class="creator-desc" id="creator-desc"></div>
+  <div class="hashtags" id="hashtags"></div>
+</div>
+
+<!-- CTA BUTTON -->
+<div class="cta-wrap" id="cta-wrap" style="display:none">
+  <button class="cta-btn" id="cta-btn" onclick="handleCTA()"></button>
+</div>
+
+<!-- PRODUCT PANEL -->
+<div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+<div class="product-panel" id="product-panel">
+  <div class="panel-handle"></div>
+  <button class="panel-close" onclick="closePanel()">✕</button>
+  <div class="panel-content">
+    <div id="panel-img-wrap"></div>
+    <div class="panel-info">
+      <div class="panel-name" id="panel-name"></div>
+      <div class="panel-price" id="panel-price"></div>
+      <div class="panel-desc" id="panel-desc"></div>
+    </div>
+  </div>
+  <button class="panel-buy" id="panel-buy" onclick="goBuy()">Comprar ahora →</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="botnav" id="botnav-wrap" style="display:none">
+  <div class="nav-item active" onclick="window.location.href='/feed.html'">
+    <div class="nav-ico">🏠</div>
+    <div class="nav-lbl">Inicio</div>
+  </div>
+  <div class="nav-item" onclick="window.location.href='/search.html'">
+    <div class="nav-ico">🔍</div>
+    <div class="nav-lbl">Buscar</div>
+  </div>
+  <button class="nav-plus" onclick="window.location.href='/upload.html'">+</button>
+  <div class="nav-item" onclick="window.location.href='/notifications.html'">
+    <div class="nav-ico">🔔</div>
+    <div class="nav-lbl">Avisos</div>
+  </div>
+  <div class="nav-item" onclick="window.location.href='/profile.html'">
+    <div class="nav-ico">👤</div>
+    <div class="nav-lbl">Perfil</div>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, query, where, orderBy, limit, getDocs, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+  authDomain:"ximvid-c8627.firebaseapp.com",
+  projectId:"ximvid-c8627",
+  storageBucket:"ximvid-c8627.firebasestorage.app",
+  messagingSenderId:"278931359476",
+  appId:"1:278931359476:web:30fef5be9d11890bef80a1"
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+window._auth = auth;
+window._db = db;
+window._fb = { collection, query, where, orderBy, limit, getDocs, doc, getDoc, updateDoc, increment };
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = '/welcome.html'; return; }
+  window._currentUser = user;
+
+  // Cargar datos del usuario
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) {
+      window._userData = snap.data();
+    }
+  } catch(e) {}
+
+  // Mostrar UI y cargar feed
+  document.getElementById('feed-loading').style.display = 'none';
+  document.getElementById('topbar-wrap').style.display = 'flex';
+  document.getElementById('botnav-wrap').style.display = 'flex';
+  await loadFeed('foryou');
+});
+</script>
+
+<script>
+let currentTab = 'foryou';
+let videos = [];
+let currentIndex = 0;
+let currentVideo = null;
+
+// ── TABS ─────────────────────────────────────────────────────
+async function setTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  await loadFeed(tab);
+}
+
+// ── LOAD FEED ─────────────────────────────────────────────────
+async function loadFeed(tab) {
+  try {
+    const db = window._db;
+    const fb = window._fb;
+    const userData = window._userData || {};
+    const userLang = userData.language || localStorage.getItem('ximvid_lang') || 'es';
+
+    let q;
+    if (tab === 'foryou') {
+      // Videos del mismo idioma, ordenados por fecha
+      q = fb.query(
+        fb.collection(db, 'videos'),
+        fb.where('isActive', '==', true),
+        fb.where('userLanguage', '==', userLang),
+        fb.orderBy('createdAt', 'desc'),
+        fb.limit(20)
+      );
+    } else if (tab === 'following') {
+      // Solo creadores que sigue
+      q = fb.query(
+        fb.collection(db, 'videos'),
+        fb.where('isActive', '==', true),
+        fb.orderBy('createdAt', 'desc'),
+        fb.limit(20)
+      );
+    } else {
+      q = fb.query(
+        fb.collection(db, 'videos'),
+        fb.where('isActive', '==', true),
+        fb.orderBy('createdAt', 'desc'),
+        fb.limit(20)
+      );
+    }
+
+    const snap = await fb.getDocs(q);
+    videos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (videos.length === 0) {
+      showEmpty();
+      return;
+    }
+
+    renderFeed();
+  } catch(e) {
+    console.error('Error cargando feed:', e);
+    // Si falla el índice, cargar sin filtro de idioma
+    try {
+      const q2 = window._fb.query(
+        window._fb.collection(window._db, 'videos'),
+        window._fb.where('isActive', '==', true),
+        window._fb.orderBy('createdAt', 'desc'),
+        window._fb.limit(20)
+      );
+      const snap2 = await window._fb.getDocs(q2);
+      videos = snap2.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (videos.length === 0) { showEmpty(); return; }
+      renderFeed();
+    } catch(e2) {
+      showEmpty();
+    }
+  }
+}
+
+// ── RENDER FEED ───────────────────────────────────────────────
+function renderFeed() {
+  const feed = document.getElementById('feed');
+  feed.innerHTML = '';
+
+  videos.forEach((video, idx) => {
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+    slide.dataset.idx = idx;
+
+    const videoEl = document.createElement('video');
+    videoEl.className = 'slide-video';
+    videoEl.src = video.videoURL || '';
+    videoEl.loop = true;
+    videoEl.muted = false;
+    videoEl.playsInline = true;
+    videoEl.preload = idx === 0 ? 'auto' : 'metadata';
+    // Reproducir automáticamente al hacer tap en iOS
+    videoEl.setAttribute('playsinline', '');
+    videoEl.setAttribute('webkit-playsinline', '');
+
+    slide.appendChild(videoEl);
+
+    // Gradientes
+    const gt = document.createElement('div'); gt.className = 'slide-gradient-top';
+    const gb = document.createElement('div'); gb.className = 'slide-gradient-bottom';
+    slide.appendChild(gt);
+    slide.appendChild(gb);
+
+    feed.appendChild(slide);
+  });
+
+  // Observar qué slide está visible
+  setupObserver();
+
+  // Reproducir el primero
+  if (videos.length > 0) updateSlide(0);
+}
+
+// ── INTERSECTION OBSERVER ─────────────────────────────────────
+function setupObserver() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const slide = entry.target;
+      const video = slide.querySelector('video');
+      const idx = parseInt(slide.dataset.idx);
+
+      if (entry.isIntersecting && entry.intersectionRatio > 0.7) {
+        // Pausar el anterior
+        if (currentVideo && currentVideo !== video) {
+          currentVideo.pause();
+        }
+        currentVideo = video;
+        currentIndex = idx;
+
+        // Reproducir
+        video.play().catch(() => {
+          // iOS requiere interacción del usuario
+          slide.addEventListener('click', () => video.play(), { once: true });
+        });
+
+        // Registrar vista
+        registerView(videos[idx].id);
+
+        // Actualizar UI
+        updateSlide(idx);
+      } else {
+        video.pause();
+      }
+    });
+  }, { threshold: 0.7 });
+
+  document.querySelectorAll('.slide').forEach(s => observer.observe(s));
+}
+
+// ── UPDATE SLIDE UI ───────────────────────────────────────────
+async function updateSlide(idx) {
+  const video = videos[idx];
+  if (!video) return;
+
+  // Cargar datos del creador
+  let creator = {};
+  try {
+    const snap = await window._fb.getDoc(window._fb.doc(window._db, 'users', video.userId));
+    if (snap.exists()) creator = snap.data();
+  } catch(e) {}
+
+  // Avatar
+  const av = document.getElementById('creator-av');
+  if (creator.profilePhoto) {
+    av.innerHTML = `<img src="${creator.profilePhoto}" alt="avatar">`;
+  } else {
+    av.innerHTML = creator.name ? creator.name.charAt(0).toUpperCase() : '👤';
+    av.style.fontSize = '1.2rem';
+  }
+  av.dataset.username = creator.username || '';
+
+  // Iconos de redes
+  const iconsScroll = document.getElementById('icons-scroll');
+  iconsScroll.innerHTML = '';
+  const socialLinks = creator.socialLinks || [];
+  socialLinks.filter(l => l.url).forEach(link => {
+    const btn = document.createElement('div');
+    btn.className = 'net-btn';
+    btn.onclick = () => openNetwork(link);
+    btn.innerHTML = `
+      <div class="net-icon-wrap">${link.icon || '🔗'}</div>
+      ${link.followers ? `<div class="net-followers">${link.followers}</div>` : ''}
+    `;
+    iconsScroll.appendChild(btn);
+  });
+
+  document.getElementById('right-col').style.display = 'flex';
+
+  // Creator info
+  document.getElementById('creator-name').textContent = '@' + (creator.username || video.username || '');
+  document.getElementById('creator-desc').textContent = video.description || creator.shortDescription || '';
+
+  // Hashtags
+  const hashtagsEl = document.getElementById('hashtags');
+  hashtagsEl.innerHTML = '';
+  const tags = video.hashtags || [];
+  tags.forEach(tag => {
+    const span = document.createElement('span');
+    span.className = 'hashtag';
+    span.textContent = '#' + tag;
+    span.onclick = () => window.location.href = '/search.html?tag=' + encodeURIComponent(tag);
+    hashtagsEl.appendChild(span);
+  });
+
+  document.getElementById('creator-info').style.display = 'block';
+
+  // CTA / COMPRAR
+  const ctaWrap = document.getElementById('cta-wrap');
+  const ctaBtn = document.getElementById('cta-btn');
+  const userType = creator.userType || video.intention;
+
+  if (userType === 'selling_product' && video.productName) {
+    ctaWrap.style.display = 'block';
+    ctaBtn.textContent = '🛒 COMPRAR';
+    ctaBtn.dataset.type = 'product';
+  } else if (video.actionButtonText && video.actionButtonURL) {
+    ctaWrap.style.display = 'block';
+    ctaBtn.textContent = video.actionButtonText;
+    ctaBtn.dataset.type = 'url';
+    ctaBtn.dataset.url = video.actionButtonURL;
+  } else if (creator.actionButtonText && creator.actionButtonURL) {
+    ctaWrap.style.display = 'block';
+    ctaBtn.textContent = creator.actionButtonText;
+    ctaBtn.dataset.type = 'url';
+    ctaBtn.dataset.url = creator.actionButtonURL;
+  } else {
+    ctaWrap.style.display = 'none';
+  }
+
+  // Guardar referencia
+  window._currentCreator = creator;
+  window._currentVideoData = video;
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────
+function handleCTA() {
+  const btn = document.getElementById('cta-btn');
+  const type = btn.dataset.type;
+  const video = window._currentVideoData;
+  const creator = window._currentCreator;
+
+  if (type === 'product') {
+    // Mostrar panel de producto
+    document.getElementById('panel-name').textContent = video.productName || '';
+    document.getElementById('panel-price').textContent = video.productPrice ? video.productPrice + ' €' : '';
+    document.getElementById('panel-desc').textContent = video.productDescription || '';
+
+    // Imagen del producto
+    const imgWrap = document.getElementById('panel-img-wrap');
+    if (video.productImage) {
+      imgWrap.innerHTML = `<img class="panel-img" src="${video.productImage}" alt="${video.productName}">`;
+    } else {
+      imgWrap.innerHTML = `<div class="panel-img-placeholder">🛍️</div>`;
+    }
+
+    document.getElementById('panel-buy').dataset.url = video.productURL || creator.actionButtonURL || '';
+    document.getElementById('product-panel').classList.add('open');
+    document.getElementById('panel-overlay').classList.add('show');
+
+    // Registrar clic CTA
+    registerActionClick(video.id);
+  } else if (type === 'url') {
+    const url = btn.dataset.url;
+    if (url) {
+      window.open(url, '_blank');
+      registerActionClick(video.id);
+    }
+  }
+}
+
+function goBuy() {
+  const url = document.getElementById('panel-buy').dataset.url;
+  if (url) window.open(url, '_blank');
+  closePanel();
+}
+
+function closePanel() {
+  document.getElementById('product-panel').classList.remove('open');
+  document.getElementById('panel-overlay').classList.remove('show');
+}
+
+function openNetwork(link) {
+  if (link.url) {
+    window.open(link.url, '_blank');
+    registerSocialClick(window._currentVideoData?.id, link.network);
+  }
+}
+
+function goLanding() {
+  const username = document.getElementById('creator-av').dataset.username;
+  if (username) window.location.href = '/' + username;
+}
+
+function shareVideo() {
+  const video = window._currentVideoData;
+  if (!video) return;
+  const url = window.location.origin + '/video/' + video.id;
+  if (navigator.share) {
+    navigator.share({ title: 'Ximvid', url });
+  } else {
+    navigator.clipboard?.writeText(url);
+    alert('Enlace copiado al portapapeles');
+  }
+}
+
+// ── HASHTAG SEARCH ────────────────────────────────────────────
+function searchHashtag(tag) {
+  window.location.href = '/search.html?tag=' + encodeURIComponent(tag);
+}
+
+// ── STATS ─────────────────────────────────────────────────────
+async function registerView(videoId) {
+  if (!videoId) return;
+  try {
+    await window._fb.updateDoc(
+      window._fb.doc(window._db, 'videos', videoId),
+      { views: window._fb.increment(1) }
+    );
+  } catch(e) {}
+}
+
+async function registerActionClick(videoId) {
+  if (!videoId) return;
+  try {
+    await window._fb.updateDoc(
+      window._fb.doc(window._db, 'videos', videoId),
+      { actionClicks: window._fb.increment(1) }
+    );
+  } catch(e) {}
+}
+
+async function registerSocialClick(videoId, network) {
+  if (!videoId || !network) return;
+  try {
+    const clickData = {
+      videoId, network,
+      clickedAt: new Date().toISOString(),
+      visitorId: window._currentUser?.uid || 'anonymous'
+    };
+    // Guardar en socialClicks
+    const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    await addDoc(collection(window._db, 'socialClicks'), clickData);
+  } catch(e) {}
+}
+
+// ── EMPTY STATE ───────────────────────────────────────────────
+function showEmpty() {
+  document.getElementById('feed').innerHTML = `
+    <div class="feed-empty">
+      <div class="feed-empty-icon">🎬</div>
+      <div class="feed-empty-title">Sé el primero</div>
+      <div class="feed-empty-sub">Aún no hay videos en tu idioma.<br>¡Sube el primero y empieza a crecer!</div>
+    </div>`;
+  document.getElementById('feed-loading').style.display = 'none';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Mi perfil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;overflow-x:hidden;padding-bottom:80px;}
+
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+/* LOADING */
+.loading{position:fixed;inset:0;background:#06101e;display:flex;align-items:center;justify-content:center;z-index:500;}
+.loading-spinner{width:32px;height:32px;border:3px solid rgba(74,144,217,.2);border-top-color:#4a90d9;border-radius:50%;animation:spin 1s linear infinite;}
+
+/* ── HEADER ── */
+.top-header{
+  padding:max(52px,calc(44px + env(safe-area-inset-top))) 20px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.top-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;letter-spacing:.04em;}
+.settings-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;text-decoration:none;transition:all .2s;}
+.settings-btn:hover{background:rgba(255,255,255,.1);}
+
+/* ── PROFILE CARD ── */
+.profile-card{margin:0 16px 20px;background:linear-gradient(145deg,rgba(15,32,64,.92),rgba(11,26,48,.88));border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:20px;position:relative;overflow:hidden;}
+.profile-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);}
+.profile-top{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.profile-av{width:64px;height:64px;border-radius:50%;border:2.5px solid rgba(255,255,255,.7);overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#0b1a30,#2258a8,#4a90d9);cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,.4);}
+.profile-av img{width:100%;height:100%;object-fit:cover;}
+.profile-av-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
+.profile-info{flex:1;min-width:0;}
+.profile-name{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.profile-username{font-size:.78rem;color:rgba(255,255,255,.38);margin-bottom:4px;}
+.profile-url{font-size:.72rem;color:rgba(74,144,217,.7);font-weight:400;}
+.profile-bio{font-size:.85rem;color:rgba(255,255,255,.5);font-weight:300;line-height:1.55;margin-bottom:14px;}
+
+/* STATS ROW */
+.stats-row{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.07);padding-top:14px;}
+.stat-item{flex:1;text-align:center;border-right:1px solid rgba(255,255,255,.07);}
+.stat-item:last-child{border-right:none;}
+.stat-n{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;display:block;
+  background:linear-gradient(135deg,#fff,#a8d0f0,#4a90d9,#a8d0f0,#fff);
+  background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;animation:metalSlide 5s linear infinite;}
+.stat-l{font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;}
+
+/* EDIT BTN */
+.btn-edit{
+  width:100%;padding:11px;border-radius:12px;border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.05);font-family:'DM Sans',sans-serif;
+  font-size:.88rem;font-weight:500;color:rgba(255,255,255,.75);cursor:pointer;
+  margin-top:14px;transition:all .2s;
+}
+.btn-edit:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);}
+
+/* ── VIDEOS GRID ── */
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:10px;}
+.section-title{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(168,208,240,.4);}
+.section-action{font-size:.78rem;color:rgba(74,144,217,.7);cursor:pointer;}
+
+.videos-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin:0 0 24px;}
+.video-thumb{aspect-ratio:9/16;position:relative;overflow:hidden;background:rgba(255,255,255,.05);cursor:pointer;}
+.video-thumb video{width:100%;height:100%;object-fit:cover;}
+.video-thumb-overlay{position:absolute;inset:0;background:rgba(0,0,0,.2);}
+.video-stats{position:absolute;bottom:4px;left:4px;display:flex;gap:6px;}
+.video-stat{font-size:.62rem;color:rgba(255,255,255,.8);text-shadow:0 1px 3px rgba(0,0,0,.9);}
+.video-menu{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;}
+
+/* Upload CTA */
+.upload-cta{margin:0 16px 24px;background:linear-gradient(145deg,rgba(15,32,64,.88),rgba(11,26,48,.84));border:1px dashed rgba(74,144,217,.25);border-radius:16px;padding:20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s;}
+.upload-cta:hover{border-color:rgba(74,144,217,.45);background:linear-gradient(145deg,rgba(20,45,88,.88),rgba(15,32,64,.84));}
+.upload-cta-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 5s linear infinite;flex-shrink:0;}
+.upload-cta-text strong{display:block;font-size:.92rem;font-weight:500;color:#fff;margin-bottom:2px;}
+.upload-cta-text span{font-size:.78rem;color:rgba(255,255,255,.35);}
+
+/* ── MENU SECTIONS ── */
+.menu-section{margin:0 16px 6px;}
+.menu-section-title{font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(168,208,240,.35);margin-bottom:8px;padding-left:4px;}
+.menu-card{background:linear-gradient(145deg,rgba(15,32,64,.9),rgba(11,26,48,.86));border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;margin-bottom:16px;position:relative;}
+.menu-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);}
+.menu-item{display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);transition:background .2s;}
+.menu-item:last-child{border-bottom:none;}
+.menu-item:hover,.menu-item:active{background:rgba(255,255,255,.04);}
+.menu-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.menu-icon.blue{background:rgba(34,88,168,.2);border:1px solid rgba(74,144,217,.2);}
+.menu-icon.green{background:rgba(52,199,89,.15);border:1px solid rgba(52,199,89,.2);}
+.menu-icon.purple{background:rgba(175,82,222,.15);border:1px solid rgba(175,82,222,.2);}
+.menu-icon.orange{background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.2);}
+.menu-icon.pink{background:rgba(255,45,85,.12);border:1px solid rgba(255,45,85,.18);}
+.menu-icon.gray{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);}
+.menu-text{flex:1;}
+.menu-text strong{display:block;font-size:.9rem;font-weight:500;color:#fff;}
+.menu-text span{font-size:.75rem;color:rgba(255,255,255,.32);font-weight:300;}
+.menu-arrow{color:rgba(255,255,255,.2);font-size:.9rem;}
+.menu-badge{background:rgba(74,144,217,.2);color:rgba(168,208,240,.8);font-size:.65rem;font-weight:600;padding:2px 8px;border-radius:100px;border:1px solid rgba(74,144,217,.25);}
+
+/* PREMIUM badge */
+.premium-item .menu-icon{background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8);background-size:300% 100%;animation:metalSlide 5s linear infinite;border:none;}
+
+/* LOGOUT */
+.logout-btn{margin:8px 16px 32px;width:calc(100% - 32px);padding:14px;border:1px solid rgba(255,45,85,.25);border-radius:14px;background:rgba(255,45,85,.06);font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:500;color:rgba(255,100,120,.8);cursor:pointer;transition:all .2s;}
+.logout-btn:hover{background:rgba(255,45,85,.12);border-color:rgba(255,45,85,.4);}
+
+/* ── VIDEO ACTION SHEET ── */
+.action-sheet-overlay{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:none;}
+.action-sheet-overlay.show{display:block;}
+.action-sheet{position:fixed;bottom:0;left:0;right:0;z-index:401;background:linear-gradient(145deg,#0f2040,#0b1a30);border-top:1px solid rgba(255,255,255,.12);border-radius:24px 24px 0 0;padding:16px 20px max(24px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.2,.64,1);}
+.action-sheet.open{transform:translateY(0);}
+.action-sheet::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);}
+.as-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px;}
+.as-title{font-size:.72rem;color:rgba(255,255,255,.35);text-align:center;margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;}
+.as-actions{display:flex;flex-direction:column;gap:8px;}
+.as-btn{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:all .2s;}
+.as-btn:hover{background:rgba(255,255,255,.09);}
+.as-btn-icon{font-size:1.2rem;}
+.as-btn-text strong{display:block;font-size:.9rem;font-weight:500;color:#fff;}
+.as-btn-text span{font-size:.75rem;color:rgba(255,255,255,.35);}
+.as-btn.danger{border-color:rgba(255,45,85,.2);background:rgba(255,45,85,.05);}
+.as-btn.danger strong{color:rgba(255,100,120,.8);}
+.as-cancel{width:100%;padding:13px;border:none;border-radius:14px;background:rgba(255,255,255,.05);font-family:'DM Sans',sans-serif;font-size:.9rem;color:rgba(255,255,255,.5);cursor:pointer;margin-top:6px;}
+
+/* BOTTOM NAV */
+.botnav{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:10px 0;padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(0,0,0,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-around;align-items:center;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 14px;transition:opacity .2s;}
+.nav-ico{font-size:1.3rem;line-height:1;}
+.nav-lbl{font-size:.6rem;color:rgba(255,255,255,.45);font-weight:400;letter-spacing:.04em;}
+.nav-item.active .nav-lbl{color:rgba(255,255,255,.85);}
+.nav-plus{width:48px;height:32px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:#fff;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 5s linear infinite;box-shadow:0 2px 12px rgba(34,88,168,.45),0 1px 0 rgba(255,255,255,.12) inset;position:relative;overflow:hidden;}
+.nav-plus::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading" id="loading"><div class="loading-spinner"></div></div>
+
+<!-- ACTION SHEET overlay -->
+<div class="action-sheet-overlay" id="as-overlay" onclick="closeActionSheet()"></div>
+<div class="action-sheet" id="action-sheet">
+  <div class="as-handle"></div>
+  <div class="as-title" id="as-title">Opciones del video</div>
+  <div class="as-actions">
+    <div class="as-btn" onclick="shareCurrentVideo()">
+      <span class="as-btn-icon">↗️</span>
+      <div class="as-btn-text"><strong>Compartir en redes</strong><span>Comparte con tu enlace de Ximvid</span></div>
+    </div>
+    <div class="as-btn" onclick="goToVideo()">
+      <span class="as-btn-icon">▶️</span>
+      <div class="as-btn-text"><strong>Ver video</strong><span>Abre en el feed</span></div>
+    </div>
+    <div class="as-btn" onclick="copyVideoLink()">
+      <span class="as-btn-icon">🔗</span>
+      <div class="as-btn-text"><strong>Copiar enlace</strong><span>app.ximvid.com/video/...</span></div>
+    </div>
+    <div class="as-btn danger" onclick="deleteVideo()">
+      <span class="as-btn-icon">🗑️</span>
+      <div class="as-btn-text"><strong>Eliminar video</strong><span>Esta acción no se puede deshacer</span></div>
+    </div>
+  </div>
+  <button class="as-cancel" onclick="closeActionSheet()">Cancelar</button>
+</div>
+
+<!-- CONTENT -->
+<div id="content" style="display:none">
+
+  <!-- HEADER -->
+  <div class="top-header">
+    <div class="top-title">Mi perfil</div>
+    <a href="/settings.html" class="settings-btn">⚙️</a>
+  </div>
+
+  <!-- PROFILE CARD -->
+  <div class="profile-card">
+    <div class="profile-top">
+      <div class="profile-av" id="profile-av" onclick="window.location.href='/edit-profile.html'">
+        <div class="profile-av-placeholder" id="av-placeholder">👤</div>
+        <img id="av-img" style="display:none" alt="Avatar">
+      </div>
+      <div class="profile-info">
+        <div class="profile-name" id="profile-name">Cargando...</div>
+        <div class="profile-username" id="profile-username"></div>
+        <div class="profile-url" id="profile-url"></div>
+      </div>
+    </div>
+    <div class="profile-bio" id="profile-bio" style="display:none"></div>
+    <div class="stats-row">
+      <div class="stat-item"><span class="stat-n" id="stat-videos">0</span><span class="stat-l">Videos</span></div>
+      <div class="stat-item"><span class="stat-n" id="stat-views">0</span><span class="stat-l">Vistas</span></div>
+      <div class="stat-item"><span class="stat-n" id="stat-clicks">0</span><span class="stat-l">Clics</span></div>
+    </div>
+    <button class="btn-edit" onclick="window.location.href='/edit-profile.html'">✏️ Editar perfil</button>
+  </div>
+
+  <!-- VIDEOS -->
+  <div class="section-header">
+    <div class="section-title">Mis videos</div>
+    <div class="section-action" onclick="window.location.href='/upload.html'">+ Subir</div>
+  </div>
+  <div class="videos-grid" id="videos-grid"></div>
+
+  <!-- UPLOAD CTA (si no tiene videos) -->
+  <div class="upload-cta" id="upload-cta" style="display:none" onclick="window.location.href='/upload.html'">
+    <div class="upload-cta-icon">+</div>
+    <div class="upload-cta-text">
+      <strong>Sube tu primer video</strong>
+      <span>Empieza a crecer en todas tus redes</span>
+    </div>
+  </div>
+
+  <!-- MENU: Mi perfil -->
+  <div class="menu-section">
+    <div class="menu-section-title">Mi perfil</div>
+    <div class="menu-card">
+      <div class="menu-item" onclick="window.location.href='/edit-profile.html'">
+        <div class="menu-icon blue">👤</div>
+        <div class="menu-text"><strong>Editar perfil y landing</strong><span>Foto, descripción, CTA y fotos personales</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="window.location.href='/social-links.html'">
+        <div class="menu-icon blue">🔗</div>
+        <div class="menu-text"><strong>Mis redes y enlaces</strong><span>Gestiona tus iconos y URLs</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item premium-item" onclick="window.location.href='/premium.html'">
+        <div class="menu-icon">⭐</div>
+        <div class="menu-text"><strong>Plan Premium</strong><span>Mayor visibilidad en el feed</span></div>
+        <div id="premium-badge" class="menu-badge" style="display:none">ACTIVO</div>
+        <div class="menu-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU: Mi contenido -->
+  <div class="menu-section">
+    <div class="menu-section-title">Mi contenido</div>
+    <div class="menu-card">
+      <div class="menu-item" onclick="window.location.href='/upload.html'">
+        <div class="menu-icon green">📹</div>
+        <div class="menu-text"><strong>Subir nuevo video</strong><span>Desde galería o cámara</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="shareMyProfile()">
+        <div class="menu-icon green">↗️</div>
+        <div class="menu-text"><strong>Compartir mi perfil</strong><span>Comparte tu URL de Ximvid en tus redes</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU: Estadísticas -->
+  <div class="menu-section">
+    <div class="menu-section-title">Mis estadísticas</div>
+    <div class="menu-card">
+      <div class="menu-item" onclick="window.location.href='/stats.html'">
+        <div class="menu-icon purple">📊</div>
+        <div class="menu-text"><strong>Resumen general</strong><span>Vistas, clics y conversiones</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="window.location.href='/stats.html?tab=network'">
+        <div class="menu-icon purple">🔗</div>
+        <div class="menu-text"><strong>Estadísticas por red social</strong><span>Cuántos clics genera cada red</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU: Configuración -->
+  <div class="menu-section">
+    <div class="menu-section-title">Configuración</div>
+    <div class="menu-card">
+      <div class="menu-item" onclick="window.location.href='/settings.html'">
+        <div class="menu-icon orange">🌍</div>
+        <div class="menu-text"><strong>Idioma</strong><span id="current-lang">Español</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="window.location.href='/settings.html?tab=notifications'">
+        <div class="menu-icon orange">🔔</div>
+        <div class="menu-text"><strong>Notificaciones</strong><span>Email y WhatsApp</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="window.location.href='/settings.html?tab=password'">
+        <div class="menu-icon orange">🔒</div>
+        <div class="menu-text"><strong>Cambiar contraseña</strong><span>Actualiza tu contraseña</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU: Comunidad -->
+  <div class="menu-section">
+    <div class="menu-section-title">Comunidad</div>
+    <div class="menu-card">
+      <div class="menu-item" onclick="inviteFriend()">
+        <div class="menu-icon pink">🎁</div>
+        <div class="menu-text"><strong>Invitar a un amigo</strong><span>Comparte Ximvid con alguien</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="rateApp()">
+        <div class="menu-icon pink">⭐</div>
+        <div class="menu-text"><strong>Valorar la app</strong><span>Ayúdanos a crecer</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="window.location.href='/whats-new.html'">
+        <div class="menu-icon pink">🚀</div>
+        <div class="menu-text"><strong>Novedades</strong><span>Últimas actualizaciones</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU: Soporte -->
+  <div class="menu-section">
+    <div class="menu-section-title">Soporte</div>
+    <div class="menu-card">
+      <div class="menu-item" onclick="window.location.href='/faq.html'">
+        <div class="menu-icon gray">❓</div>
+        <div class="menu-text"><strong>Ayuda y preguntas frecuentes</strong><span></span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="reportProblem()">
+        <div class="menu-icon gray">🐛</div>
+        <div class="menu-text"><strong>Reportar un problema</strong><span></span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="contactUs()">
+        <div class="menu-icon gray">✉️</div>
+        <div class="menu-text"><strong>Contactar con nosotros</strong><span></span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGOUT -->
+  <button class="logout-btn" onclick="doLogout()">Cerrar sesión</button>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="botnav">
+  <div class="nav-item" onclick="window.location.href='/feed.html'"><div class="nav-ico">🏠</div><div class="nav-lbl">Inicio</div></div>
+  <div class="nav-item" onclick="window.location.href='/search.html'"><div class="nav-ico">🔍</div><div class="nav-lbl">Buscar</div></div>
+  <button class="nav-plus" onclick="window.location.href='/upload.html'">+</button>
+  <div class="nav-item" onclick="window.location.href='/notifications.html'"><div class="nav-ico">🔔</div><div class="nav-lbl">Avisos</div></div>
+  <div class="nav-item active"><div class="nav-ico">👤</div><div class="nav-lbl">Perfil</div></div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+  authDomain:"ximvid-c8627.firebaseapp.com",
+  projectId:"ximvid-c8627",
+  storageBucket:"ximvid-c8627.firebasestorage.app",
+  messagingSenderId:"278931359476",
+  appId:"1:278931359476:web:30fef5be9d11890bef80a1"
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+window._auth = auth;
+window._db = db;
+window._signOut = signOut;
+window._fb = { doc, getDoc, collection, query, where, getDocs, orderBy, updateDoc, deleteDoc };
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = '/welcome.html'; return; }
+  window._currentUser = user;
+
+  try {
+    // Cargar datos del usuario
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (!snap.exists()) { window.location.href = '/welcome.html'; return; }
+    const userData = snap.data();
+    window._userData = userData;
+
+    renderProfile(userData);
+
+    // Cargar videos
+    const vq = query(
+      collection(db, 'videos'),
+      where('userId', '==', user.uid),
+      where('isActive', '==', true),
+      orderBy('createdAt', 'desc')
+    );
+    const vSnap = await getDocs(vq);
+    const videos = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    window._userVideos = videos;
+    renderVideos(videos, userData);
+
+  } catch(e) {
+    console.error(e);
+  }
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+});
+
+function renderProfile(user) {
+  // Avatar
+  if (user.profilePhoto) {
+    document.getElementById('av-img').src = user.profilePhoto;
+    document.getElementById('av-img').style.display = 'block';
+    document.getElementById('av-placeholder').style.display = 'none';
+  } else if (user.name) {
+    document.getElementById('av-placeholder').textContent = user.name.charAt(0).toUpperCase();
+  }
+
+  document.getElementById('profile-name').textContent = user.name || '';
+  document.getElementById('profile-username').textContent = '@' + (user.username || '');
+  document.getElementById('profile-url').textContent = 'app.ximvid.com/' + (user.username || '');
+
+  if (user.shortDescription) {
+    document.getElementById('profile-bio').textContent = user.shortDescription;
+    document.getElementById('profile-bio').style.display = 'block';
+  }
+
+  if (user.isPremium) {
+    document.getElementById('premium-badge').style.display = 'inline-flex';
+  }
+
+  // Idioma
+  const langNames = { es:'Español', en:'English', pt:'Português', fr:'Français', de:'Deutsch' };
+  const lang = user.language || localStorage.getItem('ximvid_lang') || 'es';
+  document.getElementById('current-lang').textContent = langNames[lang] || lang;
+}
+
+function renderVideos(videos, userData) {
+  const grid = document.getElementById('videos-grid');
+  grid.innerHTML = '';
+
+  if (videos.length === 0) {
+    document.getElementById('upload-cta').style.display = 'flex';
+    document.getElementById('stat-videos').textContent = '0';
+    document.getElementById('stat-views').textContent = '0';
+    document.getElementById('stat-clicks').textContent = '0';
+    return;
+  }
+
+  let totalViews = 0, totalClicks = 0;
+
+  videos.forEach((video, idx) => {
+    totalViews += video.views || 0;
+    totalClicks += video.actionClicks || 0;
+
+    const div = document.createElement('div');
+    div.className = 'video-thumb';
+    div.innerHTML = `
+      <video src="${video.videoURL}" muted playsinline preload="metadata"></video>
+      <div class="video-thumb-overlay"></div>
+      <div class="video-stats">
+        <span class="video-stat">👁 ${formatNum(video.views || 0)}</span>
+        <span class="video-stat">👆 ${formatNum(video.actionClicks || 0)}</span>
+      </div>
+      <div class="video-menu" onclick="openVideoMenu(event,'${video.id}',${idx})">⋮</div>`;
+    div.addEventListener('click', (e) => {
+      if (!e.target.closest('.video-menu')) {
+        window.location.href = '/feed.html?video=' + video.id;
+      }
+    });
+    grid.appendChild(div);
+  });
+
+  document.getElementById('stat-videos').textContent = formatNum(videos.length);
+  document.getElementById('stat-views').textContent = formatNum(totalViews);
+  document.getElementById('stat-clicks').textContent = formatNum(totalClicks);
+}
+</script>
+
+<script>
+let currentVideoId = null;
+let currentVideoIdx = null;
+
+function formatNum(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function openVideoMenu(e, videoId, idx) {
+  e.stopPropagation();
+  currentVideoId = videoId;
+  currentVideoIdx = idx;
+  document.getElementById('action-sheet').classList.add('open');
+  document.getElementById('as-overlay').classList.add('show');
+}
+
+function closeActionSheet() {
+  document.getElementById('action-sheet').classList.remove('open');
+  document.getElementById('as-overlay').classList.remove('show');
+}
+
+async function shareCurrentVideo() {
+  if (!currentVideoId) return;
+  const url = window.location.origin + '/video/' + currentVideoId;
+  const text = 'Mira mi video en Ximvid 👉 ' + url;
+  if (navigator.share) {
+    await navigator.share({ title: 'Ximvid', text, url });
+  } else {
+    navigator.clipboard?.writeText(text);
+    alert('Enlace copiado al portapapeles');
+  }
+  closeActionSheet();
+}
+
+function goToVideo() {
+  if (currentVideoId) window.location.href = '/feed.html?video=' + currentVideoId;
+}
+
+function copyVideoLink() {
+  if (!currentVideoId) return;
+  const url = window.location.origin + '/video/' + currentVideoId;
+  navigator.clipboard?.writeText(url).then(() => alert('Enlace copiado'));
+  closeActionSheet();
+}
+
+async function deleteVideo() {
+  if (!currentVideoId) return;
+  if (!confirm('¿Seguro que quieres eliminar este video? Esta acción no se puede deshacer.')) return;
+  try {
+    await window._fb.updateDoc(
+      window._fb.doc(window._db, 'videos', currentVideoId),
+      { isActive: false }
+    );
+    closeActionSheet();
+    window.location.reload();
+  } catch(e) { alert('Error al eliminar. Inténtalo de nuevo.'); }
+}
+
+function shareMyProfile() {
+  const user = window._userData;
+  if (!user) return;
+  const url = window.location.origin + '/' + user.username;
+  const text = 'Sígueme en Ximvid 👉 ' + url;
+  if (navigator.share) {
+    navigator.share({ title: user.name + ' en Ximvid', text, url });
+  } else {
+    navigator.clipboard?.writeText(url).then(() => alert('Enlace copiado'));
+  }
+}
+
+function inviteFriend() {
+  const url = window.location.origin;
+  const text = '¡Descubre Ximvid! Sube tus videos y consigue seguidores en todas tus redes al mismo tiempo 👉 ' + url;
+  if (navigator.share) {
+    navigator.share({ title: 'Ximvid', text, url });
+  } else {
+    const waUrl = 'https://wa.me/?text=' + encodeURIComponent(text);
+    window.open(waUrl, '_blank');
+  }
+}
+
+function rateApp() {
+  // Redirige a la tienda según el SO
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const url = isIOS
+    ? 'https://apps.apple.com/app/ximvid'
+    : 'https://play.google.com/store/apps/details?id=com.ximvid.app';
+  window.open(url, '_blank');
+}
+
+function reportProblem() {
+  window.open('mailto:soporte@ximvid.com?subject=Problema en Ximvid', '_blank');
+}
+
+function contactUs() {
+  window.open('mailto:hola@ximvid.com', '_blank');
+}
+
+async function doLogout() {
+  if (!confirm('¿Seguro que quieres cerrar sesión?')) return;
+  try {
+    await window._signOut(window._auth);
+    localStorage.clear();
+    window.location.href = '/welcome.html';
+  } catch(e) { alert('Error al cerrar sesión.'); }
+}
+</script>
+</body>
+</html>
