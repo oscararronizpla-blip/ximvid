@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Novedades</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e,#0a1628,#0f2040);color:#fff;min-height:100%;padding-bottom:40px;}
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+.header{padding:max(52px,calc(44px + env(safe-area-inset-top))) 20px 20px;display:flex;align-items:center;gap:12px;}
+.back-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.65);font-size:1rem;text-decoration:none;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;}
+.version{margin:0 16px 16px;background:linear-gradient(145deg,rgba(15,32,64,.9),rgba(11,26,48,.86));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:20px;position:relative;overflow:hidden;}
+.version::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);}
+.version-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.version-num{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;}
+.version-date{font-size:.75rem;color:rgba(255,255,255,.3);}
+.version-badge{background:linear-gradient(115deg,#06101e,#1a3668,#2258a8);background-size:300% 100%;animation:metalSlide 5s linear infinite;border-radius:100px;padding:3px 10px;font-size:.7rem;font-weight:600;color:#fff;}
+.feat{display:flex;gap:10px;margin-bottom:10px;}
+.feat:last-child{margin-bottom:0;}
+.feat-dot{width:6px;height:6px;border-radius:50%;background:#4a90d9;flex-shrink:0;margin-top:6px;}
+.feat-text{font-size:.85rem;color:rgba(255,255,255,.65);line-height:1.5;}
+.feat-text strong{color:#fff;font-weight:500;}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/profile.html" class="back-btn">←</a>
+  <div class="page-title">Novedades</div>
+</div>
+<div class="version">
+  <div class="version-header">
+    <div class="version-num">Versión 1.0</div>
+    <div class="version-badge">Actual</div>
+  </div>
+  <div class="feat"><div class="feat-dot"></div><div class="feat-text"><strong>Lanzamiento de Ximvid</strong> — La primera plataforma donde cada video hace crecer todas tus redes al mismo tiempo.</div></div>
+  <div class="feat"><div class="feat-dot"></div><div class="feat-text"><strong>29 redes conectadas</strong> — Instagram, TikTok, YouTube, WhatsApp y 25 más en un solo video.</div></div>
+  <div class="feat"><div class="feat-dot"></div><div class="feat-text"><strong>Botón COMPRAR</strong> — Panel de producto sin interrumpir el video.</div></div>
+  <div class="feat"><div class="feat-dot"></div><div class="feat-text"><strong>Estadísticas de conversión</strong> — El único dato que ninguna plataforma te da.</div></div>
+  <div class="feat"><div class="feat-dot"></div><div class="feat-text"><strong>26 idiomas</strong> — Feed filtrado automáticamente por idioma.</div></div>
+  <div class="feat"><div class="feat-dot"></div><div class="feat-text"><strong>Landing page automática</strong> — Tu URL personal con todos tus botones y videos.</div></div>
+</div>
+</body>
+</html>

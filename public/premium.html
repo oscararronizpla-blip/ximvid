@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Plan Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;padding-bottom:100px;overflow-x:hidden;}
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.loading{position:fixed;inset:0;background:#06101e;display:flex;align-items:center;justify-content:center;z-index:500;}
+.spinner{width:32px;height:32px;border:3px solid rgba(74,144,217,.2);border-top-color:#4a90d9;border-radius:50%;animation:spin 1s linear infinite;}
+.header{padding:max(52px,calc(44px + env(safe-area-inset-top))) 20px 20px;display:flex;align-items:center;gap:12px;}
+.back-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.65);font-size:1rem;text-decoration:none;flex-shrink:0;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;}
+
+.hero{padding:20px;text-align:center;margin-bottom:24px;animation:fadeUp .6s ease both;}
+.hero-icon{font-size:3rem;margin-bottom:14px;}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:600;margin-bottom:8px;}
+.hero-title em{font-style:italic;background:linear-gradient(135deg,#fff,#a8d0f0,#4a90d9,#a8d0f0,#fff);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:metalSlide 5s linear infinite;}
+.hero-sub{font-size:.9rem;color:rgba(255,255,255,.45);font-weight:300;line-height:1.65;max-width:320px;margin:0 auto;}
+
+.price-card{margin:0 16px 20px;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 8s linear infinite;border:1px solid rgba(255,255,255,.15);border-radius:24px;padding:28px;position:relative;overflow:hidden;text-align:center;}
+.price-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);}
+.price-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:4px 14px;font-size:.72rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:16px;}
+.price-amount{font-family:'Cormorant Garamond',serif;font-size:4rem;font-weight:600;color:#fff;line-height:1;}
+.price-period{font-size:.88rem;color:rgba(255,255,255,.4);margin-bottom:4px;}
+.price-cancel{font-size:.76rem;color:rgba(255,255,255,.25);}
+
+.features{margin:0 16px 20px;}
+.feat-title{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(168,208,240,.4);margin-bottom:10px;}
+.feat-card{background:linear-gradient(145deg,rgba(15,32,64,.9),rgba(11,26,48,.86));border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;}
+.feat-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.05);}
+.feat-item:last-child{border-bottom:none;}
+.feat-icon{font-size:1.1rem;flex-shrink:0;}
+.feat-text{flex:1;}
+.feat-text strong{display:block;font-size:.88rem;font-weight:500;color:#fff;}
+.feat-text span{font-size:.75rem;color:rgba(255,255,255,.35);}
+.feat-check{color:#4a90d9;font-size:.85rem;}
+
+.active-banner{margin:0 16px 20px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.25);border-radius:16px;padding:20px;text-align:center;}
+.active-icon{font-size:2rem;margin-bottom:8px;}
+.active-title{font-size:1rem;font-weight:600;color:#34c759;margin-bottom:4px;}
+.active-sub{font-size:.82rem;color:rgba(255,255,255,.4);}
+
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(6,16,30,.95);backdrop-filter:blur(16px);padding:14px 20px;padding-bottom:max(14px,env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.07);}
+.btn-activate{width:100%;padding:16px;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;color:#fff;position:relative;overflow:hidden;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 5s linear infinite;box-shadow:0 6px 24px rgba(34,88,168,.4),0 1px 0 rgba(255,255,255,.12) inset;}
+.btn-activate::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
+.btn-cancel{width:100%;padding:11px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:.82rem;color:rgba(255,100,120,.6);cursor:pointer;margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="loading" id="loading"><div class="spinner"></div></div>
+<div id="content" style="display:none">
+  <div class="header">
+    <a href="/profile.html" class="back-btn">←</a>
+    <div class="page-title">Plan Premium</div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-icon">⭐</div>
+    <div class="hero-title">Más visibilidad.<br><em>Más crecimiento.</em></div>
+    <p class="hero-sub">El Plan Premium hace que tus videos aparezcan con más frecuencia en el feed de otros usuarios. La única diferencia es la visibilidad.</p>
+  </div>
+
+  <div class="price-card">
+    <div class="price-badge">⭐ Premium</div>
+    <div class="price-amount">9,99€</div>
+    <div class="price-period">al mes</div>
+    <div class="price-cancel">Cancela cuando quieras</div>
+  </div>
+
+  <div id="active-banner" style="display:none">
+    <div class="active-banner">
+      <div class="active-icon">✅</div>
+      <div class="active-title">Plan Premium activo</div>
+      <div class="active-sub">Tu badge ⭐ está visible en tu perfil y videos</div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feat-title">Qué incluye</div>
+    <div class="feat-card">
+      <div class="feat-item"><div class="feat-icon">📈</div><div class="feat-text"><strong>Mayor visibilidad en el feed</strong><span>Tus videos aparecen más frecuentemente</span></div><div class="feat-check">✓</div></div>
+      <div class="feat-item"><div class="feat-icon">⭐</div><div class="feat-text"><strong>Badge Premium en tu perfil</strong><span>Distingue tu perfil del resto</span></div><div class="feat-check">✓</div></div>
+      <div class="feat-item"><div class="feat-icon">📊</div><div class="feat-text"><strong>Estadísticas avanzadas</strong><span>Más detalle en tus métricas</span></div><div class="feat-check">✓</div></div>
+      <div class="feat-item"><div class="feat-icon">💬</div><div class="feat-text"><strong>Notificaciones WhatsApp</strong><span>Recibe avisos por WhatsApp</span></div><div class="feat-check">✓</div></div>
+      <div class="feat-item"><div class="feat-icon">🎯</div><div class="feat-text"><strong>Todo lo de Gratuito</strong><span>Videos ilimitados, 29 redes, estadísticas</span></div><div class="feat-check">✓</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar" id="bottom-bar" style="display:none">
+  <button class="btn-activate" id="btn-activate" onclick="activatePremium()">Activar Premium — 9,99€/mes</button>
+  <button class="btn-cancel" id="btn-cancel-premium" style="display:none" onclick="cancelPremium()">Cancelar suscripción</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const app = initializeApp({apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",authDomain:"ximvid-c8627.firebaseapp.com",projectId:"ximvid-c8627",storageBucket:"ximvid-c8627.firebasestorage.app",messagingSenderId:"278931359476",appId:"1:278931359476:web:30fef5be9d11890bef80a1"});
+const auth=getAuth(app), db=getFirestore(app);
+onAuthStateChanged(auth, async (user) => {
+  if(!user){window.location.href='/welcome.html';return;}
+  try{
+    const snap=await getDoc(doc(db,'users',user.uid));
+    if(snap.exists()&&snap.data().isPremium){
+      document.getElementById('active-banner').style.display='block';
+      document.getElementById('btn-activate').style.display='none';
+      document.getElementById('btn-cancel-premium').style.display='block';
+    }
+  }catch(e){}
+  document.getElementById('loading').style.display='none';
+  document.getElementById('content').style.display='block';
+  document.getElementById('bottom-bar').style.display='block';
+});
+</script>
+<script>
+function activatePremium(){
+  // Stripe checkout — cuando esté configurado
+  alert('El pago con Stripe se activará próximamente. Contacta con hola@ximvid.com para activarlo manualmente.');
+}
+function cancelPremium(){
+  if(confirm('¿Seguro que quieres cancelar tu Plan Premium?')){
+    alert('Para cancelar contacta con hola@ximvid.com');
+  }
+}
+</script>
+</body>
+</html>

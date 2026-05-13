@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Ayuda</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e,#0a1628,#0f2040);color:#fff;min-height:100%;padding-bottom:40px;}
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.header{padding:max(52px,calc(44px + env(safe-area-inset-top))) 20px 20px;display:flex;align-items:center;gap:12px;}
+.back-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.65);font-size:1rem;text-decoration:none;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;}
+.section{margin:0 16px 8px;}
+.faq-item{background:linear-gradient(145deg,rgba(15,32,64,.9),rgba(11,26,48,.86));border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;margin-bottom:8px;}
+.faq-q{padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;}
+.faq-q span{font-size:.9rem;font-weight:400;color:#fff;}
+.faq-ico{color:rgba(74,144,217,.7);font-size:1rem;flex-shrink:0;transition:transform .3s;}
+.faq-item.open .faq-ico{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.faq-item.open .faq-a{max-height:300px;}
+.faq-a-inner{padding:0 16px 16px;font-size:.86rem;color:rgba(255,255,255,.5);line-height:1.7;font-weight:300;}
+.contact{margin:20px 16px;background:linear-gradient(145deg,rgba(15,32,64,.9),rgba(11,26,48,.86));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:20px;text-align:center;}
+.contact p{font-size:.85rem;color:rgba(255,255,255,.4);margin-bottom:12px;}
+.contact a{color:#4a90d9;text-decoration:none;font-size:.9rem;}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/profile.html" class="back-btn">←</a>
+  <div class="page-title">Ayuda y FAQ</div>
+</div>
+<div class="section">
+  <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>¿Cómo consigo seguidores en todas mis redes?</span><span class="faq-ico">+</span></div><div class="faq-a"><div class="faq-a-inner">Activa tus redes en "Mis redes y enlaces". Aparecerán como iconos en todos tus videos. Cuando alguien los pulse, irá directo a tu perfil.</div></div></div>
+  <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>¿Cómo subo mi primer video?</span><span class="faq-ico">+</span></div><div class="faq-a"><div class="faq-a-inner">Pulsa el botón + en la barra inferior. Elige entre galería o cámara. El video debe ser vertical y máximo 90 segundos.</div></div></div>
+  <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>¿Qué es la tasa de conversión?</span><span class="faq-ico">+</span></div><div class="faq-a"><div class="faq-a-inner">Es el porcentaje de personas que vieron tu video y pulsaron algún botón (red social, CTA o comprar). Es el dato más valioso para saber qué contenido funciona.</div></div></div>
+  <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>¿Es realmente gratis?</span><span class="faq-ico">+</span></div><div class="faq-a"><div class="faq-a-inner">Sí, 100% gratis. Videos ilimitados, 29 redes y estadísticas sin pagar. El Plan Premium (9,99€/mes) solo añade más visibilidad en el feed.</div></div></div>
+  <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>¿Cómo elimino mi cuenta?</span><span class="faq-ico">+</span></div><div class="faq-a"><div class="faq-a-inner">Ve a Perfil → Configuración → Eliminar cuenta. Esta acción es irreversible y borrará todos tus datos.</div></div></div>
+  <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>¿Por qué mis videos no aparecen en el feed?</span><span class="faq-ico">+</span></div><div class="faq-a"><div class="faq-a-inner">El feed filtra por idioma. Asegúrate de que tu perfil tiene el idioma correcto en Configuración. También puede tardar unos minutos en aparecer tras publicar.</div></div></div>
+</div>
+<div class="contact">
+  <p>¿No encuentras lo que buscas?</p>
+  <a href="mailto:soporte@ximvid.com">soporte@ximvid.com</a>
+</div>
+</body>
+</html>

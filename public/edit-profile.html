@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Editar perfil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;padding-bottom:100px;overflow-x:hidden;}
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.loading{position:fixed;inset:0;background:#06101e;display:flex;align-items:center;justify-content:center;z-index:500;}
+.spinner{width:32px;height:32px;border:3px solid rgba(74,144,217,.2);border-top-color:#4a90d9;border-radius:50%;animation:spin 1s linear infinite;}
+.header{padding:max(52px,calc(44px + env(safe-area-inset-top))) 20px 20px;display:flex;align-items:center;gap:12px;}
+.back-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.65);font-size:1rem;text-decoration:none;flex-shrink:0;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;}
+.section{margin:0 16px 16px;}
+.card{background:linear-gradient(145deg,rgba(15,32,64,.92),rgba(11,26,48,.88));border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:20px;position:relative;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);border-radius:18px 18px 0 0;}
+.card-title{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(168,208,240,.5);margin-bottom:16px;}
+.photo-section{display:flex;flex-direction:column;align-items:center;margin-bottom:20px;}
+.photo-circle{width:88px;height:88px;border-radius:50%;border:2.5px solid rgba(255,255,255,.7);overflow:hidden;background:linear-gradient(135deg,#0b1a30,#2258a8);display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;margin-bottom:8px;}
+.photo-circle img{width:100%;height:100%;object-fit:cover;}
+.photo-btn{font-size:.8rem;color:rgba(168,208,240,.65);background:none;border:none;font-family:'DM Sans',sans-serif;cursor:pointer;text-decoration:underline;}
+.field{margin-bottom:14px;}
+.field:last-child{margin-bottom:0;}
+.field label{display:block;font-size:.72rem;font-weight:500;color:rgba(168,208,240,.55);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.field input,.field textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:13px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;transition:border-color .2s;-webkit-appearance:none;resize:none;}
+.field input:focus,.field textarea:focus{border-color:rgba(74,144,217,.4);}
+.field input::placeholder,.field textarea::placeholder{color:rgba(255,255,255,.22);}
+.char-count{text-align:right;font-size:.7rem;color:rgba(255,255,255,.25);margin-top:4px;}
+
+/* Photos gallery */
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;}
+.gallery-slot{aspect-ratio:1;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .2s;}
+.gallery-slot:hover{border-color:rgba(74,144,217,.4);}
+.gallery-slot img{width:100%;height:100%;object-fit:cover;}
+.gallery-slot-icon{font-size:1.4rem;color:rgba(255,255,255,.2);}
+.gallery-remove{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);border:none;border-radius:50%;width:20px;height:20px;color:#fff;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* CTA toggle */
+.landing-opts{display:flex;flex-direction:column;gap:8px;}
+.landing-opt{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .2s;}
+.landing-opt.selected{border-color:rgba(74,144,217,.5);background:rgba(74,144,217,.06);}
+.landing-radio{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.2);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.landing-opt.selected .landing-radio{border-color:rgba(74,144,217,.8);}
+.landing-dot{width:6px;height:6px;border-radius:50%;background:#4a90d9;display:none;}
+.landing-opt.selected .landing-dot{display:block;}
+.landing-text strong{display:block;font-size:.88rem;font-weight:500;color:#fff;}
+.landing-text span{font-size:.74rem;color:rgba(255,255,255,.32);}
+.external-url{margin-top:10px;display:none;}
+.external-url.show{display:block;}
+
+/* Bottom */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(6,16,30,.95);backdrop-filter:blur(16px);padding:14px 20px;padding-bottom:max(14px,env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.07);}
+.btn-save{width:100%;padding:15px;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;color:#fff;position:relative;overflow:hidden;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 6s linear infinite;box-shadow:0 6px 24px rgba(34,88,168,.35),0 1px 0 rgba(255,255,255,.12) inset;}
+.btn-save::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
+.btn-save:disabled{opacity:.5;}
+#photo-input,#gallery-input{display:none;}
+</style>
+</head>
+<body>
+<div class="loading" id="loading"><div class="spinner"></div></div>
+<div id="content" style="display:none">
+  <div class="header">
+    <a href="/profile.html" class="back-btn">←</a>
+    <div class="page-title">Editar perfil</div>
+  </div>
+
+  <!-- FOTO -->
+  <div class="section">
+    <div class="card">
+      <div class="card-title">Foto de perfil</div>
+      <div class="photo-section">
+        <div class="photo-circle" id="photo-circle" onclick="document.getElementById('photo-input').click()">
+          <img id="photo-preview" style="display:none" alt="Foto">
+          <span id="photo-placeholder">👤</span>
+        </div>
+        <button class="photo-btn" onclick="document.getElementById('photo-input').click()">Cambiar foto</button>
+      </div>
+      <input type="file" id="photo-input" accept="image/*" onchange="handlePhoto(this)">
+    </div>
+  </div>
+
+  <!-- INFO -->
+  <div class="section">
+    <div class="card">
+      <div class="card-title">Información</div>
+      <div class="field"><label>Nombre o marca</label><input type="text" id="name" placeholder="Tu nombre o marca" autocapitalize="words"></div>
+      <div class="field"><label>@Usuario</label><input type="text" id="username" placeholder="tunombre" disabled style="opacity:.5;cursor:not-allowed"></div>
+      <div class="field">
+        <label>Descripción corta</label>
+        <textarea id="bio" rows="3" placeholder="Cuéntanos sobre ti..." maxlength="150" oninput="document.getElementById('bio-count').textContent=this.value.length+'/150'"></textarea>
+        <div class="char-count" id="bio-count">0/150</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOTOS PERSONALES -->
+  <div class="section">
+    <div class="card">
+      <div class="card-title">Fotos de tu galería (máx. 4)</div>
+      <div class="gallery-grid" id="gallery-grid"></div>
+      <div style="font-size:.74rem;color:rgba(255,255,255,.22);">Se muestran en tu landing page pública</div>
+      <input type="file" id="gallery-input" accept="image/*" onchange="handleGalleryPhoto(this)">
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="section">
+    <div class="card">
+      <div class="card-title">Botón de acción</div>
+      <div class="field"><label>Texto del botón</label><input type="text" id="cta-text" placeholder="Ver mi portfolio, Comprar ahora..." maxlength="40"></div>
+      <div class="field">
+        <label>URL destino</label>
+        <input type="text" id="cta-url" placeholder="https://tuweb.com" autocapitalize="none">
+      </div>
+    </div>
+  </div>
+
+  <!-- LANDING -->
+  <div class="section">
+    <div class="card">
+      <div class="card-title">Tu landing page</div>
+      <div class="landing-opts">
+        <div class="landing-opt selected" id="opt-auto" onclick="selectLanding('auto')">
+          <div class="landing-radio"><div class="landing-dot"></div></div>
+          <div class="landing-text"><strong>✨ Ximvid la genera</strong><span id="my-url">app.ximvid.com/...</span></div>
+        </div>
+        <div class="landing-opt" id="opt-external" onclick="selectLanding('external')">
+          <div class="landing-radio"><div class="landing-dot"></div></div>
+          <div class="landing-text"><strong>🌐 Mi propia web</strong><span>Redirige a tu URL</span></div>
+        </div>
+      </div>
+      <div class="external-url" id="external-url">
+        <div class="field" style="margin-top:10px;margin-bottom:0"><input type="text" id="landing-url" placeholder="https://tuweb.com" autocapitalize="none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar" style="display:none" id="bottom-bar">
+  <button class="btn-save" onclick="doSave()">Guardar cambios</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const app = initializeApp({apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",authDomain:"ximvid-c8627.firebaseapp.com",projectId:"ximvid-c8627",storageBucket:"ximvid-c8627.firebasestorage.app",messagingSenderId:"278931359476",appId:"1:278931359476:web:30fef5be9d11890bef80a1"});
+const auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
+window._auth=auth; window._db=db; window._storage=storage;
+window._fb={doc,getDoc,updateDoc,ref,uploadBytes,getDownloadURL};
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href='/welcome.html'; return; }
+  window._uid = user.uid;
+  try {
+    const snap = await getDoc(doc(db,'users',user.uid));
+    if (snap.exists()) {
+      const d = snap.data(); window._userData = d;
+      document.getElementById('name').value = d.name||'';
+      document.getElementById('username').value = d.username||'';
+      document.getElementById('bio').value = d.shortDescription||'';
+      document.getElementById('bio-count').textContent=(d.shortDescription||'').length+'/150';
+      document.getElementById('cta-text').value = d.actionButtonText||'';
+      document.getElementById('cta-url').value = d.actionButtonURL||'';
+      document.getElementById('my-url').textContent = 'app.ximvid.com/'+(d.username||'...');
+      if (d.landingType==='external') { selectLanding('external'); document.getElementById('landing-url').value=d.externalLandingURL||''; }
+      if (d.profilePhoto) { document.getElementById('photo-preview').src=d.profilePhoto; document.getElementById('photo-preview').style.display='block'; document.getElementById('photo-placeholder').style.display='none'; }
+      renderGallery(d.galleryPhotos||[]);
+    }
+  } catch(e) {}
+  document.getElementById('loading').style.display='none';
+  document.getElementById('content').style.display='block';
+  document.getElementById('bottom-bar').style.display='block';
+});
+</script>
+
+<script>
+let newPhotoBlob=null, galleryPhotos=[], newGalleryBlobs={};
+
+function selectLanding(type) {
+  document.getElementById('opt-auto').classList.toggle('selected',type==='auto');
+  document.getElementById('opt-external').classList.toggle('selected',type==='external');
+  document.getElementById('external-url').classList.toggle('show',type==='external');
+  window._landingType=type;
+}
+
+function renderGallery(photos) {
+  galleryPhotos=[...photos];
+  const grid=document.getElementById('gallery-grid');
+  grid.innerHTML='';
+  for(let i=0;i<4;i++){
+    const slot=document.createElement('div');
+    slot.className='gallery-slot';
+    if(galleryPhotos[i]){
+      slot.innerHTML=`<img src="${galleryPhotos[i]}" alt="Foto ${i+1}"><button class="gallery-remove" onclick="removeGalleryPhoto(${i})">✕</button>`;
+    } else {
+      slot.innerHTML=`<span class="gallery-slot-icon">+</span>`;
+      slot.onclick=()=>{ window._gallerySlot=i; document.getElementById('gallery-input').click(); };
+    }
+    grid.appendChild(slot);
+  }
+}
+
+function removeGalleryPhoto(idx) { galleryPhotos.splice(idx,1); renderGallery(galleryPhotos); }
+
+async function handlePhoto(input) {
+  const file=input.files[0]; if(!file) return;
+  const img=new Image(); const reader=new FileReader();
+  reader.onload=e=>{ img.onload=()=>{ const canvas=document.createElement('canvas'); canvas.width=400; canvas.height=400; const s=Math.min(img.width,img.height); canvas.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,400,400); canvas.toBlob(blob=>{ newPhotoBlob=blob; const url=URL.createObjectURL(blob); document.getElementById('photo-preview').src=url; document.getElementById('photo-preview').style.display='block'; document.getElementById('photo-placeholder').style.display='none'; },'image/webp',.75); }; img.src=e.target.result; };
+  reader.readAsDataURL(file);
+}
+
+async function handleGalleryPhoto(input) {
+  const file=input.files[0]; if(!file) return;
+  const slot=window._gallerySlot||0;
+  const img=new Image(); const reader=new FileReader();
+  reader.onload=e=>{ img.onload=()=>{ const canvas=document.createElement('canvas'); canvas.width=600; canvas.height=600; const s=Math.min(img.width,img.height); canvas.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,600,600); canvas.toBlob(blob=>{ newGalleryBlobs[slot]=blob; galleryPhotos[slot]=URL.createObjectURL(blob); renderGallery(galleryPhotos); },'image/webp',.78); }; img.src=e.target.result; };
+  reader.readAsDataURL(file);
+}
+
+async function doSave() {
+  const btn=document.querySelector('.btn-save');
+  btn.textContent='Guardando...'; btn.disabled=true;
+  try {
+    const uid=window._uid;
+    const update={
+      name: document.getElementById('name').value.trim(),
+      shortDescription: document.getElementById('bio').value.trim(),
+      actionButtonText: document.getElementById('cta-text').value.trim(),
+      actionButtonURL: document.getElementById('cta-url').value.trim(),
+      landingType: window._landingType||'auto'
+    };
+    if(window._landingType==='external') update.externalLandingURL=document.getElementById('landing-url').value.trim();
+
+    // Subir foto de perfil
+    if(newPhotoBlob) {
+      const r=window._fb.ref(window._storage,`profilePhotos/${uid}/photo.webp`);
+      const res=await window._fb.uploadBytes(r,newPhotoBlob,{contentType:'image/webp'});
+      update.profilePhoto=await window._fb.getDownloadURL(res.ref);
+    }
+
+    // Subir fotos de galería nuevas
+    const finalGallery=[...galleryPhotos];
+    for(const [slot,blob] of Object.entries(newGalleryBlobs)){
+      const r=window._fb.ref(window._storage,`galleryPhotos/${uid}/photo_${slot}.webp`);
+      const res=await window._fb.uploadBytes(r,blob,{contentType:'image/webp'});
+      finalGallery[slot]=await window._fb.getDownloadURL(res.ref);
+    }
+    update.galleryPhotos=finalGallery.filter(Boolean);
+
+    await window._fb.updateDoc(window._fb.doc(window._db,'users',uid),update);
+    window.location.href='/profile.html';
+  } catch(e) { console.error(e); btn.textContent='Guardar cambios'; btn.disabled=false; alert('Error al guardar. Inténtalo de nuevo.'); }
+}
+</script>
+</body>
+</html>

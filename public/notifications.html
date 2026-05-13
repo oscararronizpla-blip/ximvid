@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Notificaciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;padding-bottom:90px;}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.loading{position:fixed;inset:0;background:#06101e;display:flex;align-items:center;justify-content:center;z-index:500;}
+.spinner{width:32px;height:32px;border:3px solid rgba(74,144,217,.2);border-top-color:#4a90d9;border-radius:50%;animation:spin 1s linear infinite;}
+.header{padding:max(52px,calc(44px + env(safe-area-inset-top))) 20px 20px;display:flex;align-items:center;gap:12px;}
+.back-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.65);font-size:1rem;text-decoration:none;flex-shrink:0;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;}
+.notif-item{margin:0 16px 8px;background:linear-gradient(145deg,rgba(15,32,64,.9),rgba(11,26,48,.86));border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;}
+.notif-item.unread{border-color:rgba(74,144,217,.25);background:linear-gradient(145deg,rgba(20,45,88,.9),rgba(15,32,64,.86));}
+.notif-icon{font-size:1.3rem;flex-shrink:0;margin-top:2px;}
+.notif-text strong{display:block;font-size:.88rem;font-weight:500;color:#fff;margin-bottom:3px;}
+.notif-text span{font-size:.78rem;color:rgba(255,255,255,.4);}
+.notif-time{font-size:.68rem;color:rgba(255,255,255,.25);margin-top:4px;}
+.empty{padding:80px 20px;text-align:center;}
+.empty-icon{font-size:3rem;margin-bottom:12px;}
+.empty-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;margin-bottom:6px;}
+.empty-sub{font-size:.85rem;color:rgba(255,255,255,.3);}
+.botnav{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:10px 0;padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(0,0,0,.55);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-around;align-items:center;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 14px;}
+.nav-ico{font-size:1.3rem;}
+.nav-lbl{font-size:.6rem;color:rgba(255,255,255,.45);}
+.nav-item.active .nav-lbl{color:rgba(255,255,255,.85);}
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+.nav-plus{width:48px;height:32px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:#fff;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 5s linear infinite;}
+</style>
+</head>
+<body>
+<div class="loading" id="loading"><div class="spinner"></div></div>
+<div id="content" style="display:none">
+  <div class="header">
+    <a href="/feed.html" class="back-btn">←</a>
+    <div class="page-title">Notificaciones</div>
+  </div>
+  <div id="notif-list">
+    <div class="empty">
+      <div class="empty-icon">🔔</div>
+      <div class="empty-title">Sin notificaciones</div>
+      <div class="empty-sub">Aquí verás cuando alguien pulse tus redes, tu botón de acción o te siga.</div>
+    </div>
+  </div>
+</div>
+<div class="botnav">
+  <div class="nav-item" onclick="window.location.href='/feed.html'"><div class="nav-ico">🏠</div><div class="nav-lbl">Inicio</div></div>
+  <div class="nav-item" onclick="window.location.href='/search.html'"><div class="nav-ico">🔍</div><div class="nav-lbl">Buscar</div></div>
+  <button class="nav-plus" onclick="window.location.href='/upload.html'">+</button>
+  <div class="nav-item active"><div class="nav-ico">🔔</div><div class="nav-lbl">Avisos</div></div>
+  <div class="nav-item" onclick="window.location.href='/profile.html'"><div class="nav-ico">👤</div><div class="nav-lbl">Perfil</div></div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, query, where, orderBy, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const app=initializeApp({apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",authDomain:"ximvid-c8627.firebaseapp.com",projectId:"ximvid-c8627",storageBucket:"ximvid-c8627.firebasestorage.app",messagingSenderId:"278931359476",appId:"1:278931359476:web:30fef5be9d11890bef80a1"});
+const auth=getAuth(app),db=getFirestore(app);
+onAuthStateChanged(auth,async(user)=>{
+  if(!user){window.location.href='/welcome.html';return;}
+  try{
+    const q=query(collection(db,'notifications'),where('userId','==',user.uid),orderBy('createdAt','desc'),limit(50));
+    const snap=await getDocs(q);
+    if(!snap.empty){
+      const icons={new_follower:'👥',social_click:'🔗',action_click:'👆',weekly_stats:'📊'};
+      document.getElementById('notif-list').innerHTML=snap.docs.map(d=>{
+        const n=d.data();
+        return`<div class="notif-item${n.read?'':' unread'}">
+          <div class="notif-icon">${icons[n.type]||'🔔'}</div>
+          <div class="notif-text"><strong>${n.message}</strong><div class="notif-time">${n.createdAt?.toDate?.()?.toLocaleDateString('es')||'Ahora'}</div></div>
+        </div>`;
+      }).join('');
+    }
+  }catch(e){}
+  document.getElementById('loading').style.display='none';
+  document.getElementById('content').style.display='block';
+});
+</script>
+</body>
+</html>
