@@ -149,6 +149,11 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 .btn-publish:disabled{opacity:.4;cursor:not-allowed}
 .btn-publish:active:not(:disabled){transform:scale(.98)}
 
+/* Contact type selector */
+.contact-type-row{display:flex;gap:8px;margin-bottom:12px;}
+.contact-type-btn{flex:1;padding:10px 6px;border:1.5px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.04);font-family:'DM Sans',sans-serif;font-size:.8rem;color:rgba(255,255,255,.45);cursor:pointer;text-align:center;transition:all .2s;}
+.contact-type-btn.active{border-color:rgba(74,144,217,.5);background:rgba(74,144,217,.1);color:rgba(168,208,240,.9);}
+
 /* Hidden inputs */
 #video-input,#camera-input,#product-img-input{display:none;}
 </style>
@@ -262,11 +267,18 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
       </div>
     </div>
     <div class="field">
-      <label>URL de pago</label>
-      <div class="url-wrap">
+      <label>¿Cómo quieres que te contacten?</label>
+      <div class="contact-type-row">
+        <div class="contact-type-btn active" id="ct-url" onclick="setContactType('url')">🌐 Web</div>
+        <div class="contact-type-btn" id="ct-phone" onclick="setContactType('phone')">📞 Teléfono</div>
+        <div class="contact-type-btn" id="ct-email" onclick="setContactType('email')">📧 Email</div>
+      </div>
+      <div class="url-wrap" id="wrap-url">
         <span class="url-prefix">https://</span>
         <input type="text" id="prod-url" class="url-input" placeholder="tutienda.com/producto" autocapitalize="none">
       </div>
+      <input type="tel" id="prod-phone" placeholder="+34 600 000 000" style="display:none;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;-webkit-appearance:none;">
+      <input type="email" id="prod-email" placeholder="contacto@tuempresa.com" style="display:none;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;-webkit-appearance:none;">
     </div>
   </div>
 
@@ -515,6 +527,18 @@ async function handleProductImg(input) {
   reader.readAsDataURL(file);
 }
 
+// ── CONTACT TYPE ─────────────────────────────────────────────
+let selectedContactType = 'url';
+function setContactType(type) {
+  selectedContactType = type;
+  ['url','phone','email'].forEach(t => {
+    document.getElementById('ct-' + t).classList.toggle('active', t === type);
+  });
+  document.getElementById('wrap-url').style.display = type === 'url' ? 'block' : 'none';
+  document.getElementById('prod-phone').style.display = type === 'phone' ? 'block' : 'none';
+  document.getElementById('prod-email').style.display = type === 'email' ? 'block' : 'none';
+}
+
 // ── CAN PUBLISH ───────────────────────────────────────────────
 function checkCanPublish() {
   const can = selectedFile && selectedIntention;
@@ -596,8 +620,18 @@ async function publishVideo() {
       videoData.productName = document.getElementById('prod-name').value.trim();
       videoData.productPrice = document.getElementById('prod-price').value;
       videoData.productCurrency = document.getElementById('prod-currency').value || '€';
-      videoData.productURL = document.getElementById('prod-url').value.trim();
       videoData.productImage = productImageURL;
+      // Guardar según tipo de contacto elegido
+      if (selectedContactType === 'url') {
+        const u = document.getElementById('prod-url').value.trim();
+        videoData.productURL = u.startsWith('http') ? u : 'https://' + u;
+      } else if (selectedContactType === 'phone') {
+        videoData.productPhone = document.getElementById('prod-phone').value.trim();
+        videoData.productURL = 'tel:' + videoData.productPhone.replace(/\s/g,'');
+      } else if (selectedContactType === 'email') {
+        videoData.productEmail = document.getElementById('prod-email').value.trim();
+        videoData.productURL = 'mailto:' + videoData.productEmail;
+      }
     } else if (selectedIntention === 'selling_service') {
       const ctaText = document.getElementById('cta-text').value.trim();
       const ctaUrl = document.getElementById('cta-url').value.trim();
