@@ -154,7 +154,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
@@ -169,10 +169,37 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 window._auth = auth;
 window._db = db;
-window._fb = { doc, updateDoc };
+window._fb = { doc, updateDoc, getDoc };
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) window.location.href = '/welcome.html';
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = '/welcome.html'; return; }
+  window._currentUser = user;
+  // Cargar redes existentes del usuario
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) {
+      const existingLinks = snap.data().socialLinks || [];
+      existingLinks.forEach(link => {
+        if (link.network && link.url) {
+          activeNets[link.network] = true;
+          // Activar el item visualmente después de renderizar
+          setTimeout(() => {
+            const item = document.getElementById('item-' + link.network);
+            if (item) {
+              item.classList.add('active');
+              const urlInput = document.getElementById('url-' + link.network);
+              const followersInput = document.getElementById('followers-' + link.network);
+              if (urlInput) urlInput.value = link.url.replace('https://','').replace('mailto:','').replace('tel:','');
+              if (followersInput && link.followers) followersInput.value = link.followers;
+              const preview = document.getElementById('preview-' + link.network);
+              if (preview) preview.textContent = link.url;
+            }
+          }, 100);
+        }
+      });
+      updateCount();
+    }
+  } catch(e) { console.error(e); }
 });
 </script>
 
@@ -298,7 +325,6 @@ async function doSave() {
   const user = window._auth.currentUser;
   if (!user) { window.location.href = '/welcome.html'; return; }
 
-  // Recoger todas las redes activas
   const allNets = [...NETWORKS.social, ...NETWORKS.contact, ...NETWORKS.links, ...NETWORKS.creative];
   const socialLinks = [];
 
@@ -309,13 +335,12 @@ async function doSave() {
     const url = urlEl?.value.trim();
     if (!url) return;
 
-    // Normalizar URL
     let finalUrl = url;
     if (net.type === 'tel') {
       finalUrl = 'tel:' + url.replace(/\s/g, '');
     } else if (net.type === 'email') {
       finalUrl = 'mailto:' + url;
-    } else if (!url.startsWith('http')) {
+    } else if (!url.startsWith('http') && !url.startsWith('tel:') && !url.startsWith('mailto:')) {
       finalUrl = 'https://' + url;
     }
 
@@ -334,7 +359,7 @@ async function doSave() {
       window._fb.doc(window._db, 'users', user.uid),
       { socialLinks, socialLinksSetupDone: true }
     );
-    window.location.href = '/feed.html';
+    window.location.href = '/profile.html';
   } catch(e) {
     alert('Error al guardar. Inténtalo de nuevo.');
   }
