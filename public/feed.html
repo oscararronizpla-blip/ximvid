@@ -147,7 +147,7 @@ html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans
 /* ── CTA BUTTON ── */
 .cta-wrap{
   position:fixed;left:14px;right:64px;
-  bottom:calc(58px + env(safe-area-inset-bottom));
+  bottom:calc(70px + env(safe-area-inset-bottom));
   z-index:60;
 }
 .cta-btn{
@@ -155,9 +155,9 @@ html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans
   font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;
   cursor:pointer;color:#fff;text-align:center;
   position:relative;overflow:hidden;
-  background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);
+  background:linear-gradient(115deg,#3d2800,#7a5200,#c8860a,#f0b429,#c8860a,#7a5200,#3d2800);
   background-size:300% 100%;animation:metalSlide 5s linear infinite;
-  box-shadow:0 4px 20px rgba(10,22,40,.6),0 1px 0 rgba(255,255,255,.12) inset;
+  box-shadow:0 4px 20px rgba(200,134,10,.5),0 1px 0 rgba(255,255,255,.25) inset,0 0 20px rgba(240,180,41,.2);
 }
 .cta-btn::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
 .cta-btn:active{transform:scale(.97)}
@@ -285,15 +285,14 @@ html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans
 <div class="product-panel" id="product-panel">
   <div class="panel-handle"></div>
   <button class="panel-close" onclick="closePanel()">✕</button>
-  <div class="panel-content">
-    <div id="panel-img-wrap"></div>
-    <div class="panel-info">
-      <div class="panel-name" id="panel-name"></div>
-      <div class="panel-price" id="panel-price"></div>
-      <div class="panel-desc" id="panel-desc"></div>
-    </div>
+  <div id="panel-img-wrap"></div>
+  <div class="panel-body">
+    <div class="panel-name" id="panel-name"></div>
+    <div class="panel-price" id="panel-price"></div>
+    <div class="panel-desc" id="panel-desc"></div>
+    <div class="panel-contact-row" id="panel-contact-row"></div>
+    <button class="panel-buy" id="panel-buy" onclick="goBuy()">Comprar ahora →</button>
   </div>
-  <button class="panel-buy" id="panel-buy" onclick="goBuy()">Comprar ahora →</button>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -608,19 +607,36 @@ function handleCTA() {
 
   if (type === 'product') {
     // Mostrar panel de producto
-    document.getElementById('panel-name').textContent = video.productName || '';
-    document.getElementById('panel-price').textContent = video.productPrice ? video.productPrice + ' €' : '';
+    document.getElementById('panel-name').textContent = video.productName || 'Producto';
+    const currency = video.productCurrency || '€';
+    document.getElementById('panel-price').textContent = video.productPrice ? video.productPrice + ' ' + currency : '';
     document.getElementById('panel-desc').textContent = video.productDescription || '';
 
-    // Imagen del producto
+    // Imagen del producto — ancho completo
     const imgWrap = document.getElementById('panel-img-wrap');
     if (video.productImage) {
-      imgWrap.innerHTML = `<img class="panel-img" src="${video.productImage}" alt="${video.productName}">`;
+      imgWrap.innerHTML = `<img class="panel-img-full" src="${video.productImage}" alt="${video.productName || 'Producto'}">`;
     } else {
       imgWrap.innerHTML = `<div class="panel-img-placeholder">🛍️</div>`;
     }
 
-    document.getElementById('panel-buy').dataset.url = video.productURL || creator.actionButtonURL || '';
+    // Botones de contacto según tipo de URL
+    const productURL = video.productURL || creator.actionButtonURL || '';
+    const contactRow = document.getElementById('panel-contact-row');
+    contactRow.innerHTML = '';
+    if (productURL) {
+      if (productURL.startsWith('tel:') || /^[+\d\s\-()]{7,}$/.test(productURL)) {
+        const cleanPhone = productURL.replace('tel:','').trim();
+        contactRow.innerHTML = `
+          <button class="panel-contact-btn" onclick="window.open('tel:${cleanPhone}','_self')">📞 Llamar</button>
+          <button class="panel-contact-btn" onclick="window.open('https://wa.me/${cleanPhone.replace(/\D/g,'')}','_blank')">💬 WhatsApp</button>`;
+      } else if (productURL.startsWith('mailto:') || productURL.includes('@')) {
+        const email = productURL.replace('mailto:','').trim();
+        contactRow.innerHTML = `<button class="panel-contact-btn" style="flex:none;width:100%" onclick="window.open('mailto:${email}','_blank')">📧 Enviar email</button>`;
+      }
+    }
+
+    document.getElementById('panel-buy').dataset.url = productURL;
     document.getElementById('product-panel').classList.add('open');
     document.getElementById('panel-overlay').classList.add('show');
 
