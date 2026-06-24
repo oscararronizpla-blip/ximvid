@@ -39,11 +39,6 @@ subprojects {
             sourceCompatibility = JavaVersion.VERSION_17.toString()
             targetCompatibility = JavaVersion.VERSION_17.toString()
         }
-        project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile.class).configureEach {
-            kotlinOptions {
-                jvmTarget = "17"
-            }
-        }
     }
 }
 
