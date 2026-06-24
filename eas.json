@@ -13,7 +13,8 @@
       "distribution": "internal",
       "android": {
         "image": "ubuntu-24.04-jdk-17-ndk-r27b"
-      }
+      },
+      "node": "22.16.0"
     },
     "production": {
       "autoIncrement": true
