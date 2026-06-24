@@ -1,0 +1,25 @@
+{
+  "cli": {
+    "version": ">= 20.3.0",
+    "appVersionSource": "remote",
+    "requireCommit": false
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "image": "ubuntu-24.04-jdk-17-ndk-r27b"
+      }
+    },
+    "production": {
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
