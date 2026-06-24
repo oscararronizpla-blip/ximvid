@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0"
+  },
+  "scripts": {
+    "eas-build-post-install": "npx cap sync android"
+  }
+}
