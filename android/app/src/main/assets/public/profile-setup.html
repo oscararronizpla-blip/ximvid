@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Tu perfil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;display:flex;flex-direction:column;align-items:center;padding:0 20px 60px;position:relative;overflow-x:hidden;}
+.bg-grid{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(74,144,217,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(74,144,217,.04) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%);-webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%);}
+.orb{position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;opacity:.35}
+.orb1{width:500px;height:500px;background:rgba(34,88,168,.18);top:-150px;right:-100px}
+.orb2{width:350px;height:350px;background:rgba(10,22,40,.3);bottom:-80px;left:-60px}
+
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+.header{width:100%;max-width:480px;display:flex;align-items:center;justify-content:center;padding:52px 0 28px;position:relative;z-index:5;animation:fadeUp .6s ease both;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;letter-spacing:.04em}
+.logo em{font-style:italic;background:linear-gradient(135deg,#fff 0%,#a8d0f0 25%,#4a90d9 50%,#a8d0f0 75%,#fff 100%);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:metalSlide 5s linear infinite;}
+
+.progress{width:100%;max-width:480px;display:flex;gap:6px;margin-bottom:32px;position:relative;z-index:5;}
+.progress-step{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.08);}
+.progress-step.done{background:linear-gradient(90deg,#1a3668,#2258a8,#4a90d9);background-size:200% 100%;animation:metalSlide 3s linear infinite;}
+.progress-step.active{background:rgba(74,144,217,.4);}
+
+.content{width:100%;max-width:480px;position:relative;z-index:5;}
+.step-label{font-size:.72rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:rgba(168,208,240,.45);margin-bottom:10px;}
+.title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,6vw,2.4rem);font-weight:300;line-height:1.1;margin-bottom:6px;}
+.title strong{font-weight:600}
+.subtitle{font-size:.88rem;font-weight:300;color:rgba(255,255,255,.38);margin-bottom:28px;line-height:1.6;}
+
+/* ── PHOTO ── */
+.photo-section{display:flex;flex-direction:column;align-items:center;margin-bottom:28px;}
+.photo-wrap{position:relative;cursor:pointer;margin-bottom:10px;}
+.photo-circle{
+  width:96px;height:96px;border-radius:50%;
+  background:linear-gradient(145deg,rgba(15,32,64,.9),rgba(11,26,48,.85));
+  border:2px solid rgba(255,255,255,.12);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;transition:all .2s;position:relative;
+}
+.photo-circle:hover{border-color:rgba(74,144,217,.4);}
+.photo-circle img{width:100%;height:100%;object-fit:cover;display:none;}
+.photo-placeholder{font-size:2rem;color:rgba(255,255,255,.25);}
+.photo-overlay{
+  position:absolute;inset:0;border-radius:50%;
+  background:rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .2s;
+  font-size:.75rem;color:#fff;text-align:center;
+}
+.photo-wrap:hover .photo-overlay{opacity:1;}
+.photo-btn{
+  font-size:.78rem;color:rgba(168,208,240,.65);font-weight:400;cursor:pointer;
+  background:none;border:none;font-family:'DM Sans',sans-serif;
+  text-decoration:underline;padding:4px;
+}
+.photo-hint{font-size:.72rem;color:rgba(255,255,255,.22);text-align:center;}
+#photo-input{display:none;}
+
+/* ── CARD ── */
+.card{background:linear-gradient(145deg,rgba(15,32,64,.92),rgba(11,26,48,.88));border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;margin-bottom:14px;position:relative;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);border-radius:20px 20px 0 0;}
+.card-title{font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(168,208,240,.55);margin-bottom:14px;}
+
+/* ── FIELDS ── */
+.field{margin-bottom:14px;}
+.field:last-child{margin-bottom:0;}
+.field label{display:block;font-size:.76rem;font-weight:500;color:rgba(168,208,240,.55);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.field input,.field textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:13px 16px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;transition:border-color .2s,background .2s;-webkit-appearance:none;appearance:none;resize:none;}
+.field input::placeholder,.field textarea::placeholder{color:rgba(255,255,255,.22)}
+.field input:focus,.field textarea:focus{border-color:rgba(74,144,217,.45);background:rgba(74,144,217,.05)}
+.char-counter{text-align:right;font-size:.72rem;color:rgba(255,255,255,.25);margin-top:4px;}
+.char-counter.warn{color:#ffaa00;}
+.char-counter.limit{color:#ff4444;}
+
+/* ── URL INPUT ── */
+.url-wrap{position:relative;}
+.url-prefix{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:.82rem;color:rgba(255,255,255,.25);pointer-events:none;}
+.url-input{padding-left:52px !important;}
+
+/* ── LANDING TOGGLE ── */
+.landing-options{display:flex;flex-direction:column;gap:10px;}
+.landing-opt{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);
+  border-radius:14px;padding:14px 16px;cursor:pointer;transition:all .2s;
+}
+.landing-opt:hover{border-color:rgba(74,144,217,.3);background:rgba(74,144,217,.04);}
+.landing-opt.selected{border-color:rgba(74,144,217,.55);background:rgba(74,144,217,.08);}
+.landing-radio{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.landing-opt.selected .landing-radio{border-color:rgba(74,144,217,.8);background:rgba(74,144,217,.2);}
+.landing-radio-dot{width:7px;height:7px;border-radius:50%;background:#4a90d9;display:none;}
+.landing-opt.selected .landing-radio-dot{display:block;}
+.landing-opt-text{flex:1;}
+.landing-opt-title{font-size:.9rem;font-weight:500;color:#fff;margin-bottom:2px;}
+.landing-opt-desc{font-size:.76rem;color:rgba(255,255,255,.35);font-weight:300;}
+.landing-url-field{margin-top:12px;display:none;}
+.landing-url-field.show{display:block;}
+
+/* ── SKIP ── */
+.skip-btn{
+  background:none;border:none;font-family:'DM Sans',sans-serif;
+  font-size:.85rem;color:rgba(255,255,255,.28);cursor:pointer;
+  text-decoration:underline;display:block;text-align:center;
+  margin-top:10px;padding:8px;width:100%;
+}
+.skip-btn:hover{color:rgba(255,255,255,.45);}
+
+/* ── BUTTON ── */
+.btn-submit{width:100%;padding:16px;border:none;border-radius:16px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;color:#fff;position:relative;overflow:hidden;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 6s linear infinite;box-shadow:0 6px 24px rgba(34,88,168,.35),0 1px 0 rgba(255,255,255,.12) inset;transition:transform .2s;margin-bottom:6px;}
+.btn-submit::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;}
+.btn-submit:active:not(:disabled){transform:scale(.98)}
+
+/* ── UPLOAD PROGRESS ── */
+.upload-progress{display:none;text-align:center;padding:20px 0;}
+.upload-spinner{width:36px;height:36px;border:3px solid rgba(74,144,217,.2);border-top-color:#4a90d9;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;}
+.upload-text{font-size:.88rem;color:rgba(255,255,255,.5);}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="header"><div class="logo">xim<em>vid</em></div></div>
+
+<div class="progress">
+  <div class="progress-step done"></div>
+  <div class="progress-step active"></div>
+  <div class="progress-step"></div>
+</div>
+
+<div class="content">
+  <div class="step-label">Paso 2 de 3</div>
+  <h1 class="title"><strong>Tu escaparate</strong><br>en Ximvid</h1>
+  <p class="subtitle">Así te verán los demás. Puedes editarlo en cualquier momento.</p>
+
+  <!-- PHOTO -->
+  <div class="photo-section">
+    <div class="photo-wrap" onclick="document.getElementById('photo-input').click()">
+      <div class="photo-circle" id="photo-circle">
+        <div class="photo-placeholder" id="photo-placeholder">👤</div>
+        <img id="photo-preview" alt="Foto de perfil">
+        <div class="photo-overlay">📷<br>Cambiar</div>
+      </div>
+    </div>
+    <button class="photo-btn" onclick="document.getElementById('photo-input').click()">Añadir foto de perfil</button>
+    <div class="photo-hint">Máx. 400×400px · WebP comprimido · ~20KB</div>
+    <input type="file" id="photo-input" accept="image/*" onchange="handlePhoto(this)">
+  </div>
+
+  <!-- DESCRIPCIÓN -->
+  <div class="card">
+    <div class="card-title">Sobre ti</div>
+    <div class="field">
+      <label>Descripción corta</label>
+      <textarea id="bio" rows="3" placeholder="Diseñadora freelance especializada en branding para pequeñas empresas..." maxlength="150" oninput="updateCharCount(this)"></textarea>
+      <div class="char-counter" id="char-counter">0 / 150</div>
+    </div>
+  </div>
+
+  <!-- BOTÓN CTA -->
+  <div class="card">
+    <div class="card-title">Tu botón de acción</div>
+    <div class="field">
+      <label>Texto del botón</label>
+      <input type="text" id="cta-text" placeholder="Ej: Ver mi portfolio, Comprar ahora, Reservar cita..." maxlength="40">
+    </div>
+    <div class="field">
+      <label>URL destino</label>
+      <div class="url-wrap">
+        <span class="url-prefix">https://</span>
+        <input type="text" id="cta-url" class="url-input" placeholder="tutienda.com/productos" autocapitalize="none" autocorrect="off">
+      </div>
+    </div>
+  </div>
+
+  <!-- LANDING -->
+  <div class="card">
+    <div class="card-title">Tu landing page</div>
+    <div class="landing-options">
+      <div class="landing-opt selected" id="opt-auto" onclick="selectLanding('auto')">
+        <div class="landing-radio"><div class="landing-radio-dot"></div></div>
+        <div class="landing-opt-text">
+          <div class="landing-opt-title">✨ Ximvid la genera por mí</div>
+          <div class="landing-opt-desc">Tu URL: app.ximvid.com/<span id="username-display">tunombre</span></div>
+        </div>
+      </div>
+      <div class="landing-opt" id="opt-external" onclick="selectLanding('external')">
+        <div class="landing-radio"><div class="landing-radio-dot"></div></div>
+        <div class="landing-opt-text">
+          <div class="landing-opt-title">🌐 Tengo mi propia web</div>
+          <div class="landing-opt-desc">Pega la URL de tu web o Linktree</div>
+        </div>
+      </div>
+    </div>
+    <div class="landing-url-field" id="landing-url-field">
+      <div class="field" style="margin-top:12px;margin-bottom:0">
+        <label>URL de tu web</label>
+        <div class="url-wrap">
+          <span class="url-prefix">https://</span>
+          <input type="text" id="landing-url" class="url-input" placeholder="tuweb.com" autocapitalize="none" autocorrect="off">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD PROGRESS -->
+  <div class="upload-progress" id="upload-progress">
+    <div class="upload-spinner"></div>
+    <div class="upload-text" id="upload-text">Guardando tu perfil...</div>
+  </div>
+
+  <button class="btn-submit" id="btn-submit" onclick="doSave()">Guardar y continuar →</button>
+  <button class="skip-btn" onclick="doSkip()">Completar más tarde</button>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+  authDomain:"ximvid-c8627.firebaseapp.com",
+  projectId:"ximvid-c8627",
+  storageBucket:"ximvid-c8627.firebasestorage.app",
+  messagingSenderId:"278931359476",
+  appId:"1:278931359476:web:30fef5be9d11890bef80a1"
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+window._auth = auth;
+window._db = db;
+window._storage = storage;
+window._fb = { doc, getDoc, updateDoc, ref, uploadBytes, getDownloadURL };
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = '/welcome.html'; return; }
+  // Cargar username para mostrarlo
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) {
+      const username = snap.data().username || 'tunombre';
+      document.getElementById('username-display').textContent = username;
+    }
+  } catch(e) {}
+});
+</script>
+
+<script>
+let selectedLanding = 'auto';
+let compressedPhotoBlob = null;
+
+// ── CHAR COUNTER ──────────────────────────────────────────────
+function updateCharCount(el) {
+  const len = el.value.length;
+  const counter = document.getElementById('char-counter');
+  counter.textContent = len + ' / 150';
+  counter.className = 'char-counter' + (len > 130 ? ' warn' : '') + (len >= 150 ? ' limit' : '');
+}
+
+// ── LANDING TOGGLE ────────────────────────────────────────────
+function selectLanding(type) {
+  selectedLanding = type;
+  document.getElementById('opt-auto').classList.toggle('selected', type === 'auto');
+  document.getElementById('opt-external').classList.toggle('selected', type === 'external');
+  document.getElementById('landing-url-field').classList.toggle('show', type === 'external');
+}
+
+// ── PHOTO COMPRESSION ─────────────────────────────────────────
+async function handlePhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // Validar tipo
+  if (!file.type.startsWith('image/')) { alert('Por favor selecciona una imagen.'); return; }
+
+  // Comprimir: resize a 400x400, convertir a WebP calidad 75
+  const img = new Image();
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 400;
+      let w = img.width, h = img.height;
+
+      // Crop cuadrado centrado
+      const size = Math.min(w, h);
+      const sx = (w - size) / 2;
+      const sy = (h - size) / 2;
+
+      canvas.width = MAX;
+      canvas.height = MAX;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, sx, sy, size, size, 0, 0, MAX, MAX);
+
+      // Convertir a WebP
+      canvas.toBlob((blob) => {
+        compressedPhotoBlob = blob;
+        const url = URL.createObjectURL(blob);
+        const preview = document.getElementById('photo-preview');
+        const placeholder = document.getElementById('photo-placeholder');
+        preview.src = url;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+
+        const kb = (blob.size / 1024).toFixed(1);
+        document.querySelector('.photo-hint').textContent = `✅ Foto lista · ${kb}KB (comprimida)`;
+      }, 'image/webp', 0.75);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── SAVE ──────────────────────────────────────────────────────
+async function doSave() {
+  const btn = document.getElementById('btn-submit');
+  btn.style.display = 'none';
+  document.querySelector('.skip-btn').style.display = 'none';
+  document.getElementById('upload-progress').style.display = 'block';
+
+  try {
+    const user = window._auth.currentUser;
+    if (!user) { window.location.href = '/welcome.html'; return; }
+
+    const updateData = {};
+
+    // Subir foto si existe
+    if (compressedPhotoBlob) {
+      document.getElementById('upload-text').textContent = 'Subiendo foto...';
+      const photoRef = window._fb.ref(window._storage, `profilePhotos/${user.uid}/photo.webp`);
+      await window._fb.uploadBytes(photoRef, compressedPhotoBlob, { contentType: 'image/webp' });
+      updateData.profilePhoto = await window._fb.getDownloadURL(photoRef);
+    }
+
+    // Bio
+    const bio = document.getElementById('bio').value.trim();
+    if (bio) updateData.shortDescription = bio;
+
+    // CTA
+    const ctaText = document.getElementById('cta-text').value.trim();
+    const ctaUrlRaw = document.getElementById('cta-url').value.trim();
+    if (ctaText) updateData.actionButtonText = ctaText;
+    if (ctaUrlRaw) updateData.actionButtonURL = ctaUrlRaw.startsWith('http') ? ctaUrlRaw : 'https://' + ctaUrlRaw;
+
+    // Landing
+    updateData.landingType = selectedLanding;
+    if (selectedLanding === 'external') {
+      const lurl = document.getElementById('landing-url').value.trim();
+      if (lurl) updateData.externalLandingURL = lurl.startsWith('http') ? lurl : 'https://' + lurl;
+    }
+
+    updateData.profileSetupDone = true;
+
+    document.getElementById('upload-text').textContent = 'Guardando...';
+    await window._fb.updateDoc(window._fb.doc(window._db, 'users', user.uid), updateData);
+
+    window.location.href = '/social-links.html';
+
+  } catch(e) {
+    console.error(e);
+    document.getElementById('upload-progress').style.display = 'none';
+    btn.style.display = 'block';
+    document.querySelector('.skip-btn').style.display = 'block';
+    alert('Error al guardar. Inténtalo de nuevo.');
+  }
+}
+
+function doSkip() {
+  window.location.href = '/social-links.html';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Analitica Redes — Ximvid</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);font-family:"DM Sans",sans-serif;color:#fff;overflow-x:hidden}
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes countUp{from{opacity:0}to{opacity:1}}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;padding:max(14px,env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:12px;background:rgba(6,16,30,.92);backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.06)}
+.back-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s}
+.topbar-title{font-family:"Cormorant Garamond",serif;font-size:1.25rem;font-weight:600}
+.content{padding:calc(max(14px,env(safe-area-inset-top)) + 62px) 16px max(32px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:16px}
+.period-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.period-row::-webkit-scrollbar{display:none}
+.period-btn{padding:7px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.45);font-family:"DM Sans",sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .2s}
+.period-btn.active{background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 6s linear infinite;border-color:transparent;color:#fff}
+.card{background:linear-gradient(145deg,rgba(15,32,64,.85),rgba(11,26,48,.9));border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:20px;animation:fadeUp .4s ease both}
+.section-label{font-size:.65rem;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metric-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;text-align:center}
+.metric-num{font-family:"Cormorant Garamond",serif;font-size:2.2rem;font-weight:300;background:linear-gradient(135deg,#7a5200,#c8860a,#f0b429,#fff9e6);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:metalSlide 4s linear infinite}
+.metric-lbl{font-size:.72rem;color:rgba(255,255,255,.4);margin-top:2px}
+.chart-wrap{position:relative;width:100%;height:220px;margin:8px 0}
+.donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+.donut-total{font-family:"Cormorant Garamond",serif;font-size:2rem;font-weight:300;background:linear-gradient(135deg,#c8860a,#f0b429);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.donut-sub{font-size:.65rem;color:rgba(255,255,255,.35);margin-top:2px}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:.75rem;color:rgba(255,255,255,.6)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.bars-chart-wrap{position:relative;width:100%;height:200px}
+.video-row{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.video-row:last-child{border-bottom:none;padding-bottom:0}
+.vthumb{width:48px;height:48px;border-radius:10px;background:rgba(255,255,255,.06);overflow:hidden;flex-shrink:0;border:1px solid rgba(255,255,255,.08)}
+.vthumb video{width:100%;height:100%;object-fit:cover}
+.vinfo{flex:1;min-width:0}
+.vdesc{font-size:.85rem;color:rgba(255,255,255,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.vnets{display:flex;gap:4px;flex-wrap:wrap}
+.vchip{font-size:.68rem;padding:2px 7px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.45)}
+.vcount{font-family:"Cormorant Garamond",serif;font-size:1.8rem;font-weight:300;background:linear-gradient(135deg,#c8860a,#f0b429);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0}
+.empty{text-align:center;padding:32px 16px;color:rgba(255,255,255,.25);font-size:.9rem}
+.loading-msg{text-align:center;padding:32px;color:rgba(255,255,255,.3);font-size:.88rem}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <button class="back-btn" onclick="history.back()">&#8592;</button>
+  <div class="topbar-title">Analitica de Redes</div>
+</div>
+<div class="content">
+  <div class="period-row">
+    <button class="period-btn" onclick="setPeriod(this)">Hoy</button>
+    <button class="period-btn active" onclick="setPeriod(this)">Esta semana</button>
+    <button class="period-btn" onclick="setPeriod(this)">Este mes</button>
+    <button class="period-btn" onclick="setPeriod(this)">3 meses</button>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="metric-box"><div class="metric-num" id="m-total">—</div><div class="metric-lbl">clics totales</div></div>
+    <div class="metric-box"><div class="metric-num" id="m-nets">—</div><div class="metric-lbl">redes activas</div></div>
+  </div>
+
+  <div class="card" style="animation-delay:.05s">
+    <div class="section-label">distribucion por red</div>
+    <div style="position:relative">
+      <div class="chart-wrap"><canvas id="donutChart" role="img" aria-label="Grafico donut de clics por red social">Distribucion de clics por red social.</canvas></div>
+      <div class="donut-center"><div class="donut-total" id="donut-total">0</div><div class="donut-sub">clics</div></div>
+    </div>
+    <div class="legend" id="donut-legend"></div>
+  </div>
+
+  <div class="card" style="animation-delay:.1s">
+    <div class="section-label">ranking de redes</div>
+    <div class="bars-chart-wrap"><canvas id="barsChart" role="img" aria-label="Grafico de barras horizontal con ranking de redes sociales">Ranking de redes por numero de clics.</canvas></div>
+  </div>
+
+  <div class="card" style="animation-delay:.15s">
+    <div class="section-label">videos destacados</div>
+    <div id="video-list"><div class="loading-msg">Cargando...</div></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{getFirestore,collection,query,where,getDocs}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const app=initializeApp({apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",authDomain:"ximvid-c8627.firebaseapp.com",projectId:"ximvid-c8627",storageBucket:"ximvid-c8627.firebasestorage.app",messagingSenderId:"278931359476",appId:"1:278931359476:web:30fef5be9d11890bef80a1"});
+const auth=getAuth(app),db=getFirestore(app);
+const COLORS=["#2258a8","#f0b429","#1a8a6e","#9b3dbd","#d84a2e","#1e8cb8","#c8860a","#4a9e2f","#bd3d7e","#5a4abd"];
+const NET_EMOJI={instagram:"Instagram",tiktok:"TikTok",youtube:"YouTube",whatsapp:"WhatsApp",telegram:"Telegram",linkedin:"LinkedIn",facebook:"Facebook",twitter:"Twitter",spotify:"Spotify",email:"Email",phone:"Telefono",web:"Web",discord:"Discord",patreon:"Patreon"};
+const NET_SVG={
+instagram:'<svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>',
+linkedin:'<svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
+whatsapp:'<svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>',
+youtube:'<svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>',
+tiktok:'<svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.73a4.85 4.85 0 01-1.01-.04z"/></svg>',
+facebook:'<svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>',
+twitter:'<svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.727-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
+telegram:'<svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>',
+spotify:'<svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>',
+email:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="22" height="22"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>',
+phone:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="22" height="22"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.95 11.5a19.79 19.79 0 01-3.07-8.67A2 2 0 012.86 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>',
+web:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="22" height="22"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>'
+};
+let donutChart=null,barsChart=null,uid=null;
+const PERIODS=["Hoy","Esta semana","Este mes","3 meses"];
+const DAYS=[0,7,30,90];
+window.setPeriod=function(el){
+  document.querySelectorAll(".period-btn").forEach(b=>b.classList.remove("active"));
+  el.classList.add("active");
+  const idx=Array.from(document.querySelectorAll(".period-btn")).indexOf(el);
+  loadData(DAYS[idx]);
+};
+onAuthStateChanged(auth,async user=>{
+  if(!user){window.location.href="/welcome.html";return;}
+  uid=user.uid;
+  loadData(7);
+});
+async function loadData(days){
+  if(!uid)return;
+  try{
+    const vSnap=await getDocs(query(collection(db,"videos"),where("userId","==",uid),where("isActive","==",true)));
+    const videos=vSnap.docs.map(d=>({id:d.id,...d.data()}));
+    const netMap={};
+    let total=0;
+    videos.forEach(v=>{
+      Object.keys(v).forEach(k=>{
+        if(k.startsWith("net_")){
+          const net=k.replace("net_","");
+          netMap[net]=(netMap[net]||0)+(v[k]||0);
+          total+=v[k]||0;
+        }
+      });
+    });
+    const entries=Object.entries(netMap).sort((a,b)=>b[1]-a[1]);
+    document.getElementById("m-total").textContent=total;
+    document.getElementById("m-nets").textContent=entries.length;
+    document.getElementById("donut-total").textContent=total;
+    renderDonut(entries);
+    renderBars(entries);
+    renderVideos(videos);
+  }catch(e){console.error(e);}
+}
+function renderDonut(entries){
+  if(donutChart){donutChart.destroy();donutChart=null;}
+  const legendEl=document.getElementById("donut-legend");
+  if(entries.length===0){legendEl.innerHTML="<div class=\"empty\">Sin datos aun</div>";return;}
+  const labels=entries.map(([n])=>NET_EMOJI[n]||n);
+  const data=entries.map(([,v])=>v);
+  const colors=entries.map((_,i)=>COLORS[i%COLORS.length]);
+  donutChart=new Chart(document.getElementById("donutChart"),{
+    type:"doughnut",
+    data:{labels,datasets:[{data,backgroundColor:colors,borderColor:"rgba(11,26,48,.9)",borderWidth:3,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:"68%",plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.label+": "+ctx.raw+" clics ("+Math.round(ctx.parsed/data.reduce((a,b)=>a+b,0)*100)+"%)"}}},animation:{animateRotate:true,duration:800}}
+  });
+  legendEl.innerHTML=entries.map(([net,count],i)=>`<div class="legend-item" style="display:flex;align-items:center;gap:10px;background:linear-gradient(115deg,#3d2800,#7a5200,#c8860a,#f0b429,#c8860a,#7a5200,#3d2800);background-size:300% 100%;animation:metalSlide 5s linear infinite;border-radius:14px;padding:10px 14px;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">${NET_SVG[net]||""}</div><span style="font-size:.85rem;color:#fff;font-weight:600;flex:1;text-shadow:0 1px 4px rgba(0,0,0,.5)">${NET_EMOJI[net]||net}</span><span style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:#fff;text-shadow:0 0 20px rgba(255,255,255,.5)">${count}</span></div>`).join("");
+}
+function renderBars(entries){
+  if(barsChart){barsChart.destroy();barsChart=null;}
+  const wrap=document.querySelector(".bars-chart-wrap");
+  if(entries.length===0){wrap.innerHTML="<div class=\"empty\">Sin datos aun</div>";return;}
+  const h=Math.max(180,entries.length*44+40);
+  wrap.style.height=h+"px";
+  const labels=entries.map(([n])=>NET_EMOJI[n]||n);
+  const data=entries.map(([,v])=>v);
+  const colors=entries.map((_,i)=>COLORS[i%COLORS.length]);
+  barsChart=new Chart(document.getElementById("barsChart"),{
+    type:"bar",
+    data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:6,borderSkipped:false}]},
+    options:{
+      indexAxis:"y",responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+" clics"}}},
+      scales:{
+        x:{grid:{color:"rgba(255,255,255,.05)"},ticks:{color:"rgba(255,255,255,.4)",font:{size:11}},border:{color:"rgba(255,255,255,.05)"}},
+        y:{grid:{display:false},ticks:{color:"rgba(255,255,255,.7)",font:{size:12,weight:"500"}},border:{display:false}}
+      },
+      animation:{duration:700}
+    }
+  });
+}
+function renderVideos(videos){
+  const el=document.getElementById("video-list");
+  const withClicks=videos.filter(v=>v.socialClicks>0).sort((a,b)=>(b.socialClicks||0)-(a.socialClicks||0));
+  if(withClicks.length===0){el.innerHTML="<div class=\"empty\">Sin videos con clics en redes</div>";return;}
+  el.innerHTML=withClicks.map(v=>{
+    const nets=Object.keys(v).filter(k=>k.startsWith("net_")&&v[k]>0).sort((a,b)=>v[b]-v[a]).map(k=>`<span class="vchip">${(NET_EMOJI[k.replace("net_","")]||k.replace("net_",""))} ${v[k]}</span>`).join("");
+    return`<div class="video-row"><div class="vthumb"><video src="${v.videoURL}" muted preload="metadata"></video></div><div class="vinfo"><div class="vdesc">${v.description||v.productName||"Sin descripcion"}</div><div class="vnets">${nets}</div></div><div class="vcount">${v.socialClicks||0}</div></div>`;
+  }).join("");
+}
+</script>
+</body>
+</html>

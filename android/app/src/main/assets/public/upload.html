@@ -394,6 +394,37 @@ function pickCamera() {
 }
 
 // ── HANDLE VIDEO SELECT ───────────────────────────────────────
+function generateThumbnail(file) {
+  return new Promise((resolve) => {
+    try {
+      const video = document.createElement('video');
+      video.muted = true;
+      video.playsInline = true;
+      video.src = URL.createObjectURL(file);
+      video.currentTime = 0.5;
+      video.onloadeddata = () => {
+        video.onseeked = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 360;
+          canvas.height = 640;
+          const ctx = canvas.getContext('2d');
+          const scale = Math.max(360/video.videoWidth, 640/video.videoHeight);
+          const w = video.videoWidth * scale;
+          const h = video.videoHeight * scale;
+          ctx.drawImage(video, (360-w)/2, (640-h)/2, w, h);
+          canvas.toBlob(blob => {
+            URL.revokeObjectURL(video.src);
+            resolve(blob);
+          }, 'image/webp', 0.8);
+        };
+        video.currentTime = 0.5;
+      };
+      video.onerror = () => resolve(null);
+      video.load();
+    } catch(e) { resolve(null); }
+  });
+}
+
 async function handleVideoSelect(input) {
   const file = input.files[0];
   if (!file) return;
@@ -598,7 +629,19 @@ async function publishVideo() {
     status.textContent = 'Obteniendo URL...';
     const videoURL = await window._fb.getDownloadURL(videoRef);
 
-    // 2. Subir imagen del producto si existe
+    // 2. Generar thumbnail del video
+    let thumbnailURL = '';
+    try {
+      const thumbBlob = await generateThumbnail(selectedFile);
+      if (thumbBlob) {
+        status.textContent = 'Generando miniatura...';
+        const thumbRef = window._fb.ref(window._storage, `videos/${user.uid}/${videoId}/thumb.webp`);
+        await window._fb.uploadBytesResumable(thumbRef, thumbBlob);
+        thumbnailURL = await window._fb.getDownloadURL(thumbRef);
+      }
+    } catch(e) { console.warn('Thumbnail error:', e); }
+
+    // 3. Subir imagen del producto si existe
     let productImageURL = '';
     if (productImgBlob && selectedIntention === 'selling_product') {
       status.textContent = 'Subiendo imagen del producto...';
@@ -617,7 +660,7 @@ async function publishVideo() {
       username: userData.username || '',
       userLanguage: userData.language || 'es',
       videoURL,
-      thumbnailURL: '',
+      thumbnailURL: thumbnailURL,
       intention: selectedIntention,
       description: document.getElementById('video-desc').value.trim(),
       hashtags,
@@ -661,6 +704,15 @@ async function publishVideo() {
 
     bar.style.width = '100%';
     status.textContent = '¡Publicado! 🎉';
+
+    // Reset formulario
+    selectedFile = null;
+    selectedIntention = null;
+    hashtags = [];
+    productImgBlob = null;
+    videoDuration = 0;
+    document.getElementById('video-desc').value = '';
+    document.querySelectorAll('input[type="text"], input[type="number"], input[type="url"], textarea').forEach(el => el.value = '');
 
     setTimeout(() => { window.location.href = '/feed.html'; }, 1200);
 

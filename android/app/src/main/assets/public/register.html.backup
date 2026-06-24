@@ -166,6 +166,7 @@ body{
       <label>Contraseña</label>
       <input type="password" id="login-pass" placeholder="Tu contraseña" autocomplete="current-password">
     </div>
+    <div style="text-align:right;margin:-6px 0 14px"><a href="#" onclick="forgotPassword();return false;" style="color:rgba(255,255,255,.5);font-size:.8rem;text-decoration:none">¿Olvidaste tu contraseña?</a></div>
     <button class="btn-submit" id="btn-login-submit" onclick="doLogin()">Entrar →</button>
     <div class="divider"><span>o continúa con</span></div>
     <button class="btn-google" onclick="doGoogleAuth()">
@@ -185,8 +186,8 @@ body{
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, query, collection, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, query, collection, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
@@ -204,17 +205,30 @@ const gp = new GoogleAuthProvider();
 window._auth = auth;
 window._db = db;
 window._gp = gp;
-window._fb = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, doc, setDoc, getDoc, query, collection, where, getDocs, serverTimestamp };
+window._fb = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail, doc, setDoc, getDoc, query, collection, where, getDocs, serverTimestamp };
 
 // Si ya está logado redirigir
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
       const snap = await getDoc(doc(db, 'users', user.uid));
-      if (snap.exists() && snap.data()?.userType) {
-        window.location.href = '/feed.html';
-      } else if (snap.exists()) {
-        window.location.href = '/usertype.html';
+      if (snap.exists()) {
+        const udata = snap.data();
+        // Guard de estado de cuenta
+        if (udata.accountStatus === 'admin_banned') {
+          await signOut(auth);
+          window.location.href = '/welcome.html?suspended=1';
+          return;
+        }
+        if (udata.accountStatus === 'self_paused') {
+          // Reactivacion automatica silenciosa
+          await updateDoc(doc(db, 'users', user.uid), { accountStatus: 'active', statusChangedAt: serverTimestamp() });
+        }
+        if (udata.userType) {
+          window.location.href = '/feed.html';
+        } else {
+          window.location.href = '/usertype.html';
+        }
       }
     } catch(e) {}
   }
@@ -380,6 +394,32 @@ async function doRegister() {
   }
 }
 
+async function forgotPassword() {
+  hideError();
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) {
+    showError('Escribe tu email arriba y pulsa de nuevo \u00bfOlvidaste tu contrase\u00f1a?');
+    document.getElementById('login-email').focus();
+    return;
+  }
+  try {
+    await window._fb.sendPasswordResetEmail(window._auth, email);
+    alert('\u2705 Te hemos enviado un email a ' + email + ' con un enlace para crear una nueva contrase\u00f1a. Revisa tu bandeja de entrada (y la carpeta de spam).');
+  } catch(e) {
+    console.error('reset error', e);
+    if (e.code === 'auth/invalid-email') {
+      showError('El formato del email no es v\u00e1lido');
+    } else if (e.code === 'auth/user-not-found') {
+      // Por seguridad, no revelamos si el email existe o no
+      alert('\u2705 Si ese email tiene una cuenta, recibir\u00e1s un enlace para restablecer la contrase\u00f1a.');
+    } else if (e.code === 'auth/too-many-requests') {
+      showError('Demasiados intentos. Espera unos minutos.');
+    } else {
+      showError('No se pudo enviar el email. Int\u00e9ntalo de nuevo.');
+    }
+  }
+}
+
 async function doLogin() {
   hideError();
   const email = document.getElementById('login-email').value.trim();
@@ -424,7 +464,14 @@ async function doGoogleAuth() {
       window.location.href = snap.data()?.userType ? '/feed.html' : '/usertype.html';
     }
   } catch(e) {
-    showError('Error con Google. Inténtalo de nuevo.');
+    console.error('Google auth error', e);
+    // El usuario cerro el popup: no es un error que mostrar
+    if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return;
+    if (e.code === 'auth/popup-blocked') {
+      showError('El navegador bloqueó la ventana de Google. Permite ventanas emergentes.');
+    } else {
+      showError('Error con Google. Inténtalo de nuevo.');
+    }
   }
 }
 

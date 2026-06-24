@@ -103,10 +103,10 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 
   <!-- PERIOD -->
   <div class="period-scroll">
-    <button class="period-btn" onclick="setPeriod('today',this)">Hoy</button>
-    <button class="period-btn active" onclick="setPeriod('week',this)">Esta semana</button>
-    <button class="period-btn" onclick="setPeriod('month',this)">Este mes</button>
-    <button class="period-btn" onclick="setPeriod('3months',this)">Últimos 3 meses</button>
+    <button class="period-btn" onclick="setPeriod('today',this)">Últimas 24h</button>
+    <button class="period-btn active" onclick="setPeriod('week',this)">Últimos 7 días</button>
+    <button class="period-btn" onclick="setPeriod('month',this)">Últimos 30 días</button>
+    <button class="period-btn" onclick="setPeriod('3months',this)">Últimos 90 días</button>
   </div>
 
   <!-- CONVERSION RATE -->
@@ -231,21 +231,28 @@ async function loadStats(period) {
       window._fb.where('isActive', '==', true)
     );
     const vSnap = await window._fb.getDocs(vq);
-    const videos = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-    // Calcular totales
-    let totalViews = 0, totalClicks = 0, totalSocial = 0;
-    videos.forEach(v => {
-      totalViews += v.views || 0;
-      totalClicks += v.actionClicks || 0;
-      totalSocial += v.socialClicks || 0;
-    });
+    const allVideos = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     const dateFrom = getDateRange(period);
+    const filteredVideos = allVideos.filter(v => {
+      const t = v.createdAt?.toDate?.();
+      return t && t >= dateFrom;
+    });
+
+    // Totales acumulados (todos los videos, sin filtro fecha)
+    let totalViews = 0, totalClicks = 0, totalSocial = 0;
+    allVideos.forEach(v => {
+      totalViews += v.views || 0;
+      totalClicks += v.actionClicks || 0;
+    });
+
+    // Clics en redes y lista: solo videos del período
+    filteredVideos.forEach(v => { totalSocial += v.socialClicks || 0; });
     document.getElementById('m-social').textContent = formatNum(totalSocial);
-    // Construir mapa de clics por red
+
+    // Construir mapa de clics por red (solo período)
     const socialClicks = {};
-    videos.forEach(v => {
+    filteredVideos.forEach(v => {
       Object.keys(v).forEach(k => {
         if (k.startsWith('net_')) {
           const net = k.replace('net_', '');
@@ -281,7 +288,7 @@ async function loadStats(period) {
     renderSocialBars(socialClicks);
 
     // Lista de videos
-    renderVideoList(videos);
+    renderVideoList(filteredVideos);
 
   } catch(e) { console.error(e); }
 }

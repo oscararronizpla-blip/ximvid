@@ -11,7 +11,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{height:100%}
-body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;display:flex;flex-direction:column;align-items:center;padding:0 20px 100px;position:relative;overflow-x:hidden;}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;display:flex;flex-direction:column;align-items:center;padding:0 20px 200px;position:relative;overflow-x:hidden;}
 .bg-grid{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(74,144,217,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(74,144,217,.04) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%);-webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%);}
 .orb{position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;opacity:.35}
 .orb1{width:500px;height:500px;background:rgba(34,88,168,.18);top:-150px;right:-100px}
@@ -74,6 +74,9 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 .net-field input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;-webkit-appearance:none;}
 .net-field input::placeholder{color:rgba(255,255,255,.2)}
 .net-field input:focus{border-color:rgba(74,144,217,.4);background:rgba(74,144,217,.04)}
+.field-error{font-size:.72rem;color:#ff6b6b;margin-top:5px;display:none;padding-left:2px;}
+.field-error.show{display:block;}
+.net-field input.error{border-color:rgba(255,45,85,.6);background:rgba(255,45,85,.04);}
 .net-field-row{display:flex;gap:8px;}
 .net-field-row .net-field{flex:1;}
 .net-field-row .net-field.small{flex:0 0 110px;}
@@ -189,7 +192,23 @@ onAuthStateChanged(auth, async (user) => {
               item.classList.add('active');
               const urlInput = document.getElementById('url-' + link.network);
               const followersInput = document.getElementById('followers-' + link.network);
-              if (urlInput) urlInput.value = link.url.replace('https://','').replace('mailto:','').replace('tel:','');
+              if (urlInput) {
+                const netDef = Object.values(NETWORKS).flat().find(n=>n.id===link.network);
+                if (netDef && netDef.inputType === 'username' && netDef.baseUrl) {
+                  const domain = netDef.baseUrl.replace('https://','').replace('http://','').replace('www.','');
+                  const cleaned = link.url.replace(/https?:\/\/(www\.)?/,'');
+                  const domainIdx = cleaned.indexOf(domain);
+                  urlInput.value = domainIdx !== -1 ? cleaned.slice(domainIdx+domain.length).replace(/^\//,'') : cleaned;
+                } else if (netDef && netDef.inputType === 'url') {
+                  urlInput.value = link.url.replace('https://','').replace('http://','');
+                } else if (netDef && netDef.inputType === 'email') {
+                  urlInput.value = link.url.replace('mailto:','');
+                } else if (netDef && netDef.inputType === 'tel') {
+                  urlInput.value = link.url.replace('tel:','').replace('https://wa.me/','');
+                } else {
+                  urlInput.value = link.url.replace('https://','').replace('mailto:','').replace('tel:','');
+                }
+              }
               if (followersInput && link.followers) followersInput.value = link.followers;
               const preview = document.getElementById('preview-' + link.network);
               if (preview) preview.textContent = link.url;
@@ -207,41 +226,55 @@ onAuthStateChanged(auth, async (user) => {
 // ── DEFINICIÓN DE REDES ───────────────────────────────────────
 const NETWORKS = {
   social: [
-    { id:'instagram', name:'Instagram', icon:'📸', placeholder:'instagram.com/tuperfil' },
-    { id:'tiktok',    name:'TikTok',    icon:'🎵', placeholder:'tiktok.com/@tuperfil' },
-    { id:'youtube',   name:'YouTube',   icon:'▶️', placeholder:'youtube.com/@tucanal' },
-    { id:'facebook',  name:'Facebook',  icon:'👥', placeholder:'facebook.com/tupagina' },
-    { id:'twitter',   name:'X / Twitter', icon:'🐦', placeholder:'x.com/tunombre' },
-    { id:'linkedin',  name:'LinkedIn',  icon:'💼', placeholder:'linkedin.com/in/tunombre' },
-    { id:'pinterest', name:'Pinterest', icon:'📌', placeholder:'pinterest.com/tunombre' },
-    { id:'snapchat',  name:'Snapchat',  icon:'👻', placeholder:'snapchat.com/add/tunombre' },
-    { id:'twitch',    name:'Twitch',    icon:'🎮', placeholder:'twitch.tv/tunombre' },
-    { id:'reddit',    name:'Reddit',    icon:'🤖', placeholder:'reddit.com/u/tunombre' },
-    { id:'tumblr',    name:'Tumblr',    icon:'✏️', placeholder:'tunombre.tumblr.com' },
+    { id:'instagram', name:'Instagram', icon:'📸', placeholder:'tunombre', baseUrl:'https://instagram.com/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'tiktok',    name:'TikTok',    icon:'🎵', placeholder:'tunombre', baseUrl:'https://tiktok.com/@', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'youtube',   name:'YouTube',   icon:'▶️', placeholder:'tucanal',  baseUrl:'https://youtube.com/@', inputLabel:'Tu canal', inputType:'username' },
+    { id:'facebook',  name:'Facebook',  icon:'👥', placeholder:'tupagina', baseUrl:'https://facebook.com/', inputLabel:'Tu página', inputType:'username' },
+    { id:'twitter',   name:'X / Twitter', icon:'🐦', placeholder:'tunombre', baseUrl:'https://x.com/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'linkedin',  name:'LinkedIn',  icon:'💼', placeholder:'linkedin.com/in/tunombre', inputLabel:'URL de tu perfil', inputType:'url', domain:'linkedin.com' },
+    { id:'pinterest', name:'Pinterest', icon:'📌', placeholder:'tunombre', baseUrl:'https://pinterest.com/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'snapchat',  name:'Snapchat',  icon:'👻', placeholder:'tunombre', baseUrl:'https://snapchat.com/add/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'twitch',    name:'Twitch',    icon:'🎮', placeholder:'tunombre', baseUrl:'https://twitch.tv/', inputLabel:'Tu canal', inputType:'username' },
+    { id:'reddit',    name:'Reddit',    icon:'🤖', placeholder:'tunombre', baseUrl:'https://reddit.com/u/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'tumblr',    name:'Tumblr',    icon:'✏️', placeholder:'tunombre.tumblr.com', inputLabel:'Tu subdominio', inputType:'url', domain:'tumblr.com' },
+    { id:'threads',   name:'Threads',   icon:'🧵', placeholder:'tunombre', baseUrl:'https://threads.net/@', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'bluesky',   name:'Bluesky',   icon:'🦋', placeholder:'tunombre.bsky.social', inputLabel:'Tu handle', inputType:'url', domain:'bsky.social' },
+    { id:'wechat',    name:'WeChat',    icon:'💚', placeholder:'tu_id_wechat', inputLabel:'Tu ID de WeChat', inputType:'free', followersLabel: false },
+    { id:'weibo',     name:'Weibo',     icon:'🌊', placeholder:'tunombre', baseUrl:'https://weibo.com/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'line',      name:'LINE',      icon:'💬', placeholder:'tunombre', baseUrl:'https://line.me/ti/p/~', inputLabel:'Tu ID de LINE', inputType:'username', followersLabel: false },
+    { id:'kakaotalk', name:'KakaoTalk', icon:'🟡', placeholder:'tunombre', inputLabel:'Tu ID de KakaoTalk', inputType:'free', followersLabel: false },
+    { id:'xiaohongshu', name:'RedNote', icon:'📕', placeholder:'ID de tu perfil', inputLabel:'ID de perfil', inputType:'free' },
   ],
   contact: [
-    { id:'whatsapp',  name:'WhatsApp',  icon:'💬', placeholder:'+34 600 000 000', type:'tel', followersLabel: false },
-    { id:'telegram',  name:'Telegram',  icon:'✈️', placeholder:'t.me/tunombre', followersLabel: false },
-    { id:'email',     name:'Email directo', icon:'📧', placeholder:'tu@email.com', type:'email', followersLabel: false },
-    { id:'phone',     name:'Teléfono',  icon:'📞', placeholder:'+34 600 000 000', type:'tel', followersLabel: false },
+    { id:'whatsapp',  name:'WhatsApp',  icon:'💬', placeholder:'+34 600 000 000', type:'tel', inputLabel:'Número de teléfono', inputType:'tel', followersLabel: false },
+    { id:'telegram',  name:'Telegram',  icon:'✈️', placeholder:'tunombre', baseUrl:'https://t.me/', inputLabel:'Tu usuario', inputType:'username', followersLabel: false },
+    { id:'email',     name:'Email directo', icon:'📧', placeholder:'tu@email.com', type:'email', inputLabel:'Tu email', inputType:'email', followersLabel: false },
+    { id:'phone',     name:'Teléfono',  icon:'📞', placeholder:'+34 600 000 000', type:'tel', inputLabel:'Número de teléfono', inputType:'tel', followersLabel: false },
   ],
   links: [
-    { id:'web',       name:'Web propia',    icon:'🌐', placeholder:'tuweb.com', followersLabel: false },
-    { id:'shop',      name:'Tienda online', icon:'🛒', placeholder:'tutienda.com', followersLabel: false },
-    { id:'etsy',      name:'Etsy',          icon:'🏪', placeholder:'etsy.com/shop/tunombre' },
-    { id:'amazon',    name:'Amazon',        icon:'📦', placeholder:'amazon.es/tienda/tunombre', followersLabel: false },
-    { id:'wallapop',  name:'Wallapop',      icon:'🔄', placeholder:'wallapop.com/u/tunombre', followersLabel: false },
-    { id:'paypal',    name:'PayPal',        icon:'💳', placeholder:'paypal.me/tunombre', followersLabel: false },
-    { id:'bizum',     name:'Bizum',         icon:'💰', placeholder:'Número de teléfono', type:'tel', followersLabel: false },
-    { id:'patreon',   name:'Patreon',       icon:'🎁', placeholder:'patreon.com/tunombre' },
-    { id:'calendly',  name:'Calendly',      icon:'📅', placeholder:'calendly.com/tunombre', followersLabel: false },
+    { id:'web',       name:'Web propia',    icon:'🌐', placeholder:'tuweb.com', inputLabel:'URL de tu web', inputType:'free', followersLabel: false },
+    { id:'shop',      name:'Tienda online', icon:'🛒', placeholder:'tutienda.com', inputLabel:'URL de tu tienda', inputType:'free', followersLabel: false },
+    { id:'etsy',      name:'Etsy',          icon:'🏪', placeholder:'tunombre', baseUrl:'https://etsy.com/shop/', inputLabel:'Tu tienda', inputType:'username' },
+    { id:'amazon',    name:'Amazon',        icon:'📦', placeholder:'URL de tu tienda Amazon', inputLabel:'URL de Amazon', inputType:'url', domain:'amazon', followersLabel: false },
+    { id:'wallapop',  name:'Wallapop',      icon:'🔄', placeholder:'tunombre', baseUrl:'https://wallapop.com/u/', inputLabel:'Tu usuario', inputType:'username', followersLabel: false },
+    { id:'paypal',    name:'PayPal',        icon:'💳', placeholder:'tunombre', baseUrl:'https://paypal.me/', inputLabel:'Tu usuario', inputType:'username', followersLabel: false },
+    { id:'bizum',     name:'Bizum',         icon:'💰', placeholder:'+34 600 000 000', type:'tel', inputLabel:'Número de teléfono', inputType:'tel', followersLabel: false },
+    { id:'patreon',   name:'Patreon',       icon:'🎁', placeholder:'tunombre', baseUrl:'https://patreon.com/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'calendly',  name:'Calendly',      icon:'📅', placeholder:'tunombre', baseUrl:'https://calendly.com/', inputLabel:'Tu usuario', inputType:'username', followersLabel: false },
+    { id:'substack',  name:'Substack',      icon:'📰', placeholder:'tunombre', baseUrl:'https://substack.com/@', inputLabel:'Tu usuario', inputType:'username', followersLabel: false },
+    { id:'linktree',  name:'Linktree',      icon:'🌳', placeholder:'tunombre', baseUrl:'https://linktr.ee/', inputLabel:'Tu usuario', inputType:'username', followersLabel: false },
+    { id:'onlyfans',  name:'OnlyFans',      icon:'🔞', placeholder:'tunombre', baseUrl:'https://onlyfans.com/', inputLabel:'Tu usuario', inputType:'username', followersLabel: false },
   ],
   creative: [
-    { id:'spotify',    name:'Spotify',    icon:'🎧', placeholder:'open.spotify.com/artist/...' },
-    { id:'soundcloud', name:'SoundCloud', icon:'🎼', placeholder:'soundcloud.com/tunombre' },
-    { id:'vimeo',      name:'Vimeo',      icon:'🎬', placeholder:'vimeo.com/tunombre' },
-    { id:'behance',    name:'Behance',    icon:'🎨', placeholder:'behance.net/tunombre' },
-    { id:'discord',    name:'Discord',    icon:'🎲', placeholder:'discord.gg/tuservidor', followersLabel: false },
+    { id:'spotify',    name:'Spotify',    icon:'🎧', placeholder:'open.spotify.com/artist/...', inputLabel:'URL de Spotify', inputType:'url', domain:'spotify.com', followersLabel: false },
+    { id:'soundcloud', name:'SoundCloud', icon:'🎼', placeholder:'tunombre', baseUrl:'https://soundcloud.com/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'vimeo',      name:'Vimeo',      icon:'🎬', placeholder:'tunombre', baseUrl:'https://vimeo.com/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'behance',    name:'Behance',    icon:'🎨', placeholder:'tunombre', baseUrl:'https://behance.net/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'discord',    name:'Discord',    icon:'🎲', placeholder:'tuservidor', baseUrl:'https://discord.gg/', inputLabel:'Código de invitación', inputType:'username', followersLabel: false },
+    { id:'bandcamp',   name:'Bandcamp',   icon:'🎸', placeholder:'tunombre', baseUrl:'https://bandcamp.com/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'mixcloud',   name:'Mixcloud',   icon:'🎛️', placeholder:'tunombre', baseUrl:'https://mixcloud.com/', inputLabel:'Tu usuario', inputType:'username' },
+    { id:'applemusic', name:'Apple Music',icon:'🍎', placeholder:'music.apple.com/...', inputLabel:'URL de Apple Music', inputType:'url', domain:'apple.com', followersLabel: false },
+    { id:'clubhouse',  name:'Clubhouse',  icon:'🎙️', placeholder:'tunombre', baseUrl:'https://clubhouse.com/@', inputLabel:'Tu usuario', inputType:'username', followersLabel: false },
   ]
 };
 
@@ -267,12 +300,9 @@ function renderGroup(groupId, networks) {
         <div class="net-fields">
           <div class="${showFollowers ? 'net-field-row' : ''}">
             <div class="net-field ${showFollowers ? '' : ''}">
-              <label>URL o ${net.type === 'tel' ? 'teléfono' : net.type === 'email' ? 'email' : 'enlace'}</label>
-              <input type="${net.type || 'url'}"
-                id="url-${net.id}"
-                placeholder="${net.placeholder}"
-                autocapitalize="none" autocorrect="off"
-                oninput="updatePreview('${net.id}')">
+              <label>${net.inputLabel || (net.type === 'tel' ? 'Número de teléfono' : net.type === 'email' ? 'Tu email' : 'Enlace')}</label>
+              ${net.baseUrl ? `<div style="display:flex;align-items:center;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden"><span style="padding:12px 8px 12px 14px;font-size:.78rem;color:rgba(255,255,255,.3);white-space:nowrap;flex-shrink:0">${net.baseUrl}</span><input type="text" id="url-${net.id}" placeholder="${net.placeholder}" autocapitalize="none" autocorrect="off" oninput="updatePreview('${net.id}')" style="flex:1;background:none;border:none;padding:12px 14px 12px 4px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;min-width:0"></div>` : `<input type="${net.type || 'text'}" id="url-${net.id}" placeholder="${net.placeholder}" autocapitalize="none" autocorrect="off" oninput="updatePreview('${net.id}')">`}
+              <div class="field-error" id="err-${net.id}"></div>
             </div>
             ${showFollowers ? `
             <div class="net-field small">
@@ -321,6 +351,45 @@ function updateCount() {
 }
 
 // ── SAVE ──────────────────────────────────────────────────────
+const KNOWN_DOMAINS = {
+  'instagram.com':'instagram','tiktok.com':'tiktok','youtube.com':'youtube',
+  'facebook.com':'facebook','x.com':'twitter','twitter.com':'twitter',
+  'linkedin.com':'linkedin','pinterest.com':'pinterest','snapchat.com':'snapchat',
+  'twitch.tv':'twitch','reddit.com':'reddit','tumblr.com':'tumblr',
+  'threads.net':'threads','weibo.com':'weibo','spotify.com':'spotify',
+  'soundcloud.com':'soundcloud','vimeo.com':'vimeo','behance.net':'behance',
+  'discord.gg':'discord','bandcamp.com':'bandcamp','mixcloud.com':'mixcloud',
+  'apple.com':'applemusic','patreon.com':'patreon','paypal.me':'paypal',
+  'paypal.com':'paypal','etsy.com':'etsy','wallapop.com':'wallapop',
+  'calendly.com':'calendly','substack.com':'substack','linktr.ee':'linktree',
+  'onlyfans.com':'onlyfans','t.me':'telegram','discord.com':'discord'
+};
+
+function detectDomain(url) {
+  const clean = url.replace(/https?:\/\/(www\.)?/,'').toLowerCase();
+  for (const [domain, netId] of Object.entries(KNOWN_DOMAINS)) {
+    if (clean.startsWith(domain)) return netId;
+  }
+  return null;
+}
+
+function markError(netId, msg) {
+  const el = document.getElementById('url-' + netId);
+  const errEl = document.getElementById('err-' + netId);
+  if (!el) return;
+  el.classList.add('error');
+  if (errEl) { errEl.textContent = msg; errEl.classList.add('show'); }
+  // Scroll al campo con error
+  const item = document.getElementById('item-' + netId);
+  if (item) item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // El error persiste hasta que el usuario corrija
+  el.addEventListener('input', function clearErr() {
+    el.classList.remove('error');
+    if (errEl) errEl.classList.remove('show');
+    el.removeEventListener('input', clearErr);
+  });
+}
+
 async function doSave() {
   const user = window._auth.currentUser;
   if (!user) { window.location.href = '/welcome.html'; return; }
@@ -328,6 +397,7 @@ async function doSave() {
   const allNets = [...NETWORKS.social, ...NETWORKS.contact, ...NETWORKS.links, ...NETWORKS.creative];
   const socialLinks = [];
 
+  let hasErrors = false;
   allNets.forEach((net, idx) => {
     if (!activeNets[net.id]) return;
     const urlEl = document.getElementById('url-' + net.id);
@@ -336,15 +406,49 @@ async function doSave() {
     if (!url) return;
 
     let finalUrl = url;
+    let skipPush = false;
+
     if (net.id === 'whatsapp') {
-      finalUrl = 'https://wa.me/' + url.replace(/\D/g, '');
-    } else if (net.type === 'tel') {
-      finalUrl = 'tel:' + url.replace(/\s/g, '');
-    } else if (net.type === 'email') {
-      finalUrl = 'mailto:' + url;
-    } else if (!url.startsWith('http') && !url.startsWith('tel:') && !url.startsWith('mailto:')) {
-      finalUrl = 'https://' + url;
+      const digits = url.replace(/\D/g,'');
+      if (digits.length < 7) { skipPush=true; markError(net.id,'Introduce un número de teléfono válido'); }
+      else finalUrl = 'https://wa.me/' + digits;
+    } else if (net.inputType === 'tel') {
+      const digits = url.replace(/\D/g,'');
+      if (digits.length < 7) { skipPush=true; markError(net.id,'Introduce un número de teléfono válido'); }
+      else finalUrl = 'tel:' + url.replace(/\s/g,'');
+    } else if (net.inputType === 'email') {
+      if (!url.includes('@')||!url.includes('.')) { skipPush=true; markError(net.id,'Introduce un email válido, ej: tu@email.com'); }
+      else finalUrl = 'mailto:' + url;
+    } else if (net.inputType === 'url') {
+      const cleanUrl = url.replace(/https?:\/\/(www\.)?/,'').toLowerCase();
+      if (net.domain && !cleanUrl.includes(net.domain)) { skipPush=true; markError(net.id,'URL incorrecta — cópiala directamente desde '+net.name); }
+      else finalUrl = url.startsWith('http') ? url : 'https://' + url;
+    } else if (net.inputType === 'username' && net.baseUrl) {
+      let username = url.replace(/^@/,'').trim();
+      // Si parece una URL, detectar a qué red pertenece
+      if (username.includes('.') || username.includes('://')) {
+        const detectedNet = detectDomain(username);
+        if (detectedNet && detectedNet !== net.id) {
+          skipPush=true;
+          markError(net.id,'Esta URL pertenece a otra red. Escribe solo tu usuario de '+net.name+'.');
+        } else {
+          // Extraer username de la URL
+          const domain = net.baseUrl.replace('https://','').replace('http://','').replace('www.','');
+          const cleaned = username.replace(/https?:\/\/(www\.)?/,'');
+          const domainIdx = cleaned.indexOf(domain);
+          username = domainIdx !== -1 ? cleaned.slice(domainIdx+domain.length).replace(/^\//,'') : cleaned;
+          if (!username) { skipPush=true; markError(net.id,'Introduce tu usuario de '+net.name); }
+          else finalUrl = net.baseUrl + username;
+        }
+      } else {
+        if (!username) { skipPush=true; markError(net.id,'Introduce tu usuario de '+net.name); }
+        else finalUrl = net.baseUrl + username;
+      }
+    } else {
+      if (!url.startsWith('http')&&!url.startsWith('tel:')&&!url.startsWith('mailto:')) finalUrl='https://'+url;
     }
+
+    if (skipPush) { hasErrors = true; return; }
 
     socialLinks.push({
       network: net.id,
@@ -355,6 +459,8 @@ async function doSave() {
       order: idx
     });
   });
+
+  if (hasErrors) return;
 
   try {
     await window._fb.updateDoc(

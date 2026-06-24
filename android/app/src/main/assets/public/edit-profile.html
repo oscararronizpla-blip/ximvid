@@ -22,6 +22,11 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 .card{background:linear-gradient(145deg,rgba(15,32,64,.92),rgba(11,26,48,.88));border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:20px;position:relative;}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);border-radius:18px 18px 0 0;}
 .card-title{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(168,208,240,.5);margin-bottom:16px;}
+.banner-section{position:relative;width:100%;height:110px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#0b1a30,#1a3668);cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border:1.5px dashed rgba(255,255,255,.15);}
+.banner-section img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.banner-placeholder{font-size:.82rem;color:rgba(255,255,255,.3);text-align:center;z-index:1;}
+.banner-placeholder span{display:block;font-size:1.5rem;margin-bottom:4px;}
+.banner-remove{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.5);border:none;color:#fff;border-radius:50%;width:24px;height:24px;font-size:.8rem;cursor:pointer;z-index:2;display:none;}
 .photo-section{display:flex;flex-direction:column;align-items:center;margin-bottom:20px;}
 .photo-circle{width:88px;height:88px;border-radius:50%;border:2.5px solid rgba(255,255,255,.7);overflow:hidden;background:linear-gradient(135deg,#0b1a30,#2258a8);display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;margin-bottom:8px;}
 .photo-circle img{width:100%;height:100%;object-fit:cover;}
@@ -69,6 +74,21 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
   <div class="header">
     <a href="/profile.html" class="back-btn">←</a>
     <div class="page-title">Editar perfil</div>
+    <button onclick="previewLanding()" style="background:linear-gradient(115deg,#3d2800,#7a5200,#c8860a,#f0b429,#c8860a,#7a5200,#3d2800);background-size:300% 100%;animation:metalSlide 5s linear infinite;border:none;border-radius:20px;padding:6px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;">Ver página pública →</button>
+  </div>
+
+  <!-- BANNER -->
+  <div class="section">
+    <div class="card">
+      <div class="card-title">Imagen de portada</div>
+      <div class="banner-section" id="banner-section" onclick="document.getElementById('banner-input').click()">
+        <img id="banner-preview" style="display:none" alt="Banner">
+        <div class="banner-placeholder" id="banner-placeholder"><span>🖼️</span>Toca para añadir portada</div>
+        <button class="banner-remove" id="banner-remove" onclick="removeBanner(event)">✕</button>
+      </div>
+      <input type="file" id="banner-input" accept="image/*" onchange="handleBanner(this)" style="display:none">
+      <div style="font-size:.74rem;color:rgba(255,255,255,.22);">Se muestra en tu landing page pública</div>
+    </div>
   </div>
 
   <!-- FOTO -->
@@ -173,6 +193,12 @@ onAuthStateChanged(auth, async (user) => {
       document.getElementById('cta-url').value = d.actionButtonURL||'';
       document.getElementById('my-url').textContent = 'app.ximvid.com/'+(d.username||'...');
       if (d.landingType==='external') { selectLanding('external'); document.getElementById('landing-url').value=d.externalLandingURL||''; }
+      if (d.bannerPhoto) {
+        document.getElementById('banner-preview').src=d.bannerPhoto;
+        document.getElementById('banner-preview').style.display='block';
+        document.getElementById('banner-placeholder').style.display='none';
+        document.getElementById('banner-remove').style.display='block';
+      }
       if (d.profilePhoto) { document.getElementById('photo-preview').src=d.profilePhoto; document.getElementById('photo-preview').style.display='block'; document.getElementById('photo-placeholder').style.display='none'; }
       renderGallery(d.galleryPhotos||[]);
     }
@@ -184,7 +210,39 @@ onAuthStateChanged(auth, async (user) => {
 </script>
 
 <script>
-let newPhotoBlob=null, galleryPhotos=[], newGalleryBlobs={};
+let newPhotoBlob=null, newBannerBlob=null, galleryPhotos=[], newGalleryBlobs={};
+
+function handleBanner(input) {
+  const file=input.files[0]; if(!file) return;
+  const img=new Image(); const reader=new FileReader();
+  reader.onload=e=>{ img.onload=()=>{
+    const canvas=document.createElement('canvas');
+    canvas.width=1200; canvas.height=400;
+    const ctx=canvas.getContext('2d');
+    const scale=Math.max(1200/img.width, 400/img.height);
+    const w=img.width*scale, h=img.height*scale;
+    ctx.drawImage(img,(1200-w)/2,(400-h)/2,w,h);
+    canvas.toBlob(blob=>{
+      newBannerBlob=blob;
+      const url=URL.createObjectURL(blob);
+      document.getElementById('banner-preview').src=url;
+      document.getElementById('banner-preview').style.display='block';
+      document.getElementById('banner-placeholder').style.display='none';
+      document.getElementById('banner-remove').style.display='block';
+    },'image/webp',.8);
+  }; img.src=e.target.result; };
+  reader.readAsDataURL(file);
+}
+
+function removeBanner(e) {
+  e.stopPropagation();
+  newBannerBlob=null;
+  window._removeBanner=true;
+  document.getElementById('banner-preview').style.display='none';
+  document.getElementById('banner-preview').src='';
+  document.getElementById('banner-placeholder').style.display='flex';
+  document.getElementById('banner-remove').style.display='none';
+}
 
 function selectLanding(type) {
   document.getElementById('opt-auto').classList.toggle('selected',type==='auto');
@@ -194,7 +252,7 @@ function selectLanding(type) {
 }
 
 function renderGallery(photos) {
-  galleryPhotos=[...photos];
+  if(photos !== galleryPhotos) galleryPhotos=[...photos];
   const grid=document.getElementById('gallery-grid');
   grid.innerHTML='';
   for(let i=0;i<4;i++){
@@ -212,7 +270,12 @@ function renderGallery(photos) {
 
 function removeGalleryPhoto(idx) { galleryPhotos.splice(idx,1); renderGallery(galleryPhotos); }
 
-async function handlePhoto(input) {
+async function previewLanding() {
+  const username = window._userData?.username;
+  if (username) window.open('/' + username, '_blank');
+}
+
+function handlePhoto(input) {
   const file=input.files[0]; if(!file) return;
   const img=new Image(); const reader=new FileReader();
   reader.onload=e=>{ img.onload=()=>{ const canvas=document.createElement('canvas'); canvas.width=400; canvas.height=400; const s=Math.min(img.width,img.height); canvas.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,400,400); canvas.toBlob(blob=>{ newPhotoBlob=blob; const url=URL.createObjectURL(blob); document.getElementById('photo-preview').src=url; document.getElementById('photo-preview').style.display='block'; document.getElementById('photo-placeholder').style.display='none'; },'image/webp',.75); }; img.src=e.target.result; };
@@ -240,6 +303,15 @@ async function doSave() {
       landingType: window._landingType||'auto'
     };
     if(window._landingType==='external') update.externalLandingURL=document.getElementById('landing-url').value.trim();
+
+    // Subir banner
+    if(newBannerBlob) {
+      const r=window._fb.ref(window._storage,`bannerPhotos/${uid}/banner.webp`);
+      const res=await window._fb.uploadBytes(r,newBannerBlob,{contentType:'image/webp'});
+      update.bannerPhoto=await window._fb.getDownloadURL(res.ref);
+    } else if(window._removeBanner) {
+      update.bannerPhoto='';
+    }
 
     // Subir foto de perfil
     if(newPhotoBlob) {
