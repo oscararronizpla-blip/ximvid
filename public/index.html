@@ -1,9 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script>
+// Si estamos dentro de la app nativa (Capacitor), saltar directo al feed.
+// En la web normal, esto no se activa y se muestra la landing.
+(function() {
+  var isApp = (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())
+              || /XimvidApp/i.test(navigator.userAgent)
+              || window.location.protocol === 'capacitor:'
+              || window.location.protocol === 'https:' && window.location.hostname === 'localhost';
+  if (isApp) {
+    window.location.replace('feed.html');
+  }
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Un video. 29 redes. Crecimiento exponencial en todas tus redes sociales al mismo tiempo.">
+<meta name="description" content="Un video. 45 redes. Crecimiento exponencial en todas tus redes sociales al mismo tiempo.">
 <title>Ximvid — Un video. Crecimiento exponencial.</title>
 <!-- iOS Safari / Apple -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1432,7 +1445,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
   <div class="wrap" style="text-align:center">
     <span class="eyebrow rev">El feed</span>
     <h2 class="sh rev rd1" style="text-align:center;max-width:680px;margin:0 auto 14px">Donde cada video se convierte<br>en <em>negocio en tiempo real</em></h2>
-    <p class="sp rev rd2" style="margin:0 auto;text-align:center">El único feed donde el botón de venta y tus 29 redes están dentro del propio video.</p>
+    <p class="sp rev rd2" style="margin:0 auto;text-align:center">El único feed donde el botón de venta y tus 45 redes están dentro del propio video.</p>
   </div>
   <div class="phones-row">
 
@@ -1472,14 +1485,14 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
             <div><div class="pic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="pnum">Wa</div></div>
             <div><div class="pic"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></div><div class="pnum">15K</div></div>
           </div>
-          <div class="pcreator"><div class="pcname">@coach.sara</div><div class="pcrole">Coach · 29 redes activas</div></div>
+          <div class="pcreator"><div class="pcname">@coach.sara</div><div class="pcrole">Coach · 45 redes activas</div></div>
           <div class="pbottom">
             <div class="pcta">⭐ Reserva tu sesión →</div>
             <div class="pnav"><span class="pni on">⌂</span><span class="pni">⌕</span><span class="pplus">+</span><span class="pni">◻</span><span class="pni">◯</span></div>
           </div>
         </div>
       </div>
-      <div class="phone-caption">29 redes en un video</div>
+      <div class="phone-caption">45 redes en un video</div>
     </div>
 
     <!-- Phone 3: Stats -->
@@ -1518,9 +1531,9 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
   <div class="wrap">
     <span class="eyebrow eyebrow-lt rev">Por qué funciona</span>
     <h2 class="sh sh-lt rev rd1" style="max-width:680px">La única app donde un video<br>hace crecer <em>todas tus redes</em></h2>
-    <p class="sp-lt rev rd2">En TikTok acumulas seguidores solo ahí. En Ximvid, cada persona que ve tu video puede seguirte en las 29 redes a la vez. Crecimiento simultáneo. Viralidad real.</p>
+    <p class="sp-lt rev rd2">En TikTok acumulas seguidores solo ahí. En Ximvid, cada persona que ve tu video puede seguirte en las 45 redes a la vez. Crecimiento simultáneo. Viralidad real.</p>
     <div class="viral-grid">
-      <div class="vcell"><span class="vcell-n">01</span><span class="vcell-i">⚡</span><div class="vcell-ti">Un toque. <em>29 redes.</em></div><p class="vcell-p">Tu espectador pulsa tu icono de Instagram y va directo a tu perfil. Sin redireccionamientos, sin bios, sin pasos intermedios. Un toque.</p></div>
+      <div class="vcell"><span class="vcell-n">01</span><span class="vcell-i">⚡</span><div class="vcell-ti">Un toque. <em>45 redes.</em></div><p class="vcell-p">Tu espectador pulsa tu icono de Instagram y va directo a tu perfil. Sin redireccionamientos, sin bios, sin pasos intermedios. Un toque.</p></div>
       <div class="vcell"><span class="vcell-n">02</span><span class="vcell-i">📈</span><div class="vcell-ti">Crecimiento <em>simultáneo</em></div><p class="vcell-p">Mientras tu video se reproduce, tus seguidores de YouTube, Instagram y TikTok crecen al mismo tiempo. Sin hacer nada extra.</p></div>
       <div class="vcell"><span class="vcell-n">03</span><span class="vcell-i">🎯</span><div class="vcell-ti">Venta directa <em>en el video</em></div><p class="vcell-p">El botón de compra está dentro del propio video. No en la bio. Mientras alguien te ve, puede comprar o reservar sin interrumpir.</p></div>
       <div class="vcell"><span class="vcell-n">04</span><span class="vcell-i">🔥</span><div class="vcell-ti">Viralidad <em>orgánica</em></div><p class="vcell-p">Cuando alguien comparte tu video, quien lo recibe ve todos tus botones activos. Cada share genera nuevas descargas orgánicas.</p></div>
@@ -1539,7 +1552,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
     <div class="sl-c">
       <span class="eyebrow">Un solo video</span>
       <div class="sl-ti">Importa desde TikTok.<br><em>Crece en todas partes.</em></div>
-      <p class="sl-p">Pega el link de tu video de TikTok o Instagram. Ximvid lo importa con todos tus botones activos. El mismo esfuerzo. 29 veces el resultado.</p>
+      <p class="sl-p">Pega el link de tu video de TikTok o Instagram. Ximvid lo importa con todos tus botones activos. El mismo esfuerzo. 45 veces el resultado.</p>
       <a href="#cta" class="btn-m" style="font-size:.9rem;padding:13px 28px">Pruébalo gratis →</a>
     </div>
   </div>
@@ -1569,7 +1582,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
     <p class="sp rev rd2">Sin curva de aprendizaje. Sin esfuerzo extra. Sin volver a grabar nada.</p>
     <div class="steps">
       <div class="step rev rd1"><div class="step-n">01</div><div class="step-ti">Sube o importa</div><p class="step-p">Pega el link de tu TikTok o sube tu video. Ximvid lo procesa en segundos. El mismo video que ya tienes funciona aquí.</p></div>
-      <div class="step rev rd2"><div class="step-n">02</div><div class="step-ti">Conecta tus 29 redes</div><p class="step-p">Añade todos tus perfiles. Cada visitante puede seguirte en todas tus redes o comprarte directamente. Un solo toque.</p></div>
+      <div class="step rev rd2"><div class="step-n">02</div><div class="step-ti">Conecta tus 45 redes</div><p class="step-p">Añade todos tus perfiles. Cada visitante puede seguirte en todas tus redes o comprarte directamente. Un solo toque.</p></div>
       <div class="step rev rd3"><div class="step-n">03</div><div class="step-ti">Crece en todas partes</div><p class="step-p">Mientras tu video se reproduce, tus seguidores de Instagram, TikTok y YouTube crecen simultáneamente.</p></div>
     </div>
   </div>
@@ -1579,7 +1592,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
 <section id="networks">
   <div class="net-in wrap">
     <div>
-      <span class="eyebrow rev">Las 29 redes</span>
+      <span class="eyebrow rev">Las 45 redes</span>
       <div class="net-ti rev rd1">Cada red que tienes.<br><em>Conectada en un video.</em></div>
       <p class="net-p rev rd2">Si tienes presencia en Instagram, TikTok, YouTube, WhatsApp o en tu tienda de Etsy, Ximvid la conecta directamente al video.</p>
       <div class="nbadge rev rd3">
@@ -1661,7 +1674,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
         <div class="pdiv lt"></div>
         <div class="pfeats">
           <div class="pfeat lt"><div class="pchk lt"><svg viewBox="0 0 10 10" fill="none" stroke="var(--steel)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Videos ilimitados</div>
-          <div class="pfeat lt"><div class="pchk lt"><svg viewBox="0 0 10 10" fill="none" stroke="var(--steel)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>29 redes sociales</div>
+          <div class="pfeat lt"><div class="pchk lt"><svg viewBox="0 0 10 10" fill="none" stroke="var(--steel)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>45 redes sociales</div>
           <div class="pfeat lt"><div class="pchk lt"><svg viewBox="0 0 10 10" fill="none" stroke="var(--steel)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Tasa de conversión por video</div>
           <div class="pfeat lt"><div class="pchk lt"><svg viewBox="0 0 10 10" fill="none" stroke="var(--steel)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>URL personal ximvid.com/ti</div>
           <div class="pfeat lt"><div class="pchk lt"><svg viewBox="0 0 10 10" fill="none" stroke="var(--steel)" stroke-width="1.8"><polyline points="1.5 5 4 7.5 8.5 2"/></svg></div>Importar desde TikTok</div>
@@ -1713,7 +1726,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
       <div class="faq-item rev rd2"><div class="faq-q" onclick="faqT(this)"><span>¿Tengo que grabar videos nuevos o sirven los que ya tengo?</span><div class="faq-ico">+</div></div><div class="faq-body"><div class="faq-a">Sirven exactamente los que ya tienes. Pega el link de tu TikTok o Instagram y Ximvid lo importa automáticamente con todos tus botones de redes y venta. Cero esfuerzo extra.</div></div></div>
       <div class="faq-item rev rd3"><div class="faq-q" onclick="faqT(this)"><span>¿Qué redes sociales puedo conectar?</span><div class="faq-ico">+</div></div><div class="faq-body"><div class="faq-a">Las 29 disponibles: Instagram, TikTok, YouTube, Facebook, LinkedIn, Pinterest, Twitch, Spotify, SoundCloud, Behance, Vimeo, Discord, Patreon, X/Twitter, Snapchat, Reddit, Tumblr, WhatsApp, Telegram, Email, Teléfono, Web propia, Tienda online, Etsy, Amazon, Wallapop, Calendly, PayPal y Bizum.</div></div></div>
       <div class="faq-item rev rd4"><div class="faq-q" onclick="faqT(this)"><span>¿En qué se diferencia de Linktree o de la bio de TikTok?</span><div class="faq-ico">+</div></div><div class="faq-body"><div class="faq-a">Linktree es una página de links sin video. La bio de TikTok solo tiene un link. En Ximvid el botón de seguirte o comprarte está dentro del propio video mientras se reproduce. La conversión es 12 veces mayor precisamente por eso.</div></div></div>
-      <div class="faq-item rev rd5"><div class="faq-q" onclick="faqT(this)"><span>¿Es realmente gratis?</span><div class="faq-ico">+</div></div><div class="faq-body"><div class="faq-a">Sí, totalmente gratis. Videos ilimitados, 29 redes y estadísticas de conversión sin pagar nada. El Plan Premium (9.99€/mes, cancela cuando quieras) añade mayor visibilidad en el feed y estadísticas avanzadas.</div></div></div>
+      <div class="faq-item rev rd5"><div class="faq-q" onclick="faqT(this)"><span>¿Es realmente gratis?</span><div class="faq-ico">+</div></div><div class="faq-body"><div class="faq-a">Sí, totalmente gratis. Videos ilimitados, 45 redes y estadísticas de conversión sin pagar nada. El Plan Premium (9.99€/mes, cancela cuando quieras) añade mayor visibilidad en el feed y estadísticas avanzadas.</div></div></div>
     </div>
   </div>
 </section>
@@ -1744,7 +1757,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
       <div class="ftag">Un video. Todas tus redes. Todos tus clientes. Al mismo tiempo.</div>
       <div class="fnl"><input type="email" placeholder="tu@email.com" aria-label="Newsletter"><button type="button">→</button></div>
     </div>
-    <div class="fcol"><h4>Producto</h4><a href="#">Cómo funciona</a><a href="#">Las 29 redes</a><a href="#">Plan Premium</a><a href="#">Estadísticas</a><a href="#">Importar TikTok</a></div>
+    <div class="fcol"><h4>Producto</h4><a href="#">Cómo funciona</a><a href="#">Las 45 redes</a><a href="#">Plan Premium</a><a href="#">Estadísticas</a><a href="#">Importar TikTok</a></div>
     <div class="fcol"><h4>Empresa</h4><a href="#">Acerca de</a><a href="#">Blog</a><a href="#">Prensa</a><a href="#">Afiliados</a><a href="#">Contacto</a></div>
     <div class="fcol"><h4>Legal</h4><a href="https://app.ximvid.com/privacy">Privacidad</a><a href="https://app.ximvid.com/terms">Términos</a><a href="#">Cookies</a><a href="#">GDPR</a><a href="#">Eliminar cuenta</a></div>
   </div>

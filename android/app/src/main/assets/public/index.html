@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script>
+// Si estamos dentro de la app nativa (Capacitor), saltar directo al feed.
+// En la web normal, esto no se activa y se muestra la landing.
+(function() {
+  var isApp = (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())
+              || /XimvidApp/i.test(navigator.userAgent)
+              || window.location.protocol === 'capacitor:'
+              || window.location.protocol === 'https:' && window.location.hostname === 'localhost';
+  if (isApp) {
+    window.location.replace('feed.html');
+  }
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Un video. 45 redes. Crecimiento exponencial en todas tus redes sociales al mismo tiempo.">
