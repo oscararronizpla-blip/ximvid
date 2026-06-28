@@ -235,6 +235,20 @@ html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans
 .feed-empty-icon{font-size:3rem;}
 .feed-empty-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;}
 .feed-empty-sub{font-size:.88rem;color:rgba(255,255,255,.4);font-weight:300;line-height:1.6;}
+
+/* --- REDISENO FICHA PRODUCTO --- */
+.product-panel{background:rgba(255,255,255,.16) !important;backdrop-filter:blur(28px) !important;-webkit-backdrop-filter:blur(28px) !important;}
+.panel-seller{display:flex;align-items:center;gap:9px;padding:4px 4px 10px;}
+.panel-seller img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(240,180,41,.7);}
+.panel-seller .ps-avatar-letter{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);font-weight:600;color:#fff;}
+.panel-seller .ps-name{font-size:.86rem;font-weight:500;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5);}
+.panel-top-row{display:flex;gap:12px;align-items:flex-start;padding:0 4px 8px;}
+.panel-top-row #panel-img-wrap{margin:0;}
+.panel-top-row #panel-img-wrap img{width:130px !important;height:130px !important;max-width:130px !important;object-fit:cover !important;border-radius:10px !important;}
+.panel-info-col{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;}
+.panel-info-col .panel-name{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:500;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);margin-bottom:4px;line-height:1.1;}
+.panel-info-col .panel-price{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;background:linear-gradient(115deg,#7a5200,#c8860a,#f0b429,#ffd76a,#f0b429,#c8860a,#7a5200);background-size:300% 100%;animation:metalSlide 5s linear infinite;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
+.panel-info-col .panel-desc{font-size:.82rem;color:rgba(255,255,255,.92);text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1.35;}
 </style>
 </head>
 <body>
@@ -322,11 +336,16 @@ html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans
 <div class="product-panel" id="product-panel">
   <div class="panel-handle"></div>
   <button class="panel-close" onclick="closePanel()">✕</button>
-  <div id="panel-img-wrap" style="display:flex;justify-content:center;align-items:center;padding:3px;background:linear-gradient(115deg,#3d2800,#7a5200,#c8860a,#f0b429,#c8860a,#7a5200,#3d2800);background-size:300% 100%;animation:metalSlide 5s linear infinite;border-radius:12px;margin:8px auto;line-height:0;width:fit-content;"></div>
+  <div class="panel-seller" id="panel-seller"></div>
+  <div class="panel-top-row">
+    <div id="panel-img-wrap" style="display:flex;justify-content:center;align-items:center;padding:3px;background:linear-gradient(115deg,#3d2800,#7a5200,#c8860a,#f0b429,#c8860a,#7a5200,#3d2800);background-size:300% 100%;animation:metalSlide 5s linear infinite;border-radius:12px;line-height:0;flex-shrink:0;"></div>
+    <div class="panel-info-col">
+      <div class="panel-name" id="panel-name"></div>
+      <div class="panel-price" id="panel-price"></div>
+      <div class="panel-desc" id="panel-desc"></div>
+    </div>
+  </div>
   <div class="panel-body" style="margin-bottom:4mm;">
-    <div class="panel-name" id="panel-name"></div>
-    <div class="panel-price" id="panel-price"></div>
-    <div class="panel-desc" id="panel-desc"></div>
     <div class="panel-contact-row" id="panel-contact-row"></div>
     <button class="panel-buy" id="panel-buy" onclick="goBuy()">Comprar</button>
   </div>
@@ -342,12 +361,12 @@ html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans
     <div class="nav-ico">🔍</div>
     <div class="nav-lbl">Buscar</div>
   </div>
-  <button class="nav-plus" onclick="window.location.href='/upload.html'">+</button>
+  <button class="nav-plus" onclick="if(window.requireAccount&&window.requireAccount())return;window.location.href='/upload.html'">+</button>
   <div class="nav-item" id="follow-btn" onclick="toggleFollow()">
     <div class="nav-ico" id="follow-ico">🫂</div>
     <div class="nav-lbl" id="follow-lbl">Seguir</div>
   </div>
-  <div class="nav-item" onclick="window.location.href='/profile.html'">
+  <div class="nav-item" onclick="if(window.requireAccount&&window.requireAccount())return;window.location.href='/profile.html'">
     <div class="nav-ico">👤</div>
     <div class="nav-lbl">Perfil</div>
   </div>
@@ -375,33 +394,51 @@ window._db = db;
 window._fb = { collection, query, where, orderBy, limit, getDocs, doc, getDoc, updateDoc, increment, setDoc, deleteDoc, serverTimestamp, addDoc };
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) { window.location.href = '/welcome.html'; return; }
-  window._currentUser = user;
+  if (!user) {
+    // MODO INVITADO: puede ver videos pero con limitaciones
+    window._isGuest = true;
+    window._currentUser = null;
+  } else {
+    window._isGuest = false;
+    window._currentUser = user;
 
-  // Cargar datos del usuario
-  try {
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    if (snap.exists()) {
-      window._userData = {...snap.data(), uid: user.uid};
+    // Cargar datos del usuario
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        window._userData = {...snap.data(), uid: user.uid};
+      }
+    } catch(e) {}
+
+    // Actualizar ubicacion silenciosa
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const { latitude: lat, longitude: lng } = pos.coords;
+          await window._fb.updateDoc(window._fb.doc(window._db, 'users', user.uid), { lat, lng });
+          if (window._userData) { window._userData.lat = lat; window._userData.lng = lng; }
+        } catch(e) {}
+      }, () => {});
     }
-  } catch(e) {}
-
-  // Actualizar ubicacion silenciosa
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      try {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        await window._fb.updateDoc(window._fb.doc(window._db, 'users', user.uid), { lat, lng });
-        // Actualizar tambien en memoria
-        if (window._userData) { window._userData.lat = lat; window._userData.lng = lng; }
-      } catch(e) {}
-    }, () => {});
   }
 
   // Mostrar UI y cargar feed
   document.getElementById('feed-loading').style.display = 'none';
   document.getElementById('topbar-wrap').style.display = 'flex';
   document.getElementById('botnav-wrap').style.display = 'flex';
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetVideoId = urlParams.get('video');
+  if (targetVideoId) {
+    try {
+      const db = window._db;
+      const fb = window._fb;
+      const vDoc = await fb.getDoc(fb.doc(db, 'videos', targetVideoId));
+      if (vDoc.exists()) {
+        // Guardar el video del link para ponerlo primero, pero cargar tambien el resto del feed
+        window._linkVideo = { id: vDoc.id, ...vDoc.data() };
+      }
+    } catch(e) { console.error(e); }
+  }
   await loadFeed('foryou');
 });
 </script>
@@ -546,6 +583,13 @@ async function loadFeed(tab) {
     const snap = await fb.getDocs(q);
     videos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
+    // Si llegamos por un link, poner ese video primero y evitar duplicado
+    if (window._linkVideo) {
+      videos = videos.filter(v => v.id !== window._linkVideo.id);
+      videos.unshift(window._linkVideo);
+      window._linkVideo = null;
+    }
+
     if (videos.length === 0) {
       // Fallback: cargar videos de cualquier idioma
       const qAny = fb.query(
@@ -594,7 +638,7 @@ function renderFeed() {
     videoEl.className = 'slide-video';
     videoEl.src = video.videoURL || '';
     videoEl.loop = true;
-    videoEl.muted = false;
+    videoEl.muted = true;
     videoEl.playsInline = true;
     videoEl.preload = idx === 0 ? 'auto' : 'metadata';
     // Reproducir automáticamente al hacer tap en iOS
@@ -620,7 +664,19 @@ function renderFeed() {
   setupObserver();
 
   // Reproducir el primero
-  if (videos.length > 0) updateSlide(0);
+  if (videos.length > 0) {
+    updateSlide(0);
+    // Activar sonido en primer toque del usuario
+    const unlockAudio = () => {
+      window._audioUnlocked = true;
+      const vids = document.querySelectorAll('video');
+      vids.forEach(v => { v.muted = false; });
+      document.removeEventListener('touchstart', unlockAudio);
+      document.removeEventListener('click', unlockAudio);
+    };
+    document.addEventListener('touchstart', unlockAudio, { once: true });
+    document.addEventListener('click', unlockAudio, { once: true });
+  }
 }
 
 // ── INTERSECTION OBSERVER ─────────────────────────────────────
@@ -639,11 +695,26 @@ function setupObserver() {
         currentVideo = video;
         currentIndex = idx;
 
-        // Reproducir
-        video.play().catch(() => {
-          // iOS requiere interacción del usuario
-          slide.addEventListener('click', () => video.play(), { once: true });
-        });
+        // Reiniciar el video al principio (como TikTok)
+        try { video.currentTime = 0; } catch(e) {}
+
+        // Reproducir SIEMPRE mudo primero (el navegador nunca bloquea video mudo)
+        // y restaurar el audio despues si el usuario ya lo desbloqueo.
+        const wantSound = (window._audioUnlocked === true);
+        video.muted = true;
+        const tryPlay = () => {
+          video.play().then(() => {
+            if (wantSound) video.muted = false;
+          }).catch(() => {
+            // Si aun asi falla, reintentar mudo
+            video.muted = true;
+            video.play().then(() => { if (wantSound) video.muted = false; }).catch(()=>{});
+          });
+        };
+        tryPlay();
+        setTimeout(() => { if (video.paused && currentVideo === video) tryPlay(); }, 120);
+        // Fallback final: si sigue parado, arrancar al primer toque
+        slide.addEventListener('click', () => { if (video.paused) { video.muted = true; video.play().then(()=>{ if (window._audioUnlocked) video.muted = false; }).catch(()=>{}); } }, { once: true });
 
         // Registrar vista
         registerView(videos[idx].id);
@@ -663,6 +734,14 @@ function setupObserver() {
 async function updateSlide(idx) {
   const video = videos[idx];
   if (!video) return;
+  // MURO INVITADO: contar videos vistos y mostrar registro
+  if (window._isGuest) {
+    window._guestViewed = (window._guestViewed || 0) + 1;
+    // Primer muro al video 20, luego cada 15 (20, 35, 50...)
+    if (window._guestViewed === 20 || (window._guestViewed > 20 && (window._guestViewed - 20) % 15 === 0)) {
+      setTimeout(showGuestWall, 600);
+    }
+  }
   // No ocultar slider al cargar el primer video - solo al hacer swipe
   if (idx > 0) {
     const slider = document.getElementById('nearby-slider');
@@ -710,7 +789,7 @@ async function updateSlide(idx) {
 
   // Creator info
   document.getElementById('creator-name').textContent = '@' + (creator.username || video.username || '');
-  document.getElementById('creator-desc').textContent = video.description || creator.shortDescription || '';
+  document.getElementById('creator-desc').textContent = video.description || '';
 
   // Hashtags
   const hashtagsEl = document.getElementById('hashtags');
@@ -731,20 +810,15 @@ async function updateSlide(idx) {
   const ctaBtn = document.getElementById('cta-btn');
   const userType = creator.userType || video.intention;
 
-  if (video.intention === 'selling_product' || userType === 'selling_product') {
+  if (video.intention === 'selling_product') {
     ctaWrap.style.display = 'block';
     ctaBtn.textContent = 'LO QUIERO';
     ctaBtn.dataset.type = 'product';
-  } else if (video.actionButtonText && video.actionButtonURL) {
+  } else if (video.intention === 'selling_service' && video.actionButtonText && video.actionButtonURL) {
     ctaWrap.style.display = 'block';
     ctaBtn.textContent = video.actionButtonText;
     ctaBtn.dataset.type = 'url';
     ctaBtn.dataset.url = video.actionButtonURL;
-  } else if (creator.actionButtonText && creator.actionButtonURL) {
-    ctaWrap.style.display = 'block';
-    ctaBtn.textContent = creator.actionButtonText;
-    ctaBtn.dataset.type = 'url';
-    ctaBtn.dataset.url = creator.actionButtonURL;
   } else {
     ctaWrap.style.display = 'none';
   }
@@ -764,6 +838,17 @@ function handleCTA() {
 
   if (type === 'product') {
     // Mostrar panel de producto
+    // Vendedor (foto + nombre)
+    const sellerEl = document.getElementById('panel-seller');
+    if (sellerEl && creator) {
+      const sName = creator.name || creator.username || 'Vendedor';
+      const sAv = creator.profilePhoto
+        ? `<img src="${creator.profilePhoto}" alt="${sName}">`
+        : `<div class="ps-avatar-letter">${sName.charAt(0).toUpperCase()}</div>`;
+      sellerEl.innerHTML = sAv + `<span class="ps-name">${sName}</span>`;
+    } else if (sellerEl) {
+      sellerEl.innerHTML = '';
+    }
     document.getElementById('panel-name').textContent = video.productName || 'Producto';
     const currency = video.productCurrency || '€';
     document.getElementById('panel-price').textContent = video.productPrice ? video.productPrice + ' ' + currency : '';
@@ -1007,6 +1092,7 @@ function updateFollowUI() {
 }
 
 async function toggleFollow() {
+  if (window.requireAccount && window.requireAccount()) return;
   const uid = window._userData?.uid;
   if (!uid || !_currentCreatorId) return;
   const db = window._db;
@@ -1023,6 +1109,8 @@ async function toggleFollow() {
         createdAt: fb.serverTimestamp()
       });
       _isFollowing = true;
+      const myName = window._userData?.name || window._userData?.username || 'Alguien';
+      createNotification(_currentCreatorId, 'new_follower', `${myName} te ha seguido`);
     }
     updateFollowUI();
   } catch(e) { console.error(e); }
@@ -1045,7 +1133,7 @@ function goLanding() {
 function shareVideo() {
   const video = window._currentVideoData;
   if (!video) return;
-  const url = window.location.origin + '/video/' + video.id;
+  const url = window.location.origin + '/feed.html?video=' + video.id;
   if (navigator.share) {
     navigator.share({ title: 'Ximvid', url });
   } else {
@@ -1077,7 +1165,19 @@ async function registerActionClick(videoId) {
       window._fb.doc(window._db, 'videos', videoId),
       { actionClicks: window._fb.increment(1) }
     );
+    const creatorId = window._currentVideoData?.userId;
+    if (creatorId) createNotification(creatorId, 'action_click', 'Alguien pulsó tu botón de acción');
   } catch(e) {}
+}
+
+async function createNotification(userId, type, message) {
+  if (!userId) return;
+  try {
+    await window._fb.addDoc(
+      window._fb.collection(window._db, 'notifications'),
+      { userId, type, message, read: false, createdAt: window._fb.serverTimestamp() }
+    );
+  } catch(e) { console.error('Error notificacion:', e); }
 }
 
 async function registerSocialClick(videoId, network) {
@@ -1085,10 +1185,14 @@ async function registerSocialClick(videoId, network) {
   try {
     const update = { socialClicks: window._fb.increment(1) };
     update['net_' + network] = window._fb.increment(1);
+    update['week_net_' + network] = window._fb.increment(1);
     await window._fb.updateDoc(
       window._fb.doc(window._db, 'videos', videoId),
       update
     );
+    const creatorId = window._currentVideoData?.userId;
+    const netName = network.charAt(0).toUpperCase() + network.slice(1);
+    if (creatorId) createNotification(creatorId, 'social_click', `Alguien visitó tu ${netName}`);
   } catch(e) {}
 }
 
@@ -1123,6 +1227,37 @@ const NETWORK_ICONS = {
   linkedin_default:`<svg viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`
 };
 function getNetSVG(id){return NETWORK_ICONS[id]||`<svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`;}
+
+// ── MURO DE REGISTRO PARA INVITADOS ──
+function showGuestWall() {
+  if (!window._isGuest) return;
+  if (document.getElementById('guest-wall')) return;
+  const wall = document.createElement('div');
+  wall.id = 'guest-wall';
+  wall.style.cssText = 'position:fixed;inset:0;z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;background:rgba(6,16,30,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);';
+  wall.innerHTML = `
+    <button onclick="closeGuestWall()" style="position:absolute;top:18px;right:20px;background:rgba(255,255,255,.12);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:1.2rem;cursor:pointer">×</button>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:#fff;margin-bottom:10px;text-align:center">xim<em style="color:#f0b429;font-style:italic">vid</em></div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:#fff;text-align:center;margin-bottom:8px;line-height:1.3">Únete a Ximvid</div>
+    <div style="font-family:'DM Sans',sans-serif;font-size:.92rem;color:rgba(255,255,255,.7);text-align:center;max-width:300px;margin-bottom:30px;line-height:1.5">Regístrate gratis para seguir creadores, guardar tus favoritos y subir tus propios vídeos.</div>
+    <button onclick="location.href='/register.html'" style="width:100%;max-width:300px;padding:16px;border:none;border-radius:16px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;cursor:pointer;margin-bottom:12px;background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 6s linear infinite">Crear cuenta gratis</button>
+    <button onclick="location.href='/register.html?tab=login'" style="width:100%;max-width:300px;padding:14px;border:1px solid rgba(255,255,255,.2);border-radius:16px;background:transparent;color:rgba(255,255,255,.8);font-family:'DM Sans',sans-serif;font-size:.95rem;cursor:pointer">Ya tengo cuenta</button>
+  `;
+  document.body.appendChild(wall);
+}
+function closeGuestWall() {
+  const w = document.getElementById('guest-wall');
+  if (w) w.remove();
+}
+window.showGuestWall = showGuestWall;
+window.closeGuestWall = closeGuestWall;
+
+// Bloquear acciones que requieren cuenta
+function requireAccount() {
+  if (window._isGuest) { showGuestWall(); return true; }
+  return false;
+}
+window.requireAccount = requireAccount;
 </script>
 
 </body>

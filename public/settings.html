@@ -78,6 +78,20 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 
 /* DANGER */
 .btn-danger{margin:20px 16px 0;width:calc(100% - 32px);padding:13px;border:1px solid rgba(255,45,85,.25);border-radius:14px;background:rgba(255,45,85,.06);font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:500;color:rgba(255,100,120,.8);cursor:pointer;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal-box{background:linear-gradient(145deg,#0f2040,#0a1628);border:1px solid rgba(255,255,255,.1);border-radius:24px 24px 0 0;padding:28px 20px max(28px,env(safe-area-inset-bottom));width:100%;max-width:480px;transform:translateY(40px);transition:transform .25s;}
+.modal-overlay.show .modal-box{transform:translateY(0);}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:#fff;margin-bottom:6px;}
+.modal-sub{font-size:.82rem;color:rgba(255,255,255,.35);margin-bottom:20px;line-height:1.5;}
+.modal-field label{display:block;font-size:.7rem;font-weight:500;color:rgba(168,208,240,.45);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.modal-field{position:relative;margin-bottom:16px;}
+.modal-field input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 44px 12px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;-webkit-appearance:none;}
+.modal-field input:focus{border-color:rgba(255,45,85,.35);}
+.modal-field .pass-field input{padding-right:42px;}
+.pass-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:rgba(255,255,255,.3);font-size:1.1rem;padding:4px;}
+.btn-delete{width:100%;padding:13px;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;color:#fff;background:linear-gradient(115deg,#5c0a0a,#8b1a1a,#c0392b,#e74c3c,#c0392b,#8b1a1a,#5c0a0a);background-size:300% 100%;animation:metalSlide 5s linear infinite;margin-bottom:10px;}
+.btn-cancel{width:100%;padding:13px;border:1px solid rgba(255,255,255,.08);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:500;cursor:pointer;color:rgba(255,255,255,.5);background:rgba(255,255,255,.04);}
 .btn-danger:hover{background:rgba(255,45,85,.12);}
 </style>
 </head>
@@ -128,15 +142,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
         <div class="toggle-text"><strong>Notificaciones por email</strong><span>Clics, seguidores, resumen semanal</span></div>
         <div class="toggle" id="toggle-email" onclick="toggleNotif('email')"><div class="toggle-dot"></div></div>
       </div>
-      <div class="toggle-item">
-        <div class="toggle-icon">💬</div>
-        <div class="toggle-text"><strong>Notificaciones por WhatsApp</strong><span>Las mismas notificaciones por WhatsApp</span></div>
-        <div class="toggle" id="toggle-wa" onclick="toggleNotif('whatsapp')"><div class="toggle-dot"></div></div>
-      </div>
-      <div class="wa-field" id="wa-field">
-        <input type="tel" id="wa-number" placeholder="+34 600 000 000" autocomplete="tel">
-        <button class="btn-save" onclick="saveWaNumber()">Guardar número</button>
-      </div>
+
     </div>
   </div>
 
@@ -144,15 +150,19 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
   <div class="section">
     <div class="section-title">Seguridad</div>
     <div class="card">
-      <div class="simple-item" onclick="togglePassForm()">
+      <div class="simple-item" id="pwd-change-item" onclick="togglePassForm()">
         <div class="si-icon">🔒</div>
         <div class="si-text"><strong>Cambiar contraseña</strong><span>Actualiza tu contraseña de acceso</span></div>
         <div class="si-arrow">›</div>
       </div>
+      <div class="simple-item" id="google-login-info" style="display:none">
+        <div class="si-icon">🔵</div>
+        <div class="si-text"><strong>Inicias sesión con Google</strong><span>Tu acceso lo gestiona Google</span></div>
+      </div>
       <div class="pass-form" id="pass-form">
-        <div class="pass-field"><label>Contraseña actual</label><input type="password" id="pass-current" placeholder="Tu contraseña actual"></div>
-        <div class="pass-field"><label>Nueva contraseña</label><input type="password" id="pass-new" placeholder="Mínimo 6 caracteres"></div>
-        <div class="pass-field"><label>Confirmar nueva contraseña</label><input type="password" id="pass-confirm" placeholder="Repite la nueva contraseña"></div>
+        <div class="pass-field"><label>Contraseña actual</label><div style="position:relative"><input type="password" id="pass-current" placeholder="Tu contraseña actual"><button class="pass-eye" type="button" onclick="toggleEye('pass-current',this)">👁</button></div></div>
+        <div class="pass-field"><label>Nueva contraseña</label><div style="position:relative"><input type="password" id="pass-new" placeholder="Mínimo 6 caracteres"><button class="pass-eye" type="button" onclick="toggleEye('pass-new',this)">👁</button></div></div>
+        <div class="pass-field"><label>Confirmar nueva contraseña</label><div style="position:relative"><input type="password" id="pass-confirm" placeholder="Repite la nueva contraseña"><button class="pass-eye" type="button" onclick="toggleEye('pass-confirm',this)">👁</button></div></div>
         <button class="btn-save" onclick="changePassword()">Cambiar contraseña</button>
       </div>
       <div class="simple-item" onclick="showPrivacy()">
@@ -187,10 +197,25 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 
 </div>
 
+<!-- MODAL ELIMINAR CUENTA -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal-box">
+    <div class="modal-title">Eliminar cuenta</div>
+    <div class="modal-sub">Esta acción es irreversible. Perderás todos tus videos y datos. Introduce tu contraseña para confirmar.</div>
+    <div class="modal-field">
+      <label>Contraseña</label>
+      <input type="password" id="delete-pass" placeholder="Tu contraseña actual">
+      <button class="pass-eye" type="button" onclick="toggleEye('delete-pass',this)">👁</button>
+    </div>
+    <button class="btn-delete" onclick="confirmDelete()">Eliminar mi cuenta</button>
+    <button class="btn-cancel" onclick="closeDeleteModal()">Cancelar</button>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
@@ -204,11 +229,25 @@ const app = initializeApp({
 const auth = getAuth(app);
 const db = getFirestore(app);
 window._auth = auth; window._db = db;
-window._fb = { doc, getDoc, updateDoc, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser };
+window._fb = { doc, getDoc, updateDoc, serverTimestamp, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, signOut };
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = '/welcome.html'; return; }
   window._currentUser = user;
+
+  // Detectar metodo de login: ocultar cambio de contrasena para usuarios de Google
+  try {
+    const providers = (user.providerData || []).map(p => p.providerId);
+    const isGoogleOnly = providers.includes('google.com') && !providers.includes('password');
+    const pwdItem = document.getElementById('pwd-change-item');
+    const pwdForm = document.getElementById('pass-form');
+    const googleInfo = document.getElementById('google-login-info');
+    if (isGoogleOnly) {
+      if (pwdItem) pwdItem.style.display = 'none';
+      if (pwdForm) pwdForm.style.display = 'none';
+      if (googleInfo) googleInfo.style.display = 'flex';
+    }
+  } catch(e) { console.error('provider check', e); }
 
   try {
     const snap = await getDoc(doc(db, 'users', user.uid));
@@ -277,6 +316,13 @@ async function saveWaNumber() {
   } catch(e) { alert('Error al guardar.'); }
 }
 
+function toggleEye(fieldId, btn) {
+  const input = document.getElementById(fieldId);
+  const isPass = input.type === 'password';
+  input.type = isPass ? 'text' : 'password';
+  btn.textContent = isPass ? '🙈' : '👁';
+}
+
 function togglePassForm() {
   document.getElementById('pass-form').classList.toggle('show');
 }
@@ -303,20 +349,47 @@ async function changePassword() {
 
 function showPrivacy() { window.location.href = '/privacy.html'; }
 
-async function deleteAccount() {
-  if (!confirm('¿Seguro que quieres eliminar tu cuenta? Esta acción es irreversible y perderás todos tus videos y datos.')) return;
-  const pass = prompt('Introduce tu contraseña para confirmar:');
-  if (!pass) return;
+function deleteAccount() {
+  document.getElementById('delete-pass').value = '';
+  document.getElementById('delete-modal').classList.add('show');
+}
+
+function closeDeleteModal() {
+  document.getElementById('delete-modal').classList.remove('show');
+}
+
+async function confirmDelete() {
+  const pass = document.getElementById('delete-pass').value.trim();
+  if (!pass) { document.getElementById('delete-pass').focus(); return; }
   try {
     const user = window._currentUser;
     const cred = window._fb.EmailAuthProvider.credential(user.email, pass);
     await window._fb.reauthenticateWithCredential(user, cred);
-    await window._fb.deleteUser(user);
+    // Baja voluntaria (soft): la cuenta se oculta pero el email sigue siendo suyo.
+    // Al volver a entrar se reactivara automaticamente.
+    await window._fb.updateDoc(
+      window._fb.doc(window._db, 'users', user.uid),
+      { accountStatus: 'self_paused', statusChangedAt: window._fb.serverTimestamp() }
+    );
+    await window._fb.signOut(window._auth);
     localStorage.clear();
     window.location.href = '/welcome.html';
   } catch(e) {
-    if (e.code === 'auth/wrong-password') alert('Contraseña incorrecta');
-    else alert('Error al eliminar la cuenta');
+    console.error('Error baja cuenta:', e);
+    const inp = document.getElementById('delete-pass');
+    const isPass = (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential' || e.code === 'auth/invalid-login-credentials');
+    if (isPass) {
+      inp.style.borderColor = 'rgba(255,45,85,.6)';
+      inp.value = '';
+      inp.placeholder = 'Contraseña incorrecta';
+    } else if (e.code === 'auth/too-many-requests') {
+      inp.style.borderColor = 'rgba(255,45,85,.6)';
+      inp.value = '';
+      inp.placeholder = 'Demasiados intentos, espera un momento';
+    } else {
+      inp.style.borderColor = 'rgba(255,45,85,.6)';
+      inp.placeholder = 'Error: ' + (e.code || 'intenta de nuevo');
+    }
   }
 }
 </script>

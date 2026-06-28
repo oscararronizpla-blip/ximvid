@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ximvid · Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);background-attachment:fixed;color:#fff;min-height:100vh;overflow-x:hidden;}
+@keyframes metalSlide{0%{background-position:0% center}100%{background-position:300% center}}
+.metal-blue{background:linear-gradient(115deg,#06101e,#0f2040,#1a3668,#2258a8,#1a3668,#0f2040,#06101e);background-size:300% 100%;animation:metalSlide 6s linear infinite;}
+.metal-gold{background:linear-gradient(115deg,#3d2800,#7a5200,#c8860a,#f0b429,#c8860a,#7a5200,#3d2800);background-size:300% 100%;animation:metalSlide 5s linear infinite;}
+.loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:rgba(255,255,255,.6);z-index:999;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:rgba(6,16,30,.94);backdrop-filter:blur(10px);z-index:60;}
+.menu-toggle{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;width:40px;height:40px;border-radius:10px;cursor:pointer;font-size:1.2rem;}
+.topbar .logo{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:1.5rem;}
+.topbar .logo em{font-style:italic;color:#f0b429;}
+.topbar .badge{font-size:.68rem;color:#f0b429;border:1px solid rgba(240,180,41,.4);padding:2px 9px;border-radius:20px;}
+.topbar .spacer{flex:1;}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:rgba(8,18,34,.98);backdrop-filter:blur(12px);border-right:1px solid rgba(255,255,255,.08);z-index:100;transform:translateX(-100%);transition:transform .25s ease;padding-top:70px;}
+.sidebar.open{transform:translateX(0);}
+.sidebar-item{display:flex;align-items:center;gap:12px;padding:14px 22px;cursor:pointer;color:rgba(255,255,255,.65);font-size:.92rem;border-left:3px solid transparent;}
+.sidebar-item:hover{background:rgba(255,255,255,.04);color:#fff;}
+.sidebar-item.active{background:rgba(34,88,168,.18);color:#fff;border-left:3px solid #f0b429;}
+.sidebar-item .ic{font-size:1.1rem;width:24px;text-align:center;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90;display:none;}
+.overlay.show{display:block;}
+
+/* SECTIONS */
+.main{padding:20px;}
+.section{display:none;}
+.section.active{display:block;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:400;margin-bottom:18px;}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;}
+.stat-card{background:linear-gradient(145deg,rgba(15,32,64,.9),rgba(11,26,48,.86));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px;}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:2.3rem;color:#f0b429;}
+.stat-label{font-size:.78rem;color:rgba(255,255,255,.55);margin-top:4px;}
+
+/* FILTER BANNER */
+.filter-banner{background:linear-gradient(145deg,rgba(15,32,64,.7),rgba(11,26,48,.6));border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.filter-banner input,.filter-banner select{padding:9px 13px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.04);color:#fff;font-family:'DM Sans',sans-serif;font-size:.84rem;}
+.filter-banner input{flex:1;min-width:160px;}
+
+/* SPLIT VIEW (usuarios) */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px;height:calc(100vh - 230px);}
+.split-pane{background:rgba(10,22,40,.5);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow-y:auto;padding:10px;}
+.split-pane h3{font-size:.8rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin:6px 10px 12px;font-weight:500;}
+.u-row{display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;cursor:pointer;margin-bottom:5px;}
+.u-row:hover{background:rgba(255,255,255,.04);}
+.u-row.selected{background:rgba(34,88,168,.22);}
+.u-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:1rem;}
+.u-avatar img{width:100%;height:100%;object-fit:cover;}
+.u-info{flex:1;min-width:0;}
+.u-name{font-size:.9rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.u-meta{font-size:.72rem;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.u-status{font-size:.64rem;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.st-active{background:rgba(34,168,85,.2);color:#4ade80;}
+.st-paused{background:rgba(240,180,41,.2);color:#f0b429;}
+.st-banned{background:rgba(255,69,85,.2);color:#ff6b6b;}
+
+/* CARRUSEL VIDEOS */
+.vid-thumbs{display:flex;flex-wrap:wrap;gap:10px;}
+.vthumb{position:relative;width:110px;aspect-ratio:9/16;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:#0a1628;cursor:pointer;}
+.vthumb img{width:100%;height:100%;object-fit:cover;}
+.vthumb .del-tag{position:absolute;top:4px;left:4px;background:rgba(255,69,85,.9);font-size:.55rem;padding:1px 5px;border-radius:5px;}
+.vthumb .play-ic{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3);opacity:0;transition:.2s;font-size:1.3rem;}
+.vthumb:hover .play-ic{opacity:1;}
+.vthumb .v-views{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));font-size:.6rem;padding:8px 5px 4px;}
+
+/* GRID GLOBAL VIDEOS */
+.vid-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+
+/* BUTTONS */
+.btn{padding:8px 14px;border:none;border-radius:10px;font-size:.8rem;cursor:pointer;color:#fff;font-family:'DM Sans',sans-serif;}
+.btn-sm{padding:5px 10px;font-size:.72rem;}
+.btn-danger{background:rgba(255,69,85,.85);}
+.btn-warn{background:rgba(240,180,41,.85);color:#1a1a1a;}
+.btn-ok{background:rgba(34,168,85,.85);}
+.btn-ghost{background:rgba(255,255,255,.08);}
+
+/* MODAL PLAYER GRANDE */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.modal.show{display:flex;}
+.player-box{max-width:90vw;max-height:92vh;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.player-stage{position:relative;background:#000;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.player-stage video{max-height:70vh;max-width:90vw;display:block;transition:transform .2s;}
+.player-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;}
+.pc-btn{padding:8px 14px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(255,255,255,.06);color:#fff;font-size:.8rem;cursor:pointer;}
+.pc-btn.active{background:#f0b429;color:#1a1a1a;border:none;}
+.modal-close{position:fixed;top:18px;right:22px;font-size:1.6rem;cursor:pointer;color:#fff;background:rgba(0,0,0,.5);width:40px;height:40px;border-radius:50%;border:none;z-index:210;}
+.confirm-box{max-width:380px;background:linear-gradient(145deg,rgba(15,32,64,.97),rgba(11,26,48,.97));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:22px;}
+.empty{text-align:center;color:rgba(255,255,255,.4);padding:40px;font-family:'Cormorant Garamond',serif;font-size:1.15rem;}
+.csv-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 24px;border:none;border-radius:14px;color:#fff;font-size:.92rem;cursor:pointer;font-family:'DM Sans',sans-serif;margin-right:12px;margin-bottom:12px;}
+
+.modal.fs .player-box{max-width:100vw;max-height:100vh;width:100vw;height:100vh;justify-content:center;}
+.modal.fs .player-stage{max-height:88vh;}
+.modal.fs .player-stage video{max-height:88vh;max-width:98vw;}
+.modal.fs .player-controls{position:fixed;right:16px;top:50%;left:auto;transform:translateY(-50%);flex-direction:column;align-items:stretch;background:rgba(6,16,30,.85);padding:14px 12px;border-radius:14px;backdrop-filter:blur(8px);z-index:220;max-height:90vh;overflow-y:auto;}
+.modal.fs #player-info{display:none;}
+</style>
+</head>
+<body>
+<div class="loading" id="loading">Verificando acceso...</div>
+<div id="app" style="display:none">
+
+  <div class="topbar">
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <div class="logo">xim<em>vid</em></div>
+    <span class="badge">ADMIN</span>
+    <div class="spacer"></div>
+    <button class="btn btn-sm btn-ghost" onclick="location.href='/feed.html'">← App</button>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-item active" data-sec="dashboard" onclick="nav('dashboard',this)"><span class="ic">📊</span> Dashboard</div>
+    <div class="sidebar-item" data-sec="users" onclick="nav('users',this)"><span class="ic">👥</span> Usuarios</div>
+    <div class="sidebar-item" data-sec="videos" onclick="nav('videos',this)"><span class="ic">🎬</span> Videos</div>
+    <div class="sidebar-item" data-sec="admins" onclick="nav('admins',this)"><span class="ic">🔑</span> Admins</div>
+    <div class="sidebar-item" data-sec="export" onclick="nav('export',this)"><span class="ic">📥</span> Exportar</div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="sec-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="stat-grid" id="stat-grid"><div class="empty">Cargando...</div></div>
+    </div>
+
+    <!-- USUARIOS (split view) -->
+    <div class="section" id="sec-users">
+      <div class="page-title">Usuarios y sus videos</div>
+      <div class="filter-banner">
+        <input type="text" id="u-search" placeholder="Buscar usuario por nombre, email, @usuario..." oninput="renderUserList()">
+        <select id="u-status" onchange="renderUserList()">
+          <option value="">Todos los estados</option>
+          <option value="active">Activos</option>
+          <option value="self_paused">Pausados</option>
+          <option value="admin_banned">Baneados</option>
+        </select>
+        <select id="u-vidfilter" onchange="renderUserVideos()">
+          <option value="all">Videos: activos + eliminados</option>
+          <option value="active">Solo activos</option>
+          <option value="deleted">Solo eliminados</option>
+        </select>
+        <select id="u-catfilter" onchange="renderUserVideos()"><option value="">Todas las categorías</option></select>
+      </div>
+      <div class="split">
+        <div class="split-pane">
+          <h3>Usuarios</h3>
+          <div id="user-list"><div class="empty">Cargando...</div></div>
+        </div>
+        <div class="split-pane">
+          <h3 id="uv-title">Selecciona un usuario</h3>
+          <div class="vid-thumbs" id="user-videos"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIDEOS GLOBAL -->
+    <div class="section" id="sec-videos">
+      <div class="page-title">Todos los videos</div>
+      <div class="filter-banner">
+        <input type="text" id="gv-search" placeholder="Buscar por descripción o @usuario..." oninput="renderGlobalVideos()">
+        <select id="gv-cat" onchange="renderGlobalVideos()"><option value="">Todas las categorías</option></select>
+        <select id="gv-status" onchange="renderGlobalVideos()">
+          <option value="all">Activos + eliminados</option>
+          <option value="active">Solo activos</option>
+          <option value="deleted">Solo eliminados</option>
+        </select>
+      </div>
+      <div class="vid-grid" id="global-videos"><div class="empty">Cargando...</div></div>
+    </div>
+
+    <!-- ADMINS -->
+    <div class="section" id="sec-admins">
+      <div class="page-title">Gestión de administradores</div>
+      <div class="filter-banner">
+        <input type="text" id="adm-search" placeholder="Buscar usuario para dar/quitar admin..." oninput="renderAdmins()">
+      </div>
+      <div id="admins-list"><div class="empty">Cargando...</div></div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="section" id="sec-export">
+      <div class="page-title">Exportar datos</div>
+      <p style="color:rgba(255,255,255,.6);margin-bottom:20px;font-size:.9rem">Descarga los datos en formato CSV (se abre en Excel).</p>
+      <button class="csv-btn metal-blue" onclick="exportCSV('users')">📥 Exportar usuarios</button>
+      <button class="csv-btn metal-blue" onclick="exportCSV('videos')">📥 Exportar videos</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL PLAYER GRANDE -->
+<div class="modal" id="player-modal">
+  <button class="modal-close" onclick="closePlayer()">×</button>
+  <div class="player-box">
+    <div class="player-stage" id="player-stage">
+      <video id="player" playsinline></video>
+    </div>
+    <div class="player-controls">
+      <button class="pc-btn" onclick="togglePlay()" id="pc-play">⏸ Pausa</button>
+      <button class="pc-btn" onclick="zoomVideo(-1)">🔍−</button>
+      <button class="pc-btn" onclick="zoomVideo(1)">🔍+</button>
+      <button class="pc-btn" onclick="setSpd(0.5,this)">0.5x</button>
+      <button class="pc-btn active" onclick="setSpd(1,this)">1x</button>
+      <button class="pc-btn" onclick="setSpd(1.5,this)">1.5x</button>
+      <button class="pc-btn" onclick="setSpd(2,this)">2x</button>
+      <button class="pc-btn" onclick="toggleMute(this)" id="pc-mute">🔊</button>
+      <button class="pc-btn" onclick="fullscreenVideo(this)">⛶ Pantalla completa</button>
+      <button class="pc-btn" onclick="downloadVideo()">⬇ Descargar</button>
+      <button class="pc-btn" style="background:rgba(255,69,85,.85);border:none" onclick="askDeleteCurrentVideo()">🗑 Eliminar</button>
+    </div>
+    <div id="player-info" style="text-align:center;color:rgba(255,255,255,.7);font-size:.85rem;max-width:500px"></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRM -->
+<div class="modal" id="confirm-modal">
+  <div class="confirm-box">
+    <div id="confirm-text" style="font-size:.95rem;line-height:1.5;margin-bottom:18px"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok">Eliminar definitivamente</button>
+    </div>
+  </div>
+</div>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+  authDomain:"ximvid-c8627.firebaseapp.com",
+  projectId:"ximvid-c8627",
+  storageBucket:"ximvid-c8627.firebasestorage.app",
+  messagingSenderId:"278931359476",
+  appId:"1:278931359476:web:30fef5be9d11890bef80a1"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
+const functions = getFunctions(app);
+window._db = db;
+window._dbfns = { doc, updateDoc };
+window._fns = {
+  deleteVideo: httpsCallable(functions, 'adminDeleteVideo'),
+  deleteUser: httpsCallable(functions, 'adminDeleteUser'),
+  setStatus: httpsCallable(functions, 'adminSetUserStatus')
+};
+window._users = [];
+window._videos = [];
+window._selectedUser = null;
+window._currentVideo = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { location.href = '/welcome.html'; return; }
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (!snap.exists() || snap.data().isAdmin !== true) {
+      document.getElementById('loading').textContent = 'Acceso denegado';
+      setTimeout(() => location.href = '/feed.html', 1500);
+      return;
+    }
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadData();
+  } catch(e) {
+    document.getElementById('loading').textContent = 'Error: ' + e.message;
+  }
+});
+
+async function loadData() {
+  const us = await getDocs(collection(db, 'users'));
+  window._users = us.docs.map(d => ({ id: d.id, ...d.data() }));
+  const vs = await getDocs(query(collection(db, 'videos'), orderBy('createdAt','desc')));
+  window._videos = vs.docs.map(d => ({ id: d.id, ...d.data() }));
+  // poblar selects de categorias
+  const cats = [...new Set(window._videos.map(v => v.category).filter(Boolean))];
+  const opts = '<option value=\"\">Todas las categorías</option>' + cats.map(c => `<option value=\"${c}\">${c}</option>`).join('');
+  document.getElementById('u-catfilter').innerHTML = opts;
+  document.getElementById('gv-cat').innerHTML = opts;
+  renderDashboard();
+  renderUserList();
+  renderGlobalVideos();
+  renderAdmins();
+}
+window.loadData = loadData;
+
+window.toggleMenu = function() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+};
+window.nav = function(sec, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-'+sec).classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  toggleMenu();
+};
+
+function renderDashboard() {
+  const u = window._users, v = window._videos;
+  const stats = [
+    ['Usuarios totales', u.length],
+    ['Activos', u.filter(x => !x.accountStatus || x.accountStatus==='active').length],
+    ['Pausados', u.filter(x => x.accountStatus==='self_paused').length],
+    ['Baneados', u.filter(x => x.accountStatus==='admin_banned').length],
+    ['Premium', u.filter(x => x.isPremium).length],
+    ['Videos totales', v.length],
+    ['Videos activos', v.filter(x => x.isActive!==false).length],
+    ['Videos eliminados', v.filter(x => x.isActive===false).length]
+  ];
+  document.getElementById('stat-grid').innerHTML = stats.map(s =>
+    `<div class=\"stat-card\"><div class=\"stat-num\">${s[1]}</div><div class=\"stat-label\">${s[0]}</div></div>`).join('');
+}
+
+window.renderUserList = function() {
+  const term = (document.getElementById('u-search').value||'').toLowerCase();
+  const sf = document.getElementById('u-status').value;
+  let list = window._users.filter(u => {
+    const st = u.accountStatus||'active';
+    if (sf && st!==sf) return false;
+    if (term) { const b = ((u.name||'')+' '+(u.email||'')+' '+(u.username||'')).toLowerCase(); if(!b.includes(term)) return false; }
+    return true;
+  });
+  const el = document.getElementById('user-list');
+  if(!list.length){ el.innerHTML='<div class=\"empty\">Sin resultados</div>'; return; }
+  el.innerHTML = list.map(u => {
+    const st = u.accountStatus||'active';
+    const sc = st==='admin_banned'?'st-banned':(st==='self_paused'?'st-paused':'st-active');
+    const sl = st==='admin_banned'?'Baneado':(st==='self_paused'?'Pausado':'Activo');
+    const av = u.profilePhoto?`<img src=\"${u.profilePhoto}\">`:(u.name?u.name.charAt(0).toUpperCase():'?');
+    const nv = window._videos.filter(v => v.userId===u.id).length;
+    const sel = window._selectedUser===u.id?'selected':'';
+    return `<div class=\"u-row ${sel}\" onclick=\"selectUser('${u.id}')\">
+      <div class=\"u-avatar\">${av}</div>
+      <div class=\"u-info\"><div class=\"u-name\">${u.name||'Sin nombre'} ${u.isPremium?'★':''}</div>
+      <div class=\"u-meta\">@${u.username||'?'} · ${nv} videos</div></div>
+      <span class=\"u-status ${sc}\">${sl}</span>
+    </div>`;
+  }).join('');
+};
+
+window.selectUser = function(uid) {
+  window._selectedUser = uid;
+  renderUserList();
+  renderUserVideos();
+};
+
+window.renderUserVideos = function() {
+  const uid = window._selectedUser;
+  const cont = document.getElementById('user-videos');
+  const title = document.getElementById('uv-title');
+  if(!uid){ title.textContent='Selecciona un usuario'; cont.innerHTML=''; return; }
+  const u = window._users.find(x=>x.id===uid);
+  title.textContent = 'Videos de ' + (u?('@'+(u.username||u.name||'?')):'usuario');
+  const vf = document.getElementById('u-vidfilter').value;
+  const cat = document.getElementById('u-catfilter').value;
+  let vids = window._videos.filter(v => {
+    if(v.userId!==uid) return false;
+    const del = v.isActive===false;
+    if(vf==='active'&&del) return false;
+    if(vf==='deleted'&&!del) return false;
+    if(cat&&v.category!==cat) return false;
+    return true;
+  });
+  if(!vids.length){ cont.innerHTML='<div class=\"empty\">Sin videos</div>'; return; }
+  cont.innerHTML = vids.map(v => {
+    const th = v.thumbnailURL?`<img src=\"${v.thumbnailURL}\" loading=\"lazy\">`:'<div style=\"width:100%;height:100%;background:#0f2040\"></div>';
+    const dt = v.isActive===false?'<div class=\"del-tag\">ELIM</div>':'';
+    return `<div class=\"vthumb\" onclick=\"openPlayer('${v.id}')\">${th}${dt}<div class=\"play-ic\">▶</div><div class=\"v-views\">${v.views||0} 👁</div></div>`;
+  }).join('');
+};
+
+window.renderGlobalVideos = function() {
+  const term=(document.getElementById('gv-search').value||'').toLowerCase();
+  const cat=document.getElementById('gv-cat').value;
+  const sf=document.getElementById('gv-status').value;
+  let list = window._videos.filter(v => {
+    const del=v.isActive===false;
+    if(sf==='active'&&del) return false;
+    if(sf==='deleted'&&!del) return false;
+    if(cat&&v.category!==cat) return false;
+    if(term){ const b=((v.description||'')+' '+(v.username||'')).toLowerCase(); if(!b.includes(term)) return false; }
+    return true;
+  });
+  const el=document.getElementById('global-videos');
+  if(!list.length){ el.innerHTML='<div class=\"empty\">Sin videos</div>'; return; }
+  el.innerHTML = list.map(v => {
+    const th=v.thumbnailURL?`<img src=\"${v.thumbnailURL}\" loading=\"lazy\" style=\"width:100%;height:100%;object-fit:cover\">`:'<div style=\"width:100%;height:100%;background:#0f2040\"></div>';
+    const dt=v.isActive===false?'<div class=\"del-tag\" style=\"position:absolute;top:6px;left:6px;background:rgba(255,69,85,.9);font-size:.6rem;padding:2px 7px;border-radius:6px\">ELIM</div>':'';
+    return `<div class=\"vthumb\" style=\"width:auto\" onclick=\"openPlayer('${v.id}')\">${th}${dt}<div class=\"play-ic\">▶</div><div class=\"v-views\">@${v.username||'?'} · ${v.views||0}👁</div></div>`;
+  }).join('');
+};
+
+window.renderAdmins = function() {
+  const term=(document.getElementById('adm-search').value||'').toLowerCase();
+  let list = window._users.filter(u => {
+    if(term){ const b=((u.name||'')+' '+(u.email||'')+' '+(u.username||'')).toLowerCase(); if(!b.includes(term)) return false; }
+    return true;
+  });
+  // admins primero
+  list.sort((a,b)=>(b.isAdmin?1:0)-(a.isAdmin?1:0));
+  const el=document.getElementById('admins-list');
+  el.innerHTML = list.slice(0,50).map(u => {
+    const av=u.profilePhoto?`<img src=\"${u.profilePhoto}\">`:(u.name?u.name.charAt(0).toUpperCase():'?');
+    const btn = u.isAdmin
+      ? `<button class=\"btn btn-sm btn-warn\" onclick=\"toggleAdmin('${u.id}',false)\">Quitar admin</button>`
+      : `<button class=\"btn btn-sm btn-ok\" onclick=\"toggleAdmin('${u.id}',true)\">Hacer admin</button>`;
+    return `<div class=\"u-row\" style=\"cursor:default\">
+      <div class=\"u-avatar\">${av}</div>
+      <div class=\"u-info\"><div class=\"u-name\">${u.name||'?'} ${u.isAdmin?'<span style=\"color:#f0b429\">🔑</span>':''}</div>
+      <div class=\"u-meta\">@${u.username||'?'} · ${u.email||''}</div></div>${btn}</div>`;
+  }).join('');
+};
+
+window.toggleAdmin = async function(uid, makeAdmin) {
+  try {
+    await window._dbfns.updateDoc(window._dbfns.doc(window._db,'users',uid), { isAdmin: makeAdmin });
+    const u = window._users.find(x=>x.id===uid); if(u) u.isAdmin = makeAdmin;
+    renderAdmins();
+  } catch(e){ alert('Error: '+e.message); }
+};
+
+// ── PLAYER ──
+let _zoom = 1;
+window.openPlayer = function(vid) {
+  const v = window._videos.find(x=>x.id===vid);
+  if(!v) return;
+  window._currentVideo = v;
+  const p = document.getElementById('player');
+  p.src = v.videoURL||''; p.playbackRate=1; p.muted=false; p.loop=true; _zoom=1; p.style.transform='scale(1)';
+  document.querySelectorAll('.pc-btn').forEach(b=>{ if(['0.5x','1x','1.5x','2x'].includes(b.textContent)) b.classList.remove('active'); });
+  const created = v.createdAt&&v.createdAt.seconds?new Date(v.createdAt.seconds*1000).toLocaleString():'';
+  document.getElementById('player-info').innerHTML = `<strong>@${v.username||'?'}</strong> · ${v.category||'General'} · ${v.views||0} vistas<br><span style=\"color:rgba(255,255,255,.55)\">${v.description||''}</span><br><span style=\"font-size:.75rem;color:rgba(255,255,255,.4)\">${created} ${v.isActive===false?'· ELIMINADO':''}</span>`;
+  document.getElementById('player-modal').classList.add('show');
+  p.play().catch(()=>{});
+  document.getElementById('pc-play').textContent='⏸ Pausa';
+};
+window.closePlayer = function(){ const p=document.getElementById('player'); p.pause(); p.src=''; document.getElementById('player-modal').classList.remove('show'); };
+window.togglePlay = function(){ const p=document.getElementById('player'); if(p.paused){p.play();document.getElementById('pc-play').textContent='⏸ Pausa';}else{p.pause();document.getElementById('pc-play').textContent='▶ Play';} };
+window.setSpd = function(r,btn){ document.getElementById('player').playbackRate=r; document.querySelectorAll('.pc-btn').forEach(b=>{ if(['0.5x','1x','1.5x','2x'].includes(b.textContent)) b.classList.remove('active'); }); btn.classList.add('active'); };
+window.zoomVideo = function(dir){ _zoom = Math.max(0.5, Math.min(3, _zoom + dir*0.25)); document.getElementById('player').style.transform='scale('+_zoom+')'; };
+window.toggleMute = function(btn){ const p=document.getElementById('player'); p.muted=!p.muted; btn.textContent=p.muted?'🔇':'🔊'; };
+window.fullscreenVideo = function(btn){
+  const modal = document.getElementById('player-modal');
+  modal.classList.toggle('fs');
+  if (btn) btn.textContent = modal.classList.contains('fs') ? '⛶ Salir' : '⛶ Pantalla completa';
+};
+window.downloadVideo = function(){ const v=window._currentVideo; if(!v||!v.videoURL) return; const a=document.createElement('a'); a.href=v.videoURL; a.download=(v.username||'video')+'_'+v.id+'.mp4'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); };
+
+// ── CONFIRM / DELETE ──
+let _confirmAction=null;
+window.closeConfirm=function(){ document.getElementById('confirm-modal').classList.remove('show'); _confirmAction=null; };
+function askConfirm(text, action){ document.getElementById('confirm-text').innerHTML=text; _confirmAction=action; document.getElementById('confirm-modal').classList.add('show'); }
+document.getElementById('confirm-ok').onclick = async function(){ if(_confirmAction){ const a=_confirmAction; closeConfirm(); await a(); } };
+
+window.askDeleteCurrentVideo = function(){
+  const v=window._currentVideo; if(!v) return;
+  askConfirm('¿Eliminar este video <strong>definitivamente</strong>? Se borrará de la base de datos y del almacenamiento de forma <strong>irrecuperable</strong>.', async()=>{
+    try {
+      await window._fns.deleteVideo({ videoId: v.id });
+      window._videos = window._videos.filter(x=>x.id!==v.id);
+      closePlayer(); renderUserVideos(); renderGlobalVideos(); renderDashboard(); renderUserList();
+      alert('Video eliminado definitivamente');
+    } catch(e){ alert('Error: '+e.message); }
+  });
+};
+
+window.exportCSV = function(type){
+  let rows=[], filename='';
+  if(type==='users'){
+    filename='usuarios.csv';
+    rows.push(['id','nombre','usuario','email','estado','premium','admin']);
+    window._users.forEach(u=>rows.push([u.id,u.name||'',u.username||'',u.email||'',u.accountStatus||'active',u.isPremium?'si':'no',u.isAdmin?'si':'no']));
+  } else {
+    filename='videos.csv';
+    rows.push(['id','usuario','categoria','descripcion','vistas','activo']);
+    window._videos.forEach(v=>rows.push([v.id,v.username||'',v.category||'',(v.description||'').replace(/[\n,]/g,' '),v.views||0,v.isActive===false?'eliminado':'activo']));
+  }
+  const csv=rows.map(r=>r.map(c=>'\"'+String(c).replace(/\"/g,'\"\"')+'\"').join(',')).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+};
+</script>
+</body>
+</html>

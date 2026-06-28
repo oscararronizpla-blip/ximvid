@@ -53,10 +53,10 @@ html,body{min-height:100%;background:linear-gradient(160deg,#06101e 0%,#0a1628 4
 </div>
 <div class="content">
   <div class="period-row">
-    <button class="period-btn" onclick="setPeriod(this)">Hoy</button>
-    <button class="period-btn active" onclick="setPeriod(this)">Esta semana</button>
-    <button class="period-btn" onclick="setPeriod(this)">Este mes</button>
-    <button class="period-btn" onclick="setPeriod(this)">3 meses</button>
+    <button class="period-btn" onclick="setPeriod(this)">Últimas 24h</button>
+    <button class="period-btn active" onclick="setPeriod(this)">Últimos 7 días</button>
+    <button class="period-btn" onclick="setPeriod(this)">Últimos 30 días</button>
+    <button class="period-btn" onclick="setPeriod(this)">Últimos 90 días</button>
   </div>
 
   <div class="metrics-grid">
@@ -108,8 +108,7 @@ phone:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" wi
 web:'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="22" height="22"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>'
 };
 let donutChart=null,barsChart=null,uid=null;
-const PERIODS=["Hoy","Esta semana","Este mes","3 meses"];
-const DAYS=[0,7,30,90];
+const DAYS=[1,7,30,90];
 window.setPeriod=function(el){
   document.querySelectorAll(".period-btn").forEach(b=>b.classList.remove("active"));
   el.classList.add("active");
@@ -124,8 +123,10 @@ onAuthStateChanged(auth,async user=>{
 async function loadData(days){
   if(!uid)return;
   try{
+    const since=new Date(Date.now()-days*24*60*60*1000);
     const vSnap=await getDocs(query(collection(db,"videos"),where("userId","==",uid),where("isActive","==",true)));
-    const videos=vSnap.docs.map(d=>({id:d.id,...d.data()}));
+    const allVideos=vSnap.docs.map(d=>({id:d.id,...d.data()}));
+    const videos=allVideos.filter(v=>{const t=v.createdAt?.toDate?.();return t&&t>=since;});
     const netMap={};
     let total=0;
     videos.forEach(v=>{
@@ -166,6 +167,7 @@ function renderBars(entries){
   if(entries.length===0){wrap.innerHTML="<div class=\"empty\">Sin datos aun</div>";return;}
   const h=Math.max(180,entries.length*44+40);
   wrap.style.height=h+"px";
+  wrap.innerHTML='<canvas id="barsChart" role="img" aria-label="Grafico de barras horizontal con ranking de redes sociales">Ranking de redes por numero de clics.</canvas>';
   const labels=entries.map(([n])=>NET_EMOJI[n]||n);
   const data=entries.map(([,v])=>v);
   const colors=entries.map((_,i)=>COLORS[i%COLORS.length]);
@@ -187,10 +189,15 @@ function renderVideos(videos){
   const el=document.getElementById("video-list");
   const withClicks=videos.filter(v=>v.socialClicks>0).sort((a,b)=>(b.socialClicks||0)-(a.socialClicks||0));
   if(withClicks.length===0){el.innerHTML="<div class=\"empty\">Sin videos con clics en redes</div>";return;}
-  el.innerHTML=withClicks.map(v=>{
+  el.innerHTML=withClicks.map((v,i)=>{
     const nets=Object.keys(v).filter(k=>k.startsWith("net_")&&v[k]>0).sort((a,b)=>v[b]-v[a]).map(k=>`<span class="vchip">${(NET_EMOJI[k.replace("net_","")]||k.replace("net_",""))} ${v[k]}</span>`).join("");
-    return`<div class="video-row"><div class="vthumb"><video src="${v.videoURL}" muted preload="metadata"></video></div><div class="vinfo"><div class="vdesc">${v.description||v.productName||"Sin descripcion"}</div><div class="vnets">${nets}</div></div><div class="vcount">${v.socialClicks||0}</div></div>`;
+    return`<div class="video-row" style="cursor:pointer" data-vid="${v.id}"><div class="vthumb"><video src="${v.videoURL}" muted preload="metadata"></video></div><div class="vinfo"><div class="vdesc">${v.description||v.productName||"Sin descripcion"}</div><div class="vnets">${nets}</div></div><div class="vcount">${v.socialClicks||0}</div></div>`;
   }).join("");
+  el.querySelectorAll(".video-row").forEach(row=>{
+    row.addEventListener("click",()=>{
+      window.location.href="/feed.html?video="+row.dataset.vid;
+    });
+  });
 }
 </script>
 </body>

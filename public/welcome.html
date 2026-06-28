@@ -182,7 +182,7 @@ body{
 @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
-<body>
+<body style="visibility:hidden">
 
 <div class="bg-grid"></div>
 <div class="orb orb1"></div>
@@ -395,8 +395,54 @@ function goLogin() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────
-setLang(currentLang);
-setTimeout(detectDeviceLang, 800);
+(async () => {
+  try {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const { getAuth, onAuthStateChanged, signOut } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+    const { getFirestore, doc, getDoc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const app = initializeApp({
+      apiKey: "AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+      authDomain: "ximvid-c8627.firebaseapp.com",
+      projectId: "ximvid-c8627",
+      storageBucket: "ximvid-c8627.firebasestorage.app",
+      messagingSenderId: "278931359476",
+      appId: "1:278931359476:web:30fef5be9d11890bef80a1"
+    });
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const snap = await getDoc(doc(db, 'users', user.uid));
+          const udata = snap.exists() ? snap.data() : {};
+          if (udata.accountStatus === 'admin_banned') {
+            await signOut(auth);
+            document.body.style.visibility = 'visible';
+            startWelcome();
+            return;
+          }
+          if (udata.accountStatus === 'self_paused') {
+            await updateDoc(doc(db, 'users', user.uid), { accountStatus: 'active', statusChangedAt: serverTimestamp() });
+          }
+          window.location.replace('/feed.html');
+        } catch (err) {
+          window.location.replace('/feed.html');
+        }
+      } else {
+        document.body.style.visibility = 'visible';
+        startWelcome();
+      }
+    });
+  } catch (e) {
+    document.body.style.visibility = 'visible';
+    startWelcome();
+  }
+})();
+
+function startWelcome() {
+  setLang(currentLang);
+  setTimeout(detectDeviceLang, 800);
+}
 </script>
 </body>
 </html>

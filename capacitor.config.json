@@ -1,0 +1,13 @@
+{
+  "appId": "com.ximvid.app",
+  "appName": "Ximvid",
+  "webDir": "public",
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": false,
+      "providers": [
+        "google.com"
+      ]
+    }
+  }
+}
