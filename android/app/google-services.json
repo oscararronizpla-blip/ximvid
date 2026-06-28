@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "278931359476-800n86cqck8oar1k31rlb3jj2khsll24.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ximvid.app",
+            "certificate_hash": "558056c223dc6a5ed4f6fd59d9f78891f00c4e35"
+          }
+        },
+        {
           "client_id": "278931359476-n3teqmr0ksut3qcm0d39kneegj66jk7l.apps.googleusercontent.com",
           "client_type": 3
         }
