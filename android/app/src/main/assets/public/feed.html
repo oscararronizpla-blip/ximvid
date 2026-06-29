@@ -1127,13 +1127,13 @@ function openNetwork(link) {
 
 function goLanding() {
   const username = document.getElementById('creator-av').dataset.username;
-  if (username) window.location.href = '/' + username;
+  if (username) window.location.href = 'landing.html?u=' + username;
 }
 
 function shareVideo() {
   const video = window._currentVideoData;
   if (!video) return;
-  const url = window.location.origin + '/feed.html?video=' + video.id;
+  const url = 'https://ximvid-c8627.web.app/feed.html?video=' + video.id;
   if (navigator.share) {
     navigator.share({ title: 'Ximvid', url });
   } else {

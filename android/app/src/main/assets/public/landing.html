@@ -254,7 +254,7 @@ window._fb = { collection, query, where, getDocs, orderBy, limit };
 
 // Obtener username de la URL: /oscar → username = "oscar"
 const pathParts = window.location.pathname.split('/').filter(Boolean);
-const username = pathParts[0];
+const username = new URLSearchParams(window.location.search).get('u') || pathParts[0];
 
 if (!username) {
   document.getElementById('loading').style.display = 'none';
