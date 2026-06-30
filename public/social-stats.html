@@ -191,7 +191,7 @@ function renderVideos(videos){
   if(withClicks.length===0){el.innerHTML="<div class=\"empty\">Sin videos con clics en redes</div>";return;}
   el.innerHTML=withClicks.map((v,i)=>{
     const nets=Object.keys(v).filter(k=>k.startsWith("net_")&&v[k]>0).sort((a,b)=>v[b]-v[a]).map(k=>`<span class="vchip">${(NET_EMOJI[k.replace("net_","")]||k.replace("net_",""))} ${v[k]}</span>`).join("");
-    return`<div class="video-row" style="cursor:pointer" data-vid="${v.id}"><div class="vthumb"><video src="${v.videoURL}" muted preload="metadata"></video></div><div class="vinfo"><div class="vdesc">${v.description||v.productName||"Sin descripcion"}</div><div class="vnets">${nets}</div></div><div class="vcount">${v.socialClicks||0}</div></div>`;
+    return`<div class="video-row" style="cursor:pointer" data-vid="${v.id}"><div class="vthumb"><video src="${v.videoURL}" muted preload="metadata" poster="${v.thumbnailURL||''}"></video></div><div class="vinfo"><div class="vdesc">${v.description||v.productName||"Sin descripcion"}</div><div class="vnets">${nets}</div></div><div class="vcount">${v.socialClicks||0}</div></div>`;
   }).join("");
   el.querySelectorAll(".video-row").forEach(row=>{
     row.addEventListener("click",()=>{

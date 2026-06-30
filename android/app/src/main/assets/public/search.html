@@ -312,7 +312,7 @@ function renderResults(users, videos, term) {
   const videosEl = document.getElementById('results-videos');
   videosEl.innerHTML = videos.map(v => `
     <div class="video-thumb" onclick="window.location.href='/feed.html?video=${v.id}'">
-      <video src="${v.videoURL}" muted playsinline preload="metadata"></video>
+      <video src="${v.videoURL}" muted playsinline preload="metadata" poster="${v.thumbnailURL||''}"></video>
       <div class="video-thumb-overlay"></div>
       <div class="video-thumb-info">
         <div class="video-thumb-user">@${v.username||''}</div>

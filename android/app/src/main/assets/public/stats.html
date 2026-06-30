@@ -319,7 +319,7 @@ function renderVideoList(videos) {
   container.innerHTML = sorted.map(v => {
     const conv = (v.views||0) > 0 ? (((v.actionClicks||0)/(v.views||1))*100).toFixed(1) : '0.0';
     return `<div class="video-row" onclick="window.location.href='/feed.html?video=${v.id}'">
-      <video class="video-thumb-sm" src="${v.videoURL}" muted playsinline preload="metadata"></video>
+      <video class="video-thumb-sm" src="${v.videoURL}" muted playsinline preload="metadata" poster="${v.thumbnailURL||''}"></video>
       <div class="video-info">
         <div class="video-info-title">${v.description || v.hashtags?.map(h=>'#'+h).join(' ') || 'Video'}</div>
         <div class="video-info-stats">

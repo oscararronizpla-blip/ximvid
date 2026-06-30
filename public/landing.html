@@ -401,7 +401,7 @@ function renderVideos(videos) {
     div.className = 'video-thumb';
     div.onclick = () => window.location.href = '/feed.html?video=' + video.id;
     div.innerHTML = `
-      <video src="${video.videoURL}" muted playsinline preload="metadata"></video>
+      <video src="${video.videoURL}" muted playsinline preload="metadata" poster="${video.thumbnailURL||''}"></video>
       <div class="video-thumb-overlay">
         <div class="video-play">▶</div>
       </div>
