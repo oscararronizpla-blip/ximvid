@@ -3,7 +3,8 @@
     "@capacitor-firebase/authentication": "^8.3.0",
     "@capacitor/android": "^8.4.0",
     "@capacitor/cli": "^8.4.0",
-    "@capacitor/core": "^8.4.1"
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/share": "^8.0.1"
   },
   "scripts": {
     "eas-build-post-install": "npx cap sync android"

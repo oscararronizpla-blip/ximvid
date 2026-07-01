@@ -511,7 +511,9 @@ async function shareCurrentVideo() {
   if (!currentVideoId) return;
   const url = 'https://ximvid-c8627.web.app/feed.html?video=' + currentVideoId;
   const text = 'Mira mi video en Ximvid 👉 ' + url;
-  if (navigator.share) {
+  if (window.Capacitor && window.Capacitor.Plugins.Share) {
+    await window.Capacitor.Plugins.Share.share({ title: 'Ximvid', text, url });
+  } else if (navigator.share) {
     await navigator.share({ title: 'Ximvid', text, url });
   } else {
     navigator.clipboard?.writeText(text);
@@ -549,7 +551,9 @@ function shareMyProfile() {
   if (!user) return;
   const url = 'https://ximvid-c8627.web.app/' + user.username;
   const text = 'Sígueme en Ximvid 👉 ' + url;
-  if (navigator.share) {
+  if (window.Capacitor && window.Capacitor.Plugins.Share) {
+    window.Capacitor.Plugins.Share.share({ title: user.name + ' en Ximvid', text, url });
+  } else if (navigator.share) {
     navigator.share({ title: user.name + ' en Ximvid', text, url });
   } else {
     navigator.clipboard?.writeText(url).then(() => alert('Enlace copiado'));
@@ -559,7 +563,9 @@ function shareMyProfile() {
 function inviteFriend() {
   const url = 'https://ximvid-c8627.web.app';
   const text = '¡Descubre Ximvid! Sube tus videos y consigue seguidores en todas tus redes al mismo tiempo 👉 ' + url;
-  if (navigator.share) {
+  if (window.Capacitor && window.Capacitor.Plugins.Share) {
+    window.Capacitor.Plugins.Share.share({ title: 'Ximvid', text, url });
+  } else if (navigator.share) {
     navigator.share({ title: 'Ximvid', text, url });
   } else {
     const waUrl = 'https://wa.me/?text=' + encodeURIComponent(text);

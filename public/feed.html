@@ -1160,8 +1160,11 @@ function shareVideo() {
   const video = window._currentVideoData;
   if (!video) return;
   const url = 'https://ximvid-c8627.web.app/feed.html?video=' + video.id;
-  if (navigator.share) {
-    navigator.share({ title: 'Ximvid', url });
+  const txt = 'Mira este vídeo en Ximvid 👉 ' + url;
+  if (window.Capacitor && window.Capacitor.Plugins.Share) {
+    window.Capacitor.Plugins.Share.share({ title: 'Ximvid', text: txt, url });
+  } else if (navigator.share) {
+    navigator.share({ title: 'Ximvid', text: txt, url });
   } else {
     navigator.clipboard?.writeText(url);
     alert('Enlace copiado al portapapeles');
