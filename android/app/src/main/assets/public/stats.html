@@ -212,7 +212,7 @@ function setPeriod(period, el) {
 function getDateRange(period) {
   const now = new Date();
   const start = new Date();
-  if (period === 'today') start.setHours(0,0,0,0);
+  if (period === 'today') start.setTime(now.getTime() - 24*60*60*1000);
   else if (period === 'week') start.setDate(now.getDate() - 7);
   else if (period === 'month') start.setDate(now.getDate() - 30);
   else if (period === '3months') start.setDate(now.getDate() - 90);
