@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.ximvid.app",
+    "sha256_cert_fingerprints": [
+      "FC:7E:B9:64:29:19:4C:5B:4C:02:2F:D8:67:E6:2D:D0:BC:99:95:B6:6A:76:4F:E0:65:14:EC:D8:1F:0F:DA:4D"
+    ]
+  }
+}]
