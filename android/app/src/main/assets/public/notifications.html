@@ -73,9 +73,10 @@ onAuthStateChanged(auth,async(user)=>{
       const icons={new_follower:'👥',social_click:'🔗',action_click:'👆',weekly_stats:'📊'};
       document.getElementById('notif-list').innerHTML=snap.docs.map(d=>{
         const n=d.data();
-        return`<div class="notif-item${n.read?'':' unread'}">
+        const clickable = n.actorUsername ? ` onclick="window.location.href='landing.html?u=${n.actorUsername}'" style="cursor:pointer"` : '';
+        return`<div class="notif-item${n.read?'':' unread'}"${clickable}>
           <div class="notif-icon">${icons[n.type]||'🔔'}</div>
-          <div class="notif-text"><strong>${n.message}</strong><div class="notif-time">${n.createdAt?.toDate?.()?.toLocaleDateString('es')||'Ahora'}</div></div>
+          <div class="notif-text"><strong>${n.message}</strong><div class="notif-time">${n.createdAt?.toDate?.()?.toLocaleDateString('es')||'Ahora'}${n.actorUsername?' · Toca para ver su perfil':''}</div></div>
         </div>`;
       }).join('');
     }

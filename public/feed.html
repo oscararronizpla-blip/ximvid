@@ -440,6 +440,7 @@ onAuthStateChanged(auth, async (user) => {
   const urlParams = new URLSearchParams(window.location.search);
   const targetVideoId = urlParams.get('video');
   window._userFeedUid = urlParams.get('user') || null;
+  window._tagFeed = urlParams.get('tag') || null;
   // App Links con la app ya abierta: navegar a la pagina del enlace
   try {
     if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
@@ -463,7 +464,7 @@ onAuthStateChanged(auth, async (user) => {
       }
     } catch(e) { console.error(e); }
   }
-  await loadFeed(window._userFeedUid ? 'userfeed' : 'foryou');
+  await loadFeed(window._userFeedUid ? 'userfeed' : (window._tagFeed ? 'tagfeed' : 'foryou'));
 });
 </script>
 
@@ -503,7 +504,15 @@ async function loadFeed(tab) {
     const userLang = userData.language || localStorage.getItem('ximvid_lang') || 'es';
 
     let q;
-    if (tab === 'userfeed' && window._userFeedUid) {
+    if (tab === 'tagfeed' && window._tagFeed) {
+      // Modo hashtag: solo videos con ese hashtag
+      q = fb.query(
+        fb.collection(db, 'videos'),
+        fb.where('hashtags', 'array-contains', window._tagFeed),
+        fb.where('isActive', '==', true),
+        fb.limit(50)
+      );
+    } else if (tab === 'userfeed' && window._userFeedUid) {
       // Modo TikTok: solo los videos de un creador
       q = fb.query(
         fb.collection(db, 'videos'),
@@ -623,7 +632,7 @@ async function loadFeed(tab) {
       window._linkVideo = null;
     }
     // Barra de salida del modo creador
-    if (tab === 'userfeed' && videos.length > 0) {
+    if ((tab === 'userfeed' || tab === 'tagfeed') && videos.length > 0) {
       let bar = document.getElementById('userfeed-bar');
       if (!bar) {
         bar = document.createElement('div');
@@ -633,7 +642,7 @@ async function loadFeed(tab) {
         document.body.appendChild(bar);
       }
       const uname = videos[0].username || videos[0].userName || '';
-      document.getElementById('userfeed-name').textContent = uname ? '@' + uname : 'Videos del creador';
+      document.getElementById('userfeed-name').textContent = tab === 'tagfeed' ? ('#' + window._tagFeed) : (uname ? '@' + uname : 'Videos del creador');
       bar.classList.add('show');
     }
 
@@ -1177,7 +1186,11 @@ async function toggleFollow() {
       });
       _isFollowing = true;
       const myName = window._userData?.name || window._userData?.username || 'Alguien';
-      createNotification(_currentCreatorId, 'new_follower', `${myName} te ha seguido`);
+      {
+        const me = window._userData || {};
+        const actor = (me.uid && me.username) ? { actorUid: me.uid, actorUsername: me.username, actorName: me.name || '' } : null;
+        createNotification(_currentCreatorId, 'new_follower', `${myName} te ha seguido`, actor);
+      }
     }
     updateFollowUI();
   } catch(e) { console.error(e); }
@@ -1236,16 +1249,23 @@ async function registerActionClick(videoId) {
       { actionClicks: window._fb.increment(1) }
     );
     const creatorId = window._currentVideoData?.userId;
-    if (creatorId) createNotification(creatorId, 'action_click', 'Alguien pulsó tu botón de acción');
+    if (creatorId) {
+      const me = window._userData || {};
+      const actor = (me.uid && me.username) ? { actorUid: me.uid, actorUsername: me.username, actorName: me.name || '' } : null;
+      const msg = actor ? ('@' + me.username + ' pulsó tu botón de acción') : 'Alguien pulsó tu botón de acción';
+      createNotification(creatorId, 'action_click', msg, actor);
+    }
   } catch(e) {}
 }
 
-async function createNotification(userId, type, message) {
+async function createNotification(userId, type, message, extra) {
   if (!userId) return;
   try {
+    const data = { userId, type, message, read: false, createdAt: window._fb.serverTimestamp() };
+    if (extra) Object.assign(data, extra);
     await window._fb.addDoc(
       window._fb.collection(window._db, 'notifications'),
-      { userId, type, message, read: false, createdAt: window._fb.serverTimestamp() }
+      data
     );
   } catch(e) { console.error('Error notificacion:', e); }
 }
@@ -1262,7 +1282,12 @@ async function registerSocialClick(videoId, network) {
     );
     const creatorId = window._currentVideoData?.userId;
     const netName = network.charAt(0).toUpperCase() + network.slice(1);
-    if (creatorId) createNotification(creatorId, 'social_click', `Alguien visitó tu ${netName}`);
+    if (creatorId) {
+      const me = window._userData || {};
+      const actor = (me.uid && me.username) ? { actorUid: me.uid, actorUsername: me.username, actorName: me.name || '' } : null;
+      const msg = actor ? ('@' + me.username + ' visitó tu ' + netName) : ('Alguien visitó tu ' + netName);
+      createNotification(creatorId, 'social_click', msg, actor);
+    }
   } catch(e) {}
 }
 

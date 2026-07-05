@@ -263,7 +263,7 @@ function searchTag(tag) {
 
 async function doSearch(term) {
   showView('loading');
-  const isHashtag = term.startsWith('#');
+  const isHashtag = term.startsWith('#') || currentFilter === 'hashtags';
   const cleanTerm = isHashtag ? term.slice(1).toLowerCase() : term.toLowerCase();
 
   try {
@@ -307,11 +307,16 @@ function renderResults(users, videos, term) {
   document.getElementById('results-count').textContent = total + ' resultado' + (total!==1?'s':'') + ' para "' + term + '"';
 
   const usersEl = document.getElementById('results-users');
-  usersEl.innerHTML = users.map(u => userCardHTML(u)).join('');
+  const showUsers = (currentFilter === 'all' || currentFilter === 'users');
+  const showVideos = (currentFilter !== 'users');
+  usersEl.innerHTML = showUsers ? users.map(u => userCardHTML(u)).join('') : '';
 
   const videosEl = document.getElementById('results-videos');
+  if (!showVideos) { videosEl.innerHTML = ''; return; }
+  const isTag = term.startsWith('#') || currentFilter === 'hashtags';
+  const tagParam = isTag ? '&tag=' + encodeURIComponent(term.replace('#','').toLowerCase()) : '';
   videosEl.innerHTML = videos.map(v => `
-    <div class="video-thumb" onclick="window.location.href='/feed.html?video=${v.id}'">
+    <div class="video-thumb" onclick="window.location.href='/feed.html?video=${v.id}${tagParam}'">
       <video src="${v.videoURL}" muted playsinline preload="metadata" poster="${v.thumbnailURL||''}"></video>
       <div class="video-thumb-overlay"></div>
       <div class="video-thumb-info">
