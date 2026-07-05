@@ -295,7 +295,7 @@ async function loadProfile(username) {
       window._fb.where('userId', '==', userData.uid),
       window._fb.where('isActive', '==', true),
       window._fb.orderBy('createdAt', 'desc'),
-      window._fb.limit(6)
+      window._fb.limit(30)
     );
     const vSnap = await window._fb.getDocs(vq);
     const videos = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -399,7 +399,7 @@ function renderVideos(videos) {
   videos.forEach(video => {
     const div = document.createElement('div');
     div.className = 'video-thumb';
-    div.onclick = () => window.location.href = '/feed.html?video=' + video.id;
+    div.onclick = () => window.location.href = '/feed.html?video=' + video.id + '&user=' + (video.userId || '');
     div.innerHTML = `
       <video src="${video.videoURL}" muted playsinline preload="metadata" poster="${video.thumbnailURL||''}"></video>
       <div class="video-thumb-overlay">

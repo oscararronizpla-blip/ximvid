@@ -10,7 +10,26 @@
               || window.location.protocol === 'capacitor:'
               || window.location.protocol === 'https:' && window.location.hostname === 'localhost';
   if (isApp) {
-    window.location.replace('feed.html');
+    // Si la app se abrio desde un App Link (boton de email, enlace compartido),
+    // navegar a la pagina del enlace en vez del feed generico.
+    var goTo = 'feed.html';
+    try {
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+        window.Capacitor.Plugins.App.getLaunchUrl().then(function(r) {
+          if (r && r.url) {
+            var u = new URL(r.url);
+            var dest = u.pathname.replace(/^\//,'') + u.search;
+            if (dest && dest !== 'index.html' && dest !== '') {
+              window.location.replace(dest);
+              return;
+            }
+          }
+          window.location.replace(goTo);
+        }).catch(function(){ window.location.replace(goTo); });
+        return;
+      }
+    } catch(e) {}
+    window.location.replace(goTo);
   }
 })();
 </script>

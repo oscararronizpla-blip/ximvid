@@ -326,7 +326,7 @@ function userCardHTML(u) {
   const av = u.profilePhoto
     ? `<img src="${u.profilePhoto}" alt="${u.name}">`
     : (u.name ? u.name.charAt(0).toUpperCase() : '👤');
-  return `<div class="user-card" onclick="window.location.href='/${u.username}'">
+  return `<div class="user-card" onclick="window.location.href='landing.html?u=${u.username}'">
     <div class="user-av">${u.profilePhoto ? `<img src="${u.profilePhoto}" alt="${u.name}">` : (u.name?u.name.charAt(0).toUpperCase():'👤')}</div>
     <div class="user-info">
       <div class="user-name">${u.name||u.username}</div>
