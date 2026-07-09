@@ -91,7 +91,13 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 .modal.show{display:flex;}
 .player-box{max-width:90vw;max-height:92vh;display:flex;flex-direction:column;align-items:center;gap:14px;}
 .player-stage{position:relative;background:#000;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.player-stage video{max-height:70vh;max-width:90vw;display:block;transition:transform .2s;}
+.player-stage video{max-height:80vh;max-width:80vw;display:block;cursor:grab;}
+.pv-col{position:fixed;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;z-index:205;}
+.pv-left{left:16px;}
+.pv-right{right:16px;}
+.pv-btn{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.pv-btn.active{background:#f0b429;color:#1a1a1a;border:none;}
+.pv-btn.danger{background:rgba(255,69,85,.75);border:none;}
 .player-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;}
 .pc-btn{padding:8px 14px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(255,255,255,.06);color:#fff;font-size:.8rem;cursor:pointer;}
 .pc-btn.active{background:#f0b429;color:#1a1a1a;border:none;}
@@ -106,6 +112,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 .modal.fs .player-controls{position:fixed;right:16px;top:50%;left:auto;transform:translateY(-50%);flex-direction:column;align-items:stretch;background:rgba(6,16,30,.85);padding:14px 12px;border-radius:14px;backdrop-filter:blur(8px);z-index:220;max-height:90vh;overflow-y:auto;}
 .modal.fs #player-info{display:none;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="loading" id="loading">Verificando acceso...</div>
@@ -124,8 +131,11 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
     <div class="sidebar-item active" data-sec="dashboard" onclick="nav('dashboard',this)"><span class="ic">📊</span> Dashboard</div>
     <div class="sidebar-item" data-sec="users" onclick="nav('users',this)"><span class="ic">👥</span> Usuarios</div>
     <div class="sidebar-item" data-sec="videos" onclick="nav('videos',this)"><span class="ic">🎬</span> Videos</div>
+    <div class="sidebar-item" data-sec="reports" onclick="nav('reports',this)"><span class="ic">🚩</span> Reportes <span id="rep-badge" style="display:none;margin-left:auto;background:#e5484d;color:#fff;border-radius:10px;padding:1px 8px;font-size:.75rem;font-weight:700;"></span></div>
+    <div class="sidebar-item" data-sec="emails" onclick="nav('emails',this)"><span class="ic">📧</span> Emails</div>
     <div class="sidebar-item" data-sec="admins" onclick="nav('admins',this)"><span class="ic">🔑</span> Admins</div>
     <div class="sidebar-item" data-sec="export" onclick="nav('export',this)"><span class="ic">📥</span> Exportar</div>
+    <div class="sidebar-item" onclick="window.open('/moderation','_blank')"><span class="ic">🛡️</span> Moderación ↗</div>
   </div>
 
   <div class="main">
@@ -134,6 +144,16 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
     <div class="section active" id="sec-dashboard">
       <div class="page-title">Dashboard</div>
       <div class="stat-grid" id="stat-grid"><div class="empty">Cargando...</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-top:20px;">
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px;">
+          <div style="font-size:.9rem;color:rgba(255,255,255,.7);margin-bottom:10px;">👥 Usuarios nuevos por semana</div>
+          <canvas id="chart-users" height="180"></canvas>
+        </div>
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px;">
+          <div style="font-size:.9rem;color:rgba(255,255,255,.7);margin-bottom:10px;">🎬 Videos subidos por semana</div>
+          <canvas id="chart-videos" height="180"></canvas>
+        </div>
+      </div>
     </div>
 
     <!-- USUARIOS (split view) -->
@@ -160,6 +180,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
           <div id="user-list"><div class="empty">Cargando...</div></div>
         </div>
         <div class="split-pane">
+          <div id="user-card" style="display:none;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;margin-bottom:14px;"></div>
           <h3 id="uv-title">Selecciona un usuario</h3>
           <div class="vid-thumbs" id="user-videos"></div>
         </div>
@@ -178,10 +199,40 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
           <option value="deleted">Solo eliminados</option>
         </select>
       </div>
+      <div id="sel-bar" style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" id="sel-toggle" onclick="toggleSelMode()" style="font-size:.85rem;">☑ Seleccionar</button>
+        <label id="sel-all-wrap" style="display:none;align-items:center;gap:6px;font-size:.85rem;color:rgba(255,255,255,.75);cursor:pointer;"><input type="checkbox" id="sel-all" onchange="selectAllVideos(this.checked)"> Todos los visibles</label>
+        <button id="sel-del" onclick="askDeleteSelected()" style="display:none;background:rgba(255,69,85,.85);border:none;color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.85rem;">🗑 Eliminar seleccionados (<span id="sel-count">0</span>)</button>
+        <span id="sel-progress" style="display:none;font-size:.85rem;color:#f0b429;"></span>
+      </div>
       <div class="vid-grid" id="global-videos"><div class="empty">Cargando...</div></div>
     </div>
 
     <!-- ADMINS -->
+    <div class="section" id="sec-reports">
+      <h2 style="margin-bottom:14px;">🚩 Reportes</h2>
+      <select id="rep-status" onchange="renderReports()" style="background:#0d1b2e;color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px 12px;margin-bottom:14px;">
+        <option value="pending">Pendientes</option>
+        <option value="reviewed">Revisados</option>
+        <option value="all">Todos</option>
+      </select>
+      <div id="rep-list"></div>
+    </div>
+    <div class="section" id="sec-emails">
+      <h2 style="margin-bottom:14px;">📧 Emails enviados</h2>
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <input type="text" id="em-search" placeholder="Buscar por destinatario o asunto..." oninput="renderEmailLog()" style="flex:1;min-width:220px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px 12px;color:#fff;outline:none;">
+        <select id="em-type" onchange="renderEmailLog()" style="background:#0d1b2e;color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px 12px;">
+          <option value="">Todos los tipos</option>
+          <option value="admin_message">✉️ Mensaje admin</option>
+          <option value="video_rejected">⚠️ Censura</option>
+          <option value="action_click">🛍️ CTA</option>
+          <option value="weekly_summary">📊 Resumen semanal</option>
+          <option value="other">Otros</option>
+        </select>
+      </div>
+      <div id="email-list"><div class="empty">Cargando...</div></div>
+    </div>
     <div class="section" id="sec-admins">
       <div class="page-title">Gestión de administradores</div>
       <div class="filter-banner">
@@ -204,27 +255,54 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 <!-- MODAL PLAYER GRANDE -->
 <div class="modal" id="player-modal">
   <button class="modal-close" onclick="closePlayer()">×</button>
+  <div class="pv-col pv-left">
+    <button class="pv-btn" onclick="downloadVideo()" title="Descargar">⬇</button>
+    <button class="pv-btn danger" onclick="askDeleteCurrentVideo()" title="Eliminar">🗑</button>
+  </div>
+  <div class="pv-col pv-right">
+    <button class="pv-btn" onclick="togglePlay()" id="pc-play">⏸</button>
+    <button class="pv-btn" onclick="setSpd(0.5,this)">0.5x</button>
+    <button class="pv-btn active" onclick="setSpd(1,this)">1x</button>
+    <button class="pv-btn" onclick="setSpd(1.5,this)">1.5x</button>
+    <button class="pv-btn" onclick="setSpd(2,this)">2x</button>
+    <button class="pv-btn" onclick="toggleMute(this)" id="pc-mute">🔊</button>
+    <button class="pv-btn" onclick="fullscreenVideo(this)" title="Pantalla completa">⛶</button>
+    <button class="pv-btn" onclick="zoomVideo(1)">🔍+</button>
+    <button class="pv-btn" onclick="zoomVideo(-1)">🔍−</button>
+  </div>
   <div class="player-box">
     <div class="player-stage" id="player-stage">
       <video id="player" playsinline></video>
-    </div>
-    <div class="player-controls">
-      <button class="pc-btn" onclick="togglePlay()" id="pc-play">⏸ Pausa</button>
-      <button class="pc-btn" onclick="zoomVideo(-1)">🔍−</button>
-      <button class="pc-btn" onclick="zoomVideo(1)">🔍+</button>
-      <button class="pc-btn" onclick="setSpd(0.5,this)">0.5x</button>
-      <button class="pc-btn active" onclick="setSpd(1,this)">1x</button>
-      <button class="pc-btn" onclick="setSpd(1.5,this)">1.5x</button>
-      <button class="pc-btn" onclick="setSpd(2,this)">2x</button>
-      <button class="pc-btn" onclick="toggleMute(this)" id="pc-mute">🔊</button>
-      <button class="pc-btn" onclick="fullscreenVideo(this)">⛶ Pantalla completa</button>
-      <button class="pc-btn" onclick="downloadVideo()">⬇ Descargar</button>
-      <button class="pc-btn" style="background:rgba(255,69,85,.85);border:none" onclick="askDeleteCurrentVideo()">🗑 Eliminar</button>
     </div>
     <div id="player-info" style="text-align:center;color:rgba(255,255,255,.7);font-size:.85rem;max-width:500px"></div>
   </div>
 </div>
 
+<!-- MODAL EMAIL -->
+<div class="modal" id="mail-modal">
+  <div class="confirm-box" style="max-width:460px;width:92vw;">
+    <div style="font-size:1rem;font-weight:700;margin-bottom:4px;">✉️ Contactar usuario</div>
+    <div id="mail-to" style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:14px;"></div>
+    <input type="text" id="mail-subject" placeholder="Asunto" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;margin-bottom:10px;box-sizing:border-box;">
+    <textarea id="mail-body" placeholder="Escribe tu mensaje..." rows="6" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+    <div id="mail-msg" style="display:none;font-size:.85rem;color:#f0b429;margin-top:8px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-ghost" onclick="closeMailModal()">Cancelar</button>
+      <button id="mail-send" onclick="sendUserMail()" style="background:rgba(34,88,168,.7);border:none;color:#fff;border-radius:10px;padding:9px 18px;cursor:pointer;font-weight:700;">Enviar</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL EMAIL PREVIEW -->
+<div class="modal" id="empv-modal">
+  <button class="modal-close" onclick="closeEmailPreview()">×</button>
+  <div style="background:#181820;border:1px solid rgba(255,255,255,.12);border-radius:14px;width:min(680px,94vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.1);">
+      <div id="empv-subject" style="font-weight:700;font-size:.95rem;"></div>
+      <div id="empv-meta" style="font-size:.78rem;color:rgba(255,255,255,.5);margin-top:3px;"></div>
+    </div>
+    <iframe id="empv-frame" sandbox="" style="flex:1;border:none;background:#0a1522;min-height:420px;"></iframe>
+  </div>
+</div>
 <!-- MODAL CONFIRM -->
 <div class="modal" id="confirm-modal">
   <div class="confirm-box">
@@ -240,7 +318,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
 
 const app = initializeApp({
@@ -255,7 +333,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const functions = getFunctions(app);
 window._db = db;
-window._dbfns = { doc, updateDoc };
+window._dbfns = { doc, updateDoc, addDoc, collection, serverTimestamp };
 window._fns = {
   deleteVideo: httpsCallable(functions, 'adminDeleteVideo'),
   deleteUser: httpsCallable(functions, 'adminDeleteUser'),
@@ -287,6 +365,15 @@ async function loadData() {
   const us = await getDocs(collection(db, 'users'));
   window._users = us.docs.map(d => ({ id: d.id, ...d.data() }));
   const vs = await getDocs(query(collection(db, 'videos'), orderBy('createdAt','desc')));
+  try {
+    const rs = await getDocs(query(collection(db, 'reports'), orderBy('createdAt','desc')));
+    window._reports = rs.docs.map(d => ({id: d.id, ...d.data()}));
+  } catch(e) { window._reports = []; console.error('reports:', e); }
+  try {
+    const es = await getDocs(query(collection(db, 'email_log'), orderBy('sentAt','desc')));
+    window._emails = es.docs.map(d => ({id: d.id, ...d.data()}));
+  } catch(e) { window._emails = []; console.error('email_log:', e); }
+  if (window.updateRepBadge) updateRepBadge();
   window._videos = vs.docs.map(d => ({ id: d.id, ...d.data() }));
   // poblar selects de categorias
   const cats = [...new Set(window._videos.map(v => v.category).filter(Boolean))];
@@ -309,9 +396,82 @@ window.nav = function(sec, el) {
   document.getElementById('sec-'+sec).classList.add('active');
   document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
+  if (sec === 'reports') renderReports();
+  if (sec === 'emails') renderEmailLog();
   toggleMenu();
 };
 
+window.renderEmailLog = function() {
+  const term = (document.getElementById('em-search').value||'').toLowerCase();
+  const tf = document.getElementById('em-type').value;
+  let list = window._emails || [];
+  if (tf) list = list.filter(e => (e.type||'other') === tf);
+  if (term) list = list.filter(e => ((e.to||'')+' '+(e.subject||'')).toLowerCase().includes(term));
+  const el = document.getElementById('email-list');
+  if (!list.length) { el.innerHTML = '<p style="color:rgba(255,255,255,.5)">Sin emails registrados.</p>'; return; }
+  const icons = { admin_message:'✉️', video_rejected:'⚠️', action_click:'🛍️', weekly_summary:'📊' };
+  el.innerHTML = list.slice(0,200).map(e => {
+    const d = e.sentAt && e.sentAt.toDate ? e.sentAt.toDate().toLocaleString('es-ES') : '';
+    const stat = e.ok === false ? '<span style="color:#e5484d;font-size:.75rem;">✕ Error' + (e.error ? ': ' + e.error : '') + '</span>' : '<span style="color:#4caf50;font-size:.75rem;">✓ Enviado</span>';
+    const hasHtml = e.html ? '' : ' <span style="font-size:.7rem;color:rgba(255,255,255,.35);">(sin contenido guardado)</span>';
+    return `<div onclick="openEmailPreview('${e.id}')" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+        <strong style="font-size:.9rem;">${icons[e.type]||'📧'} ${e.subject||'(sin asunto)'}${hasHtml}</strong>${stat}
+      </div>
+      <div style="font-size:.8rem;color:rgba(255,255,255,.6);margin-top:4px;">Para: ${e.to||'?'} · ${d}</div>
+    </div>`;
+  }).join('');
+};
+window.openEmailPreview = function(id) {
+  const e = (window._emails||[]).find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('empv-subject').textContent = e.subject || '(sin asunto)';
+  const d = e.sentAt && e.sentAt.toDate ? e.sentAt.toDate().toLocaleString('es-ES') : '';
+  document.getElementById('empv-meta').textContent = 'Para: ' + (e.to||'?') + ' · ' + d;
+  const frame = document.getElementById('empv-frame');
+  frame.srcdoc = e.html || '<div style="color:#889;font-family:sans-serif;padding:30px;text-align:center;">Este email es anterior al registro de contenido — solo hay asunto y destinatario.</div>';
+  document.getElementById('empv-modal').classList.add('show');
+};
+window.closeEmailPreview = function() {
+  document.getElementById('empv-modal').classList.remove('show');
+  document.getElementById('empv-frame').srcdoc = '';
+};
+window.updateRepBadge = function() {
+  const n = (window._reports||[]).filter(r => r.status === 'pending').length;
+  const b = document.getElementById('rep-badge');
+  b.textContent = n; b.style.display = n > 0 ? 'inline-block' : 'none';
+};
+window.renderReports = function() {
+  const f = document.getElementById('rep-status').value;
+  let list = window._reports || [];
+  if (f !== 'all') list = list.filter(r => r.status === f);
+  if (!list.length) { document.getElementById('rep-list').innerHTML = '<p style="color:rgba(255,255,255,.5)">Sin reportes.</p>'; return; }
+  document.getElementById('rep-list').innerHTML = list.map(r => {
+    const d = r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleString('es-ES') : '';
+    const vid = (window._videos||[]).find(v => v.id === r.videoId);
+    const rc = vid && vid.reportCount ? ` · 🚩x${vid.reportCount}` : '';
+    const st = r.status === 'pending' ? '<span style="color:#f0b429">⏳ Pendiente</span>' : '<span style="color:#4caf50">✓ Revisado</span>';
+    return `<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+        <strong style="color:#e5484d;">${r.reason||'?'}</strong>${st}
+      </div>
+      <div style="font-size:.85rem;color:rgba(255,255,255,.7);margin:6px 0;">${(r.videoDesc||'(sin descripcion)')}${rc}</div>
+      <div style="font-size:.75rem;color:rgba(255,255,255,.4);">${d}</div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+        <button onclick="openPlayer('${r.videoId}')" style="background:rgba(34,88,168,.4);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;">▶ Ver video</button>
+        ${r.status === 'pending' ? `<button onclick="markReportReviewed('${r.id}')" style="background:rgba(76,175,80,.25);border:1px solid rgba(76,175,80,.4);color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;">✓ Marcar revisado</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+};
+window.markReportReviewed = async function(id) {
+  try {
+    await updateDoc(doc(db, 'reports', id), { status: 'reviewed', reviewedAt: serverTimestamp() });
+    const r = (window._reports||[]).find(x => x.id === id);
+    if (r) r.status = 'reviewed';
+    renderReports(); updateRepBadge();
+  } catch(e) { console.error(e); }
+};
 function renderDashboard() {
   const u = window._users, v = window._videos;
   const stats = [
@@ -326,6 +486,55 @@ function renderDashboard() {
   ];
   document.getElementById('stat-grid').innerHTML = stats.map(s =>
     `<div class=\"stat-card\"><div class=\"stat-num\">${s[1]}</div><div class=\"stat-label\">${s[0]}</div></div>`).join('');
+  renderGrowthCharts();
+}
+let _chUsers = null, _chVideos = null;
+function weekBuckets(n) {
+  // Devuelve n semanas: [{label:'12 ene', start:Date, end:Date}], la ultima es la actual
+  const out = [];
+  const now = new Date();
+  const day = now.getDay() === 0 ? 7 : now.getDay(); // lunes=1..domingo=7
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (day - 1));
+  for (let i = n - 1; i >= 0; i--) {
+    const start = new Date(monday); start.setDate(monday.getDate() - i * 7);
+    const end = new Date(start); end.setDate(start.getDate() + 7);
+    out.push({ label: start.getDate() + ' ' + start.toLocaleDateString('es-ES', { month: 'short' }), start, end });
+  }
+  return out;
+}
+function countByWeek(items, buckets) {
+  return buckets.map(b => items.filter(x => {
+    if (!x.createdAt || !x.createdAt.seconds) return false;
+    const d = new Date(x.createdAt.seconds * 1000);
+    return d >= b.start && d < b.end;
+  }).length);
+}
+function renderGrowthCharts() {
+  if (typeof Chart === 'undefined') return;
+  const buckets = weekBuckets(12);
+  const labels = buckets.map(b => b.label);
+  const uData = countByWeek(window._users, buckets);
+  const vData = countByWeek(window._videos, buckets);
+  const opts = {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: 'rgba(255,255,255,.5)', font: { size: 10 } }, grid: { display: false } },
+      y: { ticks: { color: 'rgba(255,255,255,.5)', precision: 0 }, grid: { color: 'rgba(255,255,255,.06)' }, beginAtZero: true }
+    }
+  };
+  if (_chUsers) _chUsers.destroy();
+  _chUsers = new Chart(document.getElementById('chart-users'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: uData, backgroundColor: 'rgba(34,88,168,.7)', borderRadius: 4 }] },
+    options: opts
+  });
+  if (_chVideos) _chVideos.destroy();
+  _chVideos = new Chart(document.getElementById('chart-videos'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: vData, backgroundColor: 'rgba(240,180,41,.75)', borderRadius: 4 }] },
+    options: opts
+  });
 }
 
 window.renderUserList = function() {
@@ -358,7 +567,102 @@ window.renderUserList = function() {
 window.selectUser = function(uid) {
   window._selectedUser = uid;
   renderUserList();
+  renderUserCard();
   renderUserVideos();
+};
+window.renderUserCard = function() {
+  const card = document.getElementById('user-card');
+  const u = window._users.find(x => x.id === window._selectedUser);
+  if (!u) { card.style.display = 'none'; return; }
+  const ts = t => t && t.seconds ? new Date(t.seconds*1000).toLocaleDateString('es-ES') : '—';
+  const st = u.accountStatus || 'active';
+  const stLabel = st==='admin_banned' ? '<span style="color:#e5484d">🚫 Baneado</span>' : st==='self_paused' ? '<span style="color:#f0b429">⏸ Pausado</span>' : '<span style="color:#4caf50">✓ Activo</span>';
+  const prem = u.isPremium ? '★ Sí' + (u.premiumUntil||u.premiumExpiresAt ? ' (hasta ' + ts(u.premiumUntil||u.premiumExpiresAt) + ')' : '') : 'No';
+  const strikes = u.rejectedCount || 0;
+  const nv = window._videos.filter(v => v.userId === u.id);
+  const row = (k,v) => `<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.85rem;"><span style="color:rgba(255,255,255,.5)">${k}</span><span style="text-align:right">${v}</span></div>`;
+  card.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+      <strong style="font-size:1rem;">${u.name||'Sin nombre'} <span style="color:rgba(255,255,255,.5);font-weight:400">@${u.username||'?'}</span></strong>
+      ${stLabel}
+    </div>
+    ${row('Email', u.email||'—')}
+    ${row('Registro', ts(u.createdAt))}
+    ${row('Premium', prem)}
+    ${row('Strikes (rechazos)', strikes > 0 ? '<span style="color:#e5484d;font-weight:700">🚩 ' + strikes + '</span>' : '0')}
+    ${row('Videos', nv.length + ' (' + nv.filter(v=>v.isActive!==false).length + ' activos)')}
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+      ${st==='admin_banned'
+        ? `<button onclick="askSetStatus('${u.id}','active')" style="background:rgba(76,175,80,.25);border:1px solid rgba(76,175,80,.4);color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.82rem;">✅ Reactivar cuenta</button>`
+        : `<button onclick="askSetStatus('${u.id}','admin_banned')" style="background:rgba(240,180,41,.2);border:1px solid rgba(240,180,41,.4);color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.82rem;">🚫 Banear cuenta</button>`}
+      <button onclick="openMailModal('${u.id}')" style="background:rgba(34,88,168,.4);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.82rem;">✉️ Contactar</button>
+      <button onclick="askDeleteUser('${u.id}')" style="background:rgba(255,69,85,.8);border:none;color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.82rem;">🗑 Eliminar usuario</button>
+    </div>`;
+  card.style.display = 'block';
+};
+window.openMailModal = function(uid) {
+  const u = window._users.find(x => x.id === uid);
+  if (!u || !u.email) { askConfirm('Este usuario no tiene email registrado.', null, 'Cerrar'); return; }
+  window._mailTo = uid;
+  document.getElementById('mail-to').textContent = 'Para: ' + u.email;
+  document.getElementById('mail-subject').value = '';
+  document.getElementById('mail-body').value = '';
+  document.getElementById('mail-msg').style.display = 'none';
+  document.getElementById('mail-send').disabled = false;
+  document.getElementById('mail-modal').classList.add('show');
+};
+window.closeMailModal = function(){ document.getElementById('mail-modal').classList.remove('show'); };
+window.sendUserMail = async function() {
+  const subj = document.getElementById('mail-subject').value.trim();
+  const body = document.getElementById('mail-body').value.trim();
+  const msg = document.getElementById('mail-msg');
+  if (!subj || !body) { msg.textContent = 'Escribe asunto y mensaje.'; msg.style.display = 'block'; return; }
+  const btn = document.getElementById('mail-send');
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  try {
+    const f = window._dbfns;
+    await f.addDoc(f.collection(_db, 'notifications'), {
+      userId: window._mailTo,
+      type: 'admin_message',
+      subject: subj,
+      body: body,
+      message: subj,
+      actorUid: auth.currentUser.uid,
+      read: false,
+      createdAt: f.serverTimestamp()
+    });
+    msg.textContent = '✓ Email enviado.'; msg.style.display = 'block';
+    setTimeout(closeMailModal, 1200);
+  } catch(e) { console.error(e); msg.textContent = 'Error: ' + (e.message||e); msg.style.display = 'block'; }
+  btn.disabled = false; btn.textContent = 'Enviar';
+};
+window.askSetStatus = function(uid, status) {
+  const u = window._users.find(x => x.id === uid);
+  const msg = status === 'admin_banned'
+    ? '¿<strong>Banear</strong> la cuenta de <strong>' + (u.name||u.email||uid) + '</strong>? El usuario no podrá acceder.'
+    : '¿<strong>Reactivar</strong> la cuenta de <strong>' + (u.name||u.email||uid) + '</strong>?';
+  askConfirm(msg, async () => {
+    try {
+      await _fns.setStatus({ userId: uid, status: status });
+      u.accountStatus = status;
+      renderUserList(); renderUserCard(); renderDashboard();
+    } catch(e) { console.error(e); askConfirm('Error: ' + (e.message||e), null, 'Cerrar'); }
+  }, status === 'admin_banned' ? 'Banear' : 'Reactivar');
+};
+window.askDeleteUser = function(uid) {
+  const u = window._users.find(x => x.id === uid);
+  askConfirm('¿Eliminar <strong>definitivamente</strong> al usuario <strong>' + (u.name||u.email||uid) + '</strong> y todos sus datos? Esta acción es <strong>irrecuperable</strong>.', async () => {
+    try {
+      await _fns.deleteUser({ userId: uid });
+      window._users = window._users.filter(x => x.id !== uid);
+      window._videos = window._videos.filter(v => v.userId !== uid);
+      window._selectedUser = null;
+      document.getElementById('user-card').style.display = 'none';
+      document.getElementById('uv-title').textContent = 'Selecciona un usuario';
+      document.getElementById('user-videos').innerHTML = '';
+      renderUserList(); renderDashboard();
+    } catch(e) { console.error(e); askConfirm('Error: ' + (e.message||e), null); }
+  });
 };
 
 window.renderUserVideos = function() {
@@ -386,6 +690,67 @@ window.renderUserVideos = function() {
   }).join('');
 };
 
+window._selMode = false;
+window._selected = new Set();
+window.toggleSelMode = function() {
+  window._selMode = !window._selMode;
+  window._selected.clear();
+  document.getElementById('sel-toggle').textContent = window._selMode ? '✕ Cancelar' : '☑ Seleccionar';
+  document.getElementById('sel-all-wrap').style.display = window._selMode ? 'flex' : 'none';
+  document.getElementById('sel-del').style.display = window._selMode ? 'inline-block' : 'none';
+  document.getElementById('sel-all').checked = false;
+  updateSelCount(); renderGlobalVideos();
+};
+window.toggleSelVideo = function(id) {
+  if (window._selected.has(id)) window._selected.delete(id); else window._selected.add(id);
+  const cb = document.querySelector('.sel-cb[data-id="'+id+'"]');
+  if (cb) cb.checked = window._selected.has(id);
+  updateSelCount();
+};
+window.updateSelCount = function() {
+  document.querySelectorAll('.sel-cb').forEach(cb => {
+    if (cb.checked) window._selected.add(cb.dataset.id); else window._selected.delete(cb.dataset.id);
+  });
+  document.getElementById('sel-count').textContent = window._selected.size;
+};
+window.selectAllVideos = function(on) {
+  document.querySelectorAll('.sel-cb').forEach(cb => { cb.checked = on; });
+  updateSelCount();
+};
+window.askDeleteSelected = function() {
+  const n = window._selected.size;
+  if (!n) return;
+  askConfirm('¿Eliminar <strong>' + n + ' videos</strong> definitivamente? Se borrarán de la base de datos y del almacenamiento de forma <strong>irrecuperable</strong>.', async () => {
+    const ids = [...window._selected];
+    const prog = document.getElementById('sel-progress');
+    prog.style.display = 'inline';
+    let ok = 0, fail = 0;
+    for (let i = 0; i < ids.length; i++) {
+      prog.textContent = 'Eliminando ' + (i+1) + '/' + ids.length + '…';
+      try {
+        await _fns.deleteVideo({ videoId: ids[i] });
+        window._videos = window._videos.filter(v => v.id !== ids[i]);
+        ok++;
+      } catch(e) {
+        if ((e.message||'').includes('no existe') || e.code === 'functions/not-found') {
+          // Ya no existe en BD: quitar de la lista local igualmente
+          window._videos = window._videos.filter(v => v.id !== ids[i]);
+          ok++;
+        } else { console.error(ids[i], e); fail++; }
+      }
+    }
+    prog.textContent = '✓ ' + ok + ' eliminados' + (fail ? ' · ' + fail + ' errores' : '');
+    setTimeout(() => { prog.style.display = 'none'; }, 4000);
+    window._selected.clear();
+    // Salir del modo seleccion: ocultar boton y checkbox "todos"
+    window._selMode = false;
+    document.getElementById('sel-toggle').textContent = '☑ Seleccionar';
+    document.getElementById('sel-all-wrap').style.display = 'none';
+    document.getElementById('sel-del').style.display = 'none';
+    document.getElementById('sel-all').checked = false;
+    renderGlobalVideos(); renderDashboard();
+  });
+};
 window.renderGlobalVideos = function() {
   const term=(document.getElementById('gv-search').value||'').toLowerCase();
   const cat=document.getElementById('gv-cat').value;
@@ -403,7 +768,9 @@ window.renderGlobalVideos = function() {
   el.innerHTML = list.map(v => {
     const th=v.thumbnailURL?`<img src=\"${v.thumbnailURL}\" loading=\"lazy\" style=\"width:100%;height:100%;object-fit:cover\">`:'<div style=\"width:100%;height:100%;background:#0f2040\"></div>';
     const dt=v.isActive===false?'<div class=\"del-tag\" style=\"position:absolute;top:6px;left:6px;background:rgba(255,69,85,.9);font-size:.6rem;padding:2px 7px;border-radius:6px\">ELIM</div>':'';
-    return `<div class=\"vthumb\" style=\"width:auto\" onclick=\"openPlayer('${v.id}')\">${th}${dt}<div class=\"play-ic\">▶</div><div class=\"v-views\">@${v.username||'?'} · ${v.views||0}👁</div></div>`;
+    const cb = window._selMode ? `<input type=\"checkbox\" class=\"sel-cb\" data-id=\"${v.id}\" onclick=\"event.stopPropagation();updateSelCount()\" style=\"position:absolute;top:8px;right:8px;width:20px;height:20px;z-index:5;accent-color:#e5484d;cursor:pointer;\" ${window._selected&&window._selected.has(v.id)?'checked':''}>` : '';
+    const clickFn = window._selMode ? `toggleSelVideo('${v.id}')` : `openPlayer('${v.id}')`;
+    return `<div class=\"vthumb\" style=\"width:auto;position:relative\" onclick=\"${clickFn}\">${cb}${th}${dt}<div class=\"play-ic\">▶</div><div class=\"v-views\">@${v.username||'?'} · ${v.views||0}👁</div></div>`;
   }).join('');
 };
 
@@ -437,24 +804,39 @@ window.toggleAdmin = async function(uid, makeAdmin) {
 };
 
 // ── PLAYER ──
-let _zoom = 1;
+let _zoom = 1, _panX = 0, _panY = 0;
+window._applyPT = function(){ document.getElementById('player').style.transform='translate('+_panX+'px,'+_panY+'px) scale('+_zoom+')'; };
+(function(){
+  const p = document.getElementById('player');
+  let drag=false, sx=0, sy=0, ox=0, oy=0, moved=false;
+  const start=(x,y)=>{ if(_zoom<=1) return false; drag=true; sx=x; sy=y; ox=_panX; oy=_panY; return true; };
+  const move=(x,y)=>{ if(!drag) return; const dx=x-sx, dy=y-sy; if(Math.abs(dx)>5||Math.abs(dy)>5) moved=true; _panX=ox+dx; _panY=oy+dy; window._applyPT(); };
+  p.addEventListener('mousedown', e=>{ moved=false; if(start(e.clientX,e.clientY)) e.preventDefault(); });
+  window.addEventListener('mousemove', e=>move(e.clientX,e.clientY));
+  window.addEventListener('mouseup', ()=>{ drag=false; });
+  p.addEventListener('touchstart', e=>{ moved=false; if(start(e.touches[0].clientX,e.touches[0].clientY)) e.preventDefault(); }, {passive:false});
+  p.addEventListener('touchmove', e=>{ if(drag){ move(e.touches[0].clientX,e.touches[0].clientY); e.preventDefault(); } }, {passive:false});
+  p.addEventListener('touchend', ()=>{ drag=false; });
+  p.addEventListener('click', ()=>{ if(moved){ moved=false; return; } if(!p.paused){ p.pause(); document.getElementById('pc-play').textContent='▶'; } });
+  p.addEventListener('dblclick', ()=>{ if(p.paused){ p.play().catch(()=>{}); document.getElementById('pc-play').textContent='⏸'; } });
+})();
 window.openPlayer = function(vid) {
   const v = window._videos.find(x=>x.id===vid);
   if(!v) return;
   window._currentVideo = v;
   const p = document.getElementById('player');
-  p.src = v.videoURL||''; p.playbackRate=1; p.muted=false; p.loop=true; _zoom=1; p.style.transform='scale(1)';
-  document.querySelectorAll('.pc-btn').forEach(b=>{ if(['0.5x','1x','1.5x','2x'].includes(b.textContent)) b.classList.remove('active'); });
+  p.src = v.videoURL||''; p.playbackRate=1; p.muted=false; p.loop=true; _zoom=1; _panX=0; _panY=0; p.style.transform='translate(0,0) scale(1)';
+  document.querySelectorAll('.pv-btn').forEach(b=>{ if(['0.5x','1x','1.5x','2x'].includes(b.textContent)) b.classList.remove('active'); });
   const created = v.createdAt&&v.createdAt.seconds?new Date(v.createdAt.seconds*1000).toLocaleString():'';
   document.getElementById('player-info').innerHTML = `<strong>@${v.username||'?'}</strong> · ${v.category||'General'} · ${v.views||0} vistas<br><span style=\"color:rgba(255,255,255,.55)\">${v.description||''}</span><br><span style=\"font-size:.75rem;color:rgba(255,255,255,.4)\">${created} ${v.isActive===false?'· ELIMINADO':''}</span>`;
   document.getElementById('player-modal').classList.add('show');
   p.play().catch(()=>{});
-  document.getElementById('pc-play').textContent='⏸ Pausa';
+  document.getElementById('pc-play').textContent='⏸';
 };
 window.closePlayer = function(){ const p=document.getElementById('player'); p.pause(); p.src=''; document.getElementById('player-modal').classList.remove('show'); };
-window.togglePlay = function(){ const p=document.getElementById('player'); if(p.paused){p.play();document.getElementById('pc-play').textContent='⏸ Pausa';}else{p.pause();document.getElementById('pc-play').textContent='▶ Play';} };
-window.setSpd = function(r,btn){ document.getElementById('player').playbackRate=r; document.querySelectorAll('.pc-btn').forEach(b=>{ if(['0.5x','1x','1.5x','2x'].includes(b.textContent)) b.classList.remove('active'); }); btn.classList.add('active'); };
-window.zoomVideo = function(dir){ _zoom = Math.max(0.5, Math.min(3, _zoom + dir*0.25)); document.getElementById('player').style.transform='scale('+_zoom+')'; };
+window.togglePlay = function(){ const p=document.getElementById('player'); if(p.paused){p.play();document.getElementById('pc-play').textContent='⏸';}else{p.pause();document.getElementById('pc-play').textContent='▶';} };
+window.setSpd = function(r,btn){ document.getElementById('player').playbackRate=r; document.querySelectorAll('.pv-btn').forEach(b=>{ if(['0.5x','1x','1.5x','2x'].includes(b.textContent)) b.classList.remove('active'); }); btn.classList.add('active'); };
+window.zoomVideo = function(dir){ _zoom = Math.max(1, Math.min(5, _zoom + dir*0.5)); if(_zoom===1){ _panX=0; _panY=0; } window._applyPT(); };
 window.toggleMute = function(btn){ const p=document.getElementById('player'); p.muted=!p.muted; btn.textContent=p.muted?'🔇':'🔊'; };
 window.fullscreenVideo = function(btn){
   const modal = document.getElementById('player-modal');
@@ -466,7 +848,7 @@ window.downloadVideo = function(){ const v=window._currentVideo; if(!v||!v.video
 // ── CONFIRM / DELETE ──
 let _confirmAction=null;
 window.closeConfirm=function(){ document.getElementById('confirm-modal').classList.remove('show'); _confirmAction=null; };
-function askConfirm(text, action){ document.getElementById('confirm-text').innerHTML=text; _confirmAction=action; document.getElementById('confirm-modal').classList.add('show'); }
+function askConfirm(text, action, btnText){ document.getElementById('confirm-text').innerHTML=text; _confirmAction=action; document.getElementById('confirm-ok').textContent = btnText || 'Eliminar definitivamente'; document.getElementById('confirm-modal').classList.add('show'); }
 document.getElementById('confirm-ok').onclick = async function(){ if(_confirmAction){ const a=_confirmAction; closeConfirm(); await a(); } };
 
 window.askDeleteCurrentVideo = function(){

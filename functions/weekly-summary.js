@@ -75,7 +75,7 @@ exports.weeklySocialSummary = functions.pubsub
           counts,
           lang
         });
-        await sendEmail(user.email, title, html);
+        await sendEmail(user.email, title, html, 'weekly_summary');
 
         // Resetear contadores semanales de sus videos
         const batch = db.batch();

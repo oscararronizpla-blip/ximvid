@@ -1,7 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { sendEmail } = require('./mailer');
-const { buildWelcomeEmail, buildCtaEmail } = require('./email-template');
+const { buildWelcomeEmail, buildCtaEmail, buildWarningEmail, buildAdminMessageEmail } = require('./email-template');
 
 const db = admin.firestore();
 
@@ -11,14 +11,16 @@ const T = {
     action_click: { s: 'Alguien pulsó tu botón', b: 'Un usuario ha pulsado tu botón de acción en Ximvid.' },
     new_follower: { s: 'Tienes un nuevo seguidor', b: 'Alguien ha empezado a seguirte en Ximvid.' },
     premium_activated: { s: 'Tu Premium está activo', b: 'Tu suscripción Premium se ha activado correctamente.' },
-    payment_failed: { s: 'Problema con tu pago', b: 'No hemos podido procesar tu pago de Premium. Revisa tu método de pago.' }
+    payment_failed: { s: 'Problema con tu pago', b: 'No hemos podido procesar tu pago de Premium. Revisa tu método de pago.' },
+    video_rejected: { s: '⚠️ Un video tuyo ha sido retirado', b: 'Nuestro equipo de moderación ha retirado uno de tus videos por contenido inapropiado según nuestras normas de comunidad. Si continúas publicando este tipo de contenido, tu cuenta podría ser suspendida o eliminada de forma permanente. Te recomendamos revisar nuestros Términos de uso.' }
   },
   en: {
     social_click: { s: 'Someone visited your social link', b: 'A user clicked one of your social links on Ximvid.' },
     action_click: { s: 'Someone tapped your button', b: 'A user tapped your action button on Ximvid.' },
     new_follower: { s: 'You have a new follower', b: 'Someone started following you on Ximvid.' },
     premium_activated: { s: 'Your Premium is active', b: 'Your Premium subscription is now active.' },
-    payment_failed: { s: 'Payment issue', b: 'We could not process your Premium payment. Please check your payment method.' }
+    payment_failed: { s: 'Payment issue', b: 'We could not process your Premium payment. Please check your payment method.' },
+    video_rejected: { s: '⚠️ One of your videos has been removed', b: 'Our moderation team has removed one of your videos for inappropriate content under our community guidelines. If you continue posting this type of content, your account may be suspended or permanently deleted. Please review our Terms of use.' }
   }
 };
 
@@ -49,16 +51,25 @@ exports.onNotificationCreated = functions.region('europe-west1').firestore
       if (n.type === 'social_click') return null;
 
       const lang = (user.language === 'es') ? 'es' : 'en';
+      // Mensaje directo del admin: asunto/cuerpo vienen en la propia notificacion
+      if (n.type === 'admin_message') {
+        const subj = n.subject || (lang === 'es' ? 'Mensaje del equipo Ximvid' : 'Message from the Ximvid team');
+        const html = buildAdminMessageEmail({ userName: user.name || user.username, title: subj, body: n.body || '', lang });
+        await sendEmail(user.email, subj, html, 'admin_message');
+        return null;
+      }
       const pack = T[lang][n.type];
       if (!pack) return null;
 
       let emailHtml;
       if (n.type === 'action_click') {
         emailHtml = buildCtaEmail({ userName: user.name || user.username, videoDesc: n.videoDesc || '', ctaType: n.ctaType || 'product', lang });
+      } else if (n.type === 'video_rejected') {
+        emailHtml = buildWarningEmail({ userName: user.name || user.username, title: pack.s, body: pack.b, videoDesc: n.videoDesc || '', lang });
       } else {
         emailHtml = buildWelcomeEmail(user.name || user.username);
       }
-      await sendEmail(user.email, pack.s, emailHtml);
+      await sendEmail(user.email, pack.s, emailHtml, n.type);
       return null;
     } catch (e) {
       console.error('Error enviando email de notificacion:', e);

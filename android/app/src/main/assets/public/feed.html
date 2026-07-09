@@ -328,8 +328,24 @@ html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans
     <div class="share-icon">↗️</div>
     <div class="share-label">Compartir</div>
   </div>
+  <div class="share-btn" onclick="openReportModal()">
+    <div class="share-icon">🚩</div>
+    <div class="share-label">Reportar</div>
+  </div>
 </div>
 
+<!-- REPORT MODAL -->
+<div id="report-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:#181820;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:20px;width:min(340px,90vw);font-family:'DM Sans',sans-serif;">
+    <div style="font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:12px;">🚩 Reportar vídeo</div>
+    <div id="report-reasons" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+    <div id="report-msg" style="display:none;font-size:.85rem;color:#f0b429;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeReportModal()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:10px;padding:9px 16px;cursor:pointer;">Cancelar</button>
+      <button id="report-send" onclick="submitReport()" style="background:#e5484d;border:none;color:#fff;border-radius:10px;padding:9px 16px;cursor:pointer;font-weight:700;opacity:.5;pointer-events:none;">Reportar</button>
+    </div>
+  </div>
+</div>
 <!-- CREATOR INFO -->
 <div class="creator-info" id="creator-info" style="display:none">
   <div class="creator-name" id="creator-name"></div>
@@ -400,6 +416,8 @@ const app = initializeApp({
 
 const auth = getAuth(app);
 const db = getFirestore(app);
+window._db = db;
+window._auth = getAuth(app);
 window._auth = auth;
 window._db = db;
 window._fb = { collection, query, where, orderBy, limit, getDocs, doc, getDoc, updateDoc, increment, setDoc, deleteDoc, serverTimestamp, addDoc };
@@ -1210,6 +1228,58 @@ function goLanding() {
   if (username) window.location.href = 'landing.html?u=' + username;
 }
 
+// ===== REPORTES =====
+const REPORT_REASONS = ['Contenido sexual','Violencia o contenido peligroso','Acoso o incitacion al odio','Spam o estafa','Menores en riesgo','Otro'];
+window._reportReason = null;
+window.openReportModal = function(){
+  const m = document.getElementById('report-modal');
+  const list = document.getElementById('report-reasons');
+  const send = document.getElementById('report-send');
+  window._reportReason = null;
+  document.getElementById('report-msg').style.display='none';
+  send.style.opacity='.5'; send.style.pointerEvents='none';
+  list.innerHTML='';
+  REPORT_REASONS.forEach(r=>{
+    const b=document.createElement('div');
+    b.textContent=r;
+    b.style.cssText='padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:.9rem;cursor:pointer;';
+    b.onclick=()=>{
+      window._reportReason=r;
+      [...list.children].forEach(c2=>{c2.style.background='rgba(255,255,255,.06)';c2.style.borderColor='rgba(255,255,255,.1)';});
+      b.style.background='rgba(229,72,77,.25)'; b.style.borderColor='#e5484d';
+      send.style.opacity='1'; send.style.pointerEvents='auto';
+    };
+    list.appendChild(b);
+  });
+  m.style.display='flex';
+};
+window.closeReportModal = function(){ document.getElementById('report-modal').style.display='none'; };
+window.submitReport = async function(){
+  const video = window._currentVideoData;
+  const u = window._auth && window._auth.currentUser;
+  const msg = document.getElementById('report-msg');
+  if(!video || !window._reportReason) return;
+  if(!u){ msg.textContent='Inicia sesion para reportar.'; msg.style.display='block'; return; }
+  const fb = window._fb, db = window._db;
+  try{
+    const rid = video.id + '_' + u.uid;
+    const ref = fb.doc(db,'reports',rid);
+    const ex = await fb.getDoc(ref);
+    if(ex.exists()){ msg.textContent='Ya has reportado este video.'; msg.style.display='block'; return; }
+    await fb.setDoc(ref,{
+      videoId: video.id,
+      videoDesc: (video.description||'').slice(0,120),
+      videoUserId: video.userId||null,
+      reporterId: u.uid,
+      reason: window._reportReason,
+      status: 'pending',
+      createdAt: fb.serverTimestamp()
+    });
+    await fb.updateDoc(fb.doc(db,'videos',video.id),{ reportCount: fb.increment(1), reportedAt: fb.serverTimestamp() });
+    msg.textContent='Reporte enviado. Gracias por avisarnos.'; msg.style.display='block';
+    setTimeout(window.closeReportModal, 1200);
+  }catch(e){ console.error(e); msg.textContent='Error al enviar. Intentalo de nuevo.'; msg.style.display='block'; }
+};
 function shareVideo() {
   const video = window._currentVideoData;
   if (!video) return;

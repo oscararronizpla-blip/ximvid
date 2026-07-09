@@ -278,4 +278,42 @@ function buildWeeklyEmail(opts) {
   return wrap(rows);
 }
 
-module.exports = { buildEmail: buildWelcomeEmail, buildWelcomeEmail, buildCtaEmail, buildWeeklyEmail, buildInviteEmail, IMGS };
+// ── EMAIL AVISO SERIO (censura, advertencias) — sobrio, sin marketing ──
+function buildWarningEmail(opts) {
+  const { userName, title, body, videoDesc, lang } = opts;
+  const isEs = lang !== 'en';
+  const rows = `
+  ${header()}
+  <tr><td style="padding:36px 32px 8px">
+    <div style="font-size:40px;margin:0 0 14px">⚠️</div>
+    <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;color:#fff;line-height:1.25;margin:0 0 16px">${title}</div>
+    <div style="font-family:Arial,sans-serif;font-size:15px;color:#c9d4e3;line-height:1.7;margin:0 0 14px">${isEs ? 'Hola' : 'Hi'} ${userName || ''},</div>
+    <div style="font-family:Arial,sans-serif;font-size:15px;color:#c9d4e3;line-height:1.7">${body}</div>
+    ${videoDesc ? `<div style="margin:18px 0 0;padding:12px 16px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.25);border-radius:12px;font-family:Arial,sans-serif;font-size:13px;color:#e8b4b4">${isEs?'Video afectado':'Affected video'}: "${videoDesc}"</div>` : ''}
+  </td></tr>
+  <tr><td style="padding:22px 32px 8px">
+    <a href="${BASE_URL}/terms.html" style="display:inline-block;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;text-decoration:none;padding:13px 28px;border-radius:12px;font-family:Arial,sans-serif;font-size:14px">${isEs?'Leer las normas de la comunidad':'Read community guidelines'}</a>
+  </td></tr>
+  ${footer()}`;
+  return wrap(rows);
+}
+
+function buildAdminMessageEmail(opts) {
+  const { userName, title, body, lang } = opts;
+  const isEs = lang !== 'en';
+  const rows = `
+  ${header()}
+  <tr><td style="padding:36px 32px 8px">
+    <div style="font-size:40px;margin:0 0 14px">✉️</div>
+    <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;color:#fff;line-height:1.25;margin:0 0 16px">${title}</div>
+    <div style="font-family:Arial,sans-serif;font-size:15px;color:#c9d4e3;line-height:1.7;margin:0 0 16px">${isEs ? 'Hola' : 'Hi'} ${userName || ''},</div>
+    <div style="padding:18px 20px;background:rgba(34,88,168,.12);border:1px solid rgba(34,88,168,.35);border-left:3px solid #2258a8;border-radius:12px;font-family:Arial,sans-serif;font-size:15px;color:#dde6f2;line-height:1.75">${(body || '').replace(/\n/g, '<br>')}</div>
+    <div style="font-family:Arial,sans-serif;font-size:14px;color:#8a97a8;margin:18px 0 0">— ${isEs ? 'El equipo de Ximvid' : 'The Ximvid team'}</div>
+  </td></tr>
+  <tr><td style="padding:24px 32px 8px">
+    <a href="${BASE_URL}/feed.html" style="display:inline-block;background:#f0b429;color:#1a1a1a;text-decoration:none;padding:13px 30px;border-radius:12px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold">${isEs ? 'Abrir Ximvid' : 'Open Ximvid'}</a>
+  </td></tr>
+  ${footer()}`;
+  return wrap(rows);
+}
+module.exports = { buildEmail: buildWelcomeEmail, buildWelcomeEmail, buildCtaEmail, buildWeeklyEmail, buildInviteEmail, buildWarningEmail, buildAdminMessageEmail, IMGS };

@@ -2,19 +2,36 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function isAdmin() {
+      return request.auth != null && userDoc().get('isAdmin', false) == true;
+    }
+    function isModerator() {
+      return request.auth != null && (userDoc().get('isModerator', false) == true || userDoc().get('isAdmin', false) == true);
+    }
+
     match /users/{userId} {
       allow read: if true;
-      allow create, update, delete: if request.auth != null && request.auth.uid == userId;
+      allow create, delete: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && (
+        request.auth.uid == userId ||
+        (isModerator() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rejectedCount']))
+      );
     }
 
     match /videos/{videoId} {
       allow read: if true;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow delete: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
       allow update: if request.auth != null && (
         request.auth.uid == resource.data.userId ||
+        (isModerator() && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'moderationStatus','moderatedAt','isActive','reportsReviewedAt'
+        ])) ||
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'views','actionClicks','shareClicks','socialClicks',
+          'views','actionClicks','shareClicks','socialClicks','reportCount','reportedAt',
           'net_instagram','net_tiktok','net_youtube','net_facebook',
           'net_twitter','net_linkedin','net_pinterest','net_snapchat',
           'net_twitch','net_reddit','net_tumblr','net_threads','net_bluesky',
@@ -29,6 +46,15 @@ service cloud.firestore {
       );
     }
 
+    match /reports/{reportId} {
+      allow get: if request.auth != null && (isModerator() || reportId.matches('.*_' + request.auth.uid));
+      allow list: if isModerator();
+      allow create: if request.auth != null
+                    && request.resource.data.reporterId == request.auth.uid
+                    && reportId == request.resource.data.videoId + '_' + request.auth.uid;
+      allow update: if isModerator();
+      allow delete: if isAdmin();
+    }
     match /follows/{followId} {
       allow read: if true;
       allow create: if request.auth != null
@@ -43,6 +69,10 @@ service cloud.firestore {
                     && (!('actorUid' in request.resource.data) || request.resource.data.actorUid == request.auth.uid);
     }
 
+    match /email_log/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
     match /config/{configId} {
       allow read: if true;
       allow write: if false;
