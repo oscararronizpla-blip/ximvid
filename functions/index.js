@@ -25,3 +25,7 @@ exports.adminSetUserStatus = adminDelete.adminSetUserStatus;
 // Resumen semanal de clics en redes (viernes 11h Madrid)
 const weeklySummary = require('./weekly-summary');
 exports.weeklySocialSummary = weeklySummary.weeklySocialSummary;
+
+const viralRobot = require('./viral-robot');
+exports.viralRobotNightly = viralRobot.viralRobotNightly;
+exports.viralRobotRunNow  = viralRobot.viralRobotRunNow;
