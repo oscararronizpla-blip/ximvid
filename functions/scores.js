@@ -61,8 +61,14 @@ async function calcular() {
 
     let score;
     let enGracia = false;
+    const esSeed = v.isSeed === true;
 
-    if (vistas < cfg.cuotaArranque) {
+    if (esSeed) {
+      // Los seeds del robot son relleno: sin periodo de gracia ni impulso.
+      // Solo puntuan por frescura + engagement real (que sera ~0).
+      const engSeed = vistas > 0 ? (inter / vistas) : 0;
+      score = Math.round(engSeed * cfg.pesoEngagement * 100 + fresh * 0.5);
+    } else if (vistas < cfg.cuotaArranque) {
       // Periodo de gracia: prioridad para que arranque
       enGracia = true;
       score = 100 + fresh;
