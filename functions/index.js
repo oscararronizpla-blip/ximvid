@@ -33,3 +33,8 @@ exports.viralRobotRunNow  = viralRobot.viralRobotRunNow;
 // Play Billing: validacion de compras de Google Play
 const playBilling = require('./play-billing');
 exports.verifyPlayPurchase = playBilling.verifyPlayPurchase;
+
+// Algoritmo: calculo de scores del feed
+const scores = require('./scores');
+exports.calcularScoresHourly = scores.calcularScoresHourly;
+exports.calcularScoresNow    = scores.calcularScoresNow;
