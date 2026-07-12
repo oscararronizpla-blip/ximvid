@@ -4,18 +4,100 @@
       "collectionGroup": "videos",
       "queryScope": "COLLECTION",
       "fields": [
-        {"fieldPath": "isActive", "order": "ASCENDING"},
-        {"fieldPath": "userLanguage", "order": "ASCENDING"},
-        {"fieldPath": "createdAt", "order": "DESCENDING"}
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "userLanguage",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "videos",
       "queryScope": "COLLECTION",
       "fields": [
-        {"fieldPath": "userId", "order": "ASCENDING"},
-        {"fieldPath": "isActive", "order": "ASCENDING"},
-        {"fieldPath": "createdAt", "order": "DESCENDING"}
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "videos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "userLanguage",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "score",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "videos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "score",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "videos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isPremiumUser",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "score",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "videos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "ASCENDING"
+        }
       ]
     }
   ],
