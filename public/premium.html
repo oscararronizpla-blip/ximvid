@@ -132,42 +132,45 @@ onAuthStateChanged(auth, async (user) => {
 });
 </script>
 <script>
+const PRODUCT_ID = 'premium_mensual';
+function esApp(){ return !!window.Capacitor; }
+
 async function activatePremium(){
   const btn = document.getElementById('btn-activate');
+  if (!esApp()) {
+    alert('Para suscribirte a Premium, descarga Ximvid en Google Play desde tu movil.');
+    return;
+  }
   btn.textContent = 'Procesando...';
   btn.disabled = true;
   try {
-    const createIntent = window._httpsCallable(window._functions, 'createStripePaymentIntent');
-    const result = await createIntent({});
-    // Guardar clientSecret y subscriptionId para completar el pago
-    sessionStorage.setItem('stripeData', JSON.stringify(result.data));
-    sessionStorage.setItem('ximvid_uid', window._uid);
-    window.location.href = '/premium-checkout.html';
+    const { NativePurchases } = window.Capacitor.Plugins;
+    const res = await NativePurchases.purchaseProduct({
+      productIdentifier: PRODUCT_ID,
+      planIdentifier: 'mensual',
+      productType: 1
+    });
+    const token = res && (res.transactionId || res.purchaseToken || (res.transaction && res.transaction.transactionId));
+    if (!token) throw new Error('No se recibio token de compra');
+    const verify = window._httpsCallable(window._functions, 'verifyPlayPurchase');
+    await verify({ purchaseToken: token, productId: PRODUCT_ID });
+    alert('Premium activado. Gracias!');
+    window.location.reload();
   } catch(e) {
-    console.error('Error completo:', e);
-    console.error('Código:', e.code);
-    console.error('Mensaje:', e.message);
-    btn.textContent = 'Activar Premium — 9,99€/mes';
+    console.error('Error compra:', e);
+    btn.textContent = 'Activar Premium - 9,99 EUR/mes';
     btn.disabled = false;
-    alert('Error: ' + e.message);
+    const msg = (e && e.message) ? e.message : 'Error desconocido';
+    if (msg.toLowerCase().indexOf('cancel') === -1) {
+      alert('No se pudo completar la compra: ' + msg);
+    }
   }
 }
 
 async function cancelPremium(){
-  if(!confirm('¿Seguro que quieres cancelar tu Plan Premium? Seguirá activo hasta el final del período pagado.')) return;
-  const btn = document.getElementById('btn-cancel-premium');
-  btn.textContent = 'Cancelando...';
-  btn.disabled = true;
-  try {
-    const cancel = window._httpsCallable(window._functions, 'cancelStripeSubscription');
-    const result = await cancel({});
-    alert('Suscripción cancelada. ' + result.data.message);
-    window.location.reload();
-  } catch(e) {
-    btn.textContent = 'Cancelar suscripción';
-    btn.disabled = false;
-    alert('Error al cancelar. Contacta con hola@ximvid.com');
-  }
+  if(!confirm('Para cancelar tu suscripcion se abrira Google Play. Seguira activa hasta el final del periodo pagado. Continuar?')) return;
+  const url = 'https://play.google.com/store/account/subscriptions?sku=' + PRODUCT_ID + '&package=com.ximvid.app';
+  window.open(url, '_blank');
 }
 </script>
 </body>
