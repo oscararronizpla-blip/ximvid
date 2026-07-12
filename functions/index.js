@@ -29,3 +29,7 @@ exports.weeklySocialSummary = weeklySummary.weeklySocialSummary;
 const viralRobot = require('./viral-robot');
 exports.viralRobotNightly = viralRobot.viralRobotNightly;
 exports.viralRobotRunNow  = viralRobot.viralRobotRunNow;
+
+// Play Billing: validacion de compras de Google Play
+const playBilling = require('./play-billing');
+exports.verifyPlayPurchase = playBilling.verifyPlayPurchase;
