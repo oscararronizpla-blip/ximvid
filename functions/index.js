@@ -38,3 +38,7 @@ exports.verifyPlayPurchase = playBilling.verifyPlayPurchase;
 const scores = require('./scores');
 exports.calcularScoresHourly = scores.calcularScoresHourly;
 exports.calcularScoresNow    = scores.calcularScoresNow;
+
+// RTDN: notificaciones en tiempo real de Google Play (renovaciones, cancelaciones)
+const rtdn = require('./rtdn');
+exports.playBillingRTDN = rtdn.playBillingRTDN;
