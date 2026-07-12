@@ -73,6 +73,23 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow write: if false;
     }
+    match /impressions/{impId} {
+      allow read: if isAdmin() || isModerator();
+      allow create, update: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && impId == request.resource.data.videoId + '_' + request.auth.uid;
+      allow delete: if isAdmin();
+    }
+    match /interactions/{intId} {
+      allow read: if request.auth != null
+                    && (isAdmin() || isModerator() || resource.data.userId == request.auth.uid);
+      allow create, update: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && intId == request.resource.data.videoId + '_' + request.auth.uid
+                    && request.resource.data.count <= 3
+                    && request.resource.data.creatorId != request.auth.uid;
+      allow delete: if isAdmin();
+    }
     match /config/{configId} {
       allow read: if true;
       allow write: if (configId == 'robot' || configId == 'algoritmo') && isAdmin();

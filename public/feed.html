@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <script src="/js/device-gate.js"></script>
+<script src="/js/algoritmo.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1309,6 +1310,11 @@ async function registerView(videoId) {
       window._fb.doc(window._db, 'videos', videoId),
       { views: window._fb.increment(1) }
     );
+    if (window._algo) {
+      window._algo.marcarVisto(videoId);
+      const vd = window._currentVideoData;
+      if (vd && vd.id === videoId) window._algo.registrarImpresionPremium(vd);
+    }
   } catch(e) {}
 }
 
@@ -1320,6 +1326,7 @@ async function registerActionClick(videoId) {
       { actionClicks: window._fb.increment(1) }
     );
     const creatorId = window._currentVideoData?.userId;
+    if (window._algo) window._algo.registrarInteraccion(videoId, creatorId, 'cta');
     if (creatorId) {
       const me = window._userData || {};
       const actor = (me.uid && me.username) ? { actorUid: me.uid, actorUsername: me.username, actorName: me.name || '' } : null;
@@ -1352,6 +1359,7 @@ async function registerSocialClick(videoId, network) {
       update
     );
     const creatorId = window._currentVideoData?.userId;
+    if (window._algo) window._algo.registrarInteraccion(videoId, creatorId, 'social');
     const netName = network.charAt(0).toUpperCase() + network.slice(1);
     if (creatorId) {
       const me = window._userData || {};
