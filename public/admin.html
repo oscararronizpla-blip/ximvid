@@ -140,6 +140,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
     <div class="sidebar-item" data-sec="reports" onclick="nav('reports',this)"><span class="ic">🚩</span> Reportes <span id="rep-badge" style="display:none;margin-left:auto;background:#e5484d;color:#fff;border-radius:10px;padding:1px 8px;font-size:.75rem;font-weight:700;"></span></div>
     <div class="sidebar-item" data-sec="emails" onclick="nav('emails',this)"><span class="ic">📧</span> Emails</div>
     <div class="sidebar-item" data-sec="robot" onclick="nav('robot',this)"><span class="ic">🤖</span> Vídeos Automáticos</div>
+    <div class="sidebar-item" data-sec="algoritmo" onclick="nav('algoritmo',this)"><span class="ic">⚙️</span> Algoritmo</div>
     <div class="sidebar-item" data-sec="admins" onclick="nav('admins',this)"><span class="ic">🔑</span> Admins</div>
     <div class="sidebar-item" data-sec="export" onclick="nav('export',this)"><span class="ic">📥</span> Exportar</div>
     <div class="sidebar-item" onclick="window.open('/moderation','_blank')"><span class="ic">🛡️</span> Moderación ↗</div>
@@ -264,6 +265,50 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
       <h3 style="margin-bottom:10px;font-size:.95rem;">Últimos vídeos insertados</h3>
       <div class="vid-grid" id="robot-videos"><div class="empty">Cargando...</div></div>
     </div>
+    <div class="section" id="sec-algoritmo">
+      <h2 style="margin-bottom:14px;">⚙️ Algoritmo del feed</h2>
+
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px;margin-bottom:16px;max-width:620px;">
+        <div style="font-weight:700;margin-bottom:4px;">Parámetros</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:14px;">Los scores se recalculan cada hora automáticamente.</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;">
+          <label style="font-size:.85rem;color:rgba(255,255,255,.7);">1 premium cada
+            <input type="number" id="al-boost" min="2" max="10" onchange="saveAlgoConfig()" style="width:60px;margin-left:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 8px;color:#fff;outline:none;"> vídeos
+          </label>
+          <label style="font-size:.85rem;color:rgba(255,255,255,.7);">No repetir durante
+            <input type="number" id="al-ventana" min="1" max="90" onchange="saveAlgoConfig()" style="width:60px;margin-left:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 8px;color:#fff;outline:none;"> días
+          </label>
+          <label style="font-size:.85rem;color:rgba(255,255,255,.7);">Cuota de arranque
+            <input type="number" id="al-cuota" min="5" max="500" onchange="saveAlgoConfig()" style="width:70px;margin-left:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 8px;color:#fff;outline:none;"> vistas
+          </label>
+          <label style="font-size:.85rem;color:rgba(255,255,255,.7);">Peso interacción
+            <input type="number" id="al-peso" min="1" max="200" onchange="saveAlgoConfig()" style="width:60px;margin-left:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 8px;color:#fff;outline:none;">
+          </label>
+        </div>
+      </div>
+
+      <div style="background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.3);border-radius:12px;padding:16px;margin-bottom:16px;max-width:620px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;">
+          <div>
+            <div style="font-weight:700;">🚀 Impulso inicial</div>
+            <div style="font-size:.8rem;color:rgba(255,255,255,.5);">Garantiza visualizaciones a los vídeos nuevos</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="al-impulso" onchange="saveAlgoConfig()"><span class="slider-t"></span></label>
+        </div>
+        <label style="font-size:.85rem;color:rgba(255,255,255,.7);">Vistas garantizadas:
+          <input type="number" id="al-impulso-vistas" min="100" max="50000" step="100" onchange="saveAlgoConfig()" style="width:90px;margin-left:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 8px;color:#fff;outline:none;">
+        </label>
+        <div id="al-aviso" style="margin-top:12px;font-size:.82rem;line-height:1.5;"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;">
+        <button onclick="recalcScores()" id="al-run" style="background:rgba(34,88,168,.5);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:9px 16px;cursor:pointer;font-size:.85rem;">▶ Recalcular scores ahora</button>
+        <span id="al-status" style="font-size:.8rem;color:rgba(255,255,255,.5);"></span>
+      </div>
+
+      <h3 style="margin-bottom:10px;font-size:.95rem;">Top 10 vídeos por score</h3>
+      <div id="al-top" style="max-width:760px;"><div class="empty">Cargando...</div></div>
+    </div>
     <div class="section" id="sec-admins">
       <div class="page-title">Gestión de administradores</div>
       <div class="filter-banner">
@@ -369,7 +414,8 @@ window._fns = {
   deleteVideo: httpsCallable(functions, 'adminDeleteVideo'),
   deleteUser: httpsCallable(functions, 'adminDeleteUser'),
   setStatus: httpsCallable(functions, 'adminSetUserStatus'),
-  runRobot: httpsCallable(functions, 'viralRobotRunNow')
+  runRobot: httpsCallable(functions, 'viralRobotRunNow'),
+  recalcScores: httpsCallable(functions, 'calcularScoresNow')
 };
 window._users = [];
 window._videos = [];
@@ -431,6 +477,7 @@ window.nav = function(sec, el) {
   if (sec === 'reports') renderReports();
   if (sec === 'emails') renderEmailLog();
   if (sec === 'robot') { loadRobotConfig(); renderRobotVideos(); }
+  if (sec === 'algoritmo') { loadAlgoConfig(); renderTopScores(); }
   toggleMenu();
 };
 
