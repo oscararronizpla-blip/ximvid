@@ -507,6 +507,91 @@ window.toggleRobotCat = function(k) {
   cf.categorias = cats;
   saveRobotConfig();
 };
+window._algoConf = null;
+
+window.loadAlgoConfig = async function() {
+  try {
+    const snap = await getDoc(doc(db, 'config', 'algoritmo'));
+    const cf = snap.exists() ? snap.data() : {};
+    window._algoConf = cf;
+    document.getElementById('al-boost').value   = cf.boostPremiumCada || 4;
+    document.getElementById('al-ventana').value = cf.ventanaVistosDias || 14;
+    document.getElementById('al-cuota').value   = cf.cuotaArranque || 30;
+    document.getElementById('al-peso').value    = cf.pesoEngagement || 50;
+    document.getElementById('al-impulso').checked = !!cf.impulsoInicialActivo;
+    document.getElementById('al-impulso-vistas').value = cf.impulsoInicialVistas || 4000;
+    const st = document.getElementById('al-status');
+    if (cf.ultimoCalculo && cf.ultimoCalculo.toDate) {
+      st.textContent = 'Ultimo calculo: ' + cf.ultimoCalculo.toDate().toLocaleString('es-ES') + ' (' + (cf.ultimoCalculoVideos || 0) + ' videos)';
+    }
+    window.calcAvisoAlgo();
+  } catch(e) { console.error('loadAlgoConfig:', e); }
+};
+
+window.calcAvisoAlgo = function() {
+  const el = document.getElementById('al-aviso');
+  if (!el) return;
+  try {
+    const objetivo = parseInt(document.getElementById('al-impulso-vistas').value) || 4000;
+    const usuarios = (window._users || []).length;
+    const impresionesDia = Math.max(1, usuarios * 20);
+    const pct = Math.round((objetivo / impresionesDia) * 100);
+    let color = '#5bd97a', txt = 'Viable con tu trafico actual.';
+    if (pct > 30) { color = '#e5484d'; txt = 'NO viable: consumiria casi todo el feed. No lo actives ni lo anuncies.'; }
+    else if (pct > 10) { color = '#f0b429'; txt = 'Ajustado: usalo con cuidado.'; }
+    el.innerHTML = '<span style="color:' + color + ';font-weight:600;">Estimacion:</span> con ~' + usuarios + ' usuarios (~' + impresionesDia + ' impresiones/dia), garantizar ' + objetivo + ' vistas a un video consumiria el <b style="color:' + color + '">' + pct + '%</b> del feed diario. ' + txt;
+  } catch(e) {}
+};
+
+window.saveAlgoConfig = async function() {
+  try {
+    await updateDoc(doc(db, 'config', 'algoritmo'), {
+      boostPremiumCada: Math.max(2, Math.min(10, parseInt(document.getElementById('al-boost').value) || 4)),
+      ventanaVistosDias: Math.max(1, Math.min(90, parseInt(document.getElementById('al-ventana').value) || 14)),
+      cuotaArranque: Math.max(5, Math.min(500, parseInt(document.getElementById('al-cuota').value) || 30)),
+      pesoEngagement: Math.max(1, Math.min(200, parseInt(document.getElementById('al-peso').value) || 50)),
+      impulsoInicialActivo: document.getElementById('al-impulso').checked,
+      impulsoInicialVistas: Math.max(100, parseInt(document.getElementById('al-impulso-vistas').value) || 4000),
+      actualizadoEn: serverTimestamp()
+    });
+    window.calcAvisoAlgo();
+  } catch(e) { console.error(e); alert('Error guardando: ' + e.message); }
+};
+
+window.recalcScores = async function() {
+  const btn = document.getElementById('al-run');
+  const st = document.getElementById('al-status');
+  btn.disabled = true; btn.textContent = 'Calculando...';
+  try {
+    const r = await window._fns.recalcScores({});
+    st.textContent = 'OK: ' + (r.data.total || 0) + ' videos puntuados.';
+    window.renderTopScores();
+    window.loadAlgoConfig();
+  } catch(e) {
+    st.textContent = 'Error: ' + e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Recalcular scores ahora';
+};
+
+window.renderTopScores = function() {
+  const el = document.getElementById('al-top');
+  if (!el) return;
+  const vids = (window._videos || []).slice().sort(function(a,b){ return (b.score||0) - (a.score||0); }).slice(0,10);
+  if (vids.length === 0) { el.innerHTML = '<div class="empty">Sin videos</div>'; return; }
+  el.innerHTML = vids.map(function(v,i) {
+    const prem = v.isPremiumUser ? '<span style="color:#f0b429;">*</span> ' : '';
+    const gracia = v.scoreEnGracia ? '<span style="color:#5bd97a;font-size:.75rem;"> (arranque)</span>' : '';
+    const eng = (v.scoreEngagement || 0) + '%';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.07);font-size:.85rem;">' +
+      '<span style="color:rgba(255,255,255,.4);width:22px;">' + (i+1) + '</span>' +
+      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + prem + ((v.description || '(sin descripcion)').slice(0,50)) + gracia + '</span>' +
+      '<span style="color:rgba(255,255,255,.5);width:70px;text-align:right;">' + (v.views||0) + ' vistas</span>' +
+      '<span style="color:rgba(255,255,255,.5);width:60px;text-align:right;">' + eng + '</span>' +
+      '<span style="color:#f0b429;font-weight:700;width:60px;text-align:right;">' + (v.score||0) + '</span>' +
+    '</div>';
+  }).join('');
+};
+
 window.saveRobotConfig = async function() {
   try {
     const cf = window._robotConf || {};
