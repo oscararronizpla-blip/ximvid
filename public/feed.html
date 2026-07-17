@@ -492,6 +492,10 @@ onAuthStateChanged(auth, async (user) => {
 let currentTab = 'foryou';
 let videos = [];
 let currentIndex = 0;
+let feedCursorScore = null;   // ultimo doc cargado (cursor por score)
+let cargandoMas = false;      // evita cargas duplicadas
+let feedAgotado = false;      // true cuando no quedan mas videos
+let idsCargados = new Set();  // ids ya en el feed (evita duplicados)
 let currentVideo = null;
 
 // ── TABS ─────────────────────────────────────────────────────
@@ -645,8 +649,15 @@ async function loadFeed(tab) {
     const snap = await fb.getDocs(q);
     videos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
+    // Reset de paginacion en cada carga de feed
+    feedCursorScore = snap.docs.length ? snap.docs[snap.docs.length - 1] : null;
+    feedAgotado = snap.docs.length < 40;
+    cargandoMas = false;
+    idsCargados = new Set(videos.map(v => v.id));
+
     // ── ALGORITMO: filtrar vistos + inyectar premium (solo feed principal)
     const esFeedPrincipal = (tab === 'foryou' || !tab || tab === 'home');
+    window._esFeedPrincipal = esFeedPrincipal;
     if (esFeedPrincipal && window._algo) {
       try {
         videos = window._algo.filtrarVistos(videos, 5);
@@ -679,6 +690,7 @@ async function loadFeed(tab) {
           videos = mezcla;
         }
         videos = videos.slice(0, 25);
+        idsCargados = new Set(videos.map(v => v.id));
       } catch(e) { console.warn('algoritmo feed:', e); }
     }
 
@@ -801,6 +813,74 @@ function renderFeed() {
   }
 }
 
+// ── PAGINACION: cargar mas videos (mantiene score, no-repetidos, premium) ──
+async function cargarMasVideos() {
+  if (cargandoMas || feedAgotado || !window._esFeedPrincipal) return;
+  if (!feedCursorScore) return;
+  cargandoMas = true;
+  try {
+    const fb = window._fb, db = window._db;
+    const q = fb.query(
+      fb.collection(db, 'videos'),
+      fb.where('isActive', '==', true),
+      fb.orderBy('score', 'desc'),
+      fb.startAfter(feedCursorScore),
+      fb.limit(30)
+    );
+    const snap = await fb.getDocs(q);
+    if (snap.empty) { feedAgotado = true; return; }
+    feedCursorScore = snap.docs[snap.docs.length - 1];
+    if (snap.docs.length < 30) feedAgotado = true;
+
+    let nuevos = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                          .filter(v => !idsCargados.has(v.id));
+    // Priorizar no vistos, pero si no quedan, mostrar los que sean (nunca vacio)
+    if (window._algo) {
+      const noVistos = nuevos.filter(v => !window._algo.estaVisto(v.id));
+      if (noVistos.length > 0) nuevos = noVistos;
+    }
+    if (nuevos.length === 0) { return; }
+
+    nuevos.forEach(v => { idsCargados.add(v.id); });
+    const base = videos.length;
+    videos = videos.concat(nuevos);
+    nuevos.forEach((v, i) => appendSlide(v, base + i));
+  } catch(e) {
+    console.warn('cargarMasVideos:', e);
+    feedAgotado = true;
+  } finally {
+    cargandoMas = false;
+  }
+}
+
+// Crea un slide y lo engancha (misma estructura que renderFeed)
+function appendSlide(video, idx) {
+  const feed = document.getElementById('feed');
+  const slide = document.createElement('div');
+  slide.className = 'slide';
+  slide.dataset.idx = idx;
+  const videoEl = document.createElement('video');
+  videoEl.className = 'slide-video';
+  videoEl.src = video.videoURL || '';
+  videoEl.loop = true; videoEl.muted = true; videoEl.playsInline = true;
+  videoEl.preload = 'metadata';
+  if (video.thumbnailURL) videoEl.poster = video.thumbnailURL;
+  videoEl.setAttribute('playsinline', '');
+  videoEl.setAttribute('webkit-playsinline', '');
+  slide.appendChild(videoEl);
+  const gt = document.createElement('div'); gt.className = 'slide-gradient-top';
+  const gb = document.createElement('div'); gb.className = 'slide-gradient-bottom';
+  slide.appendChild(gt); slide.appendChild(gb);
+  const sp = document.createElement('div'); sp.className = 'slide-spinner';
+  sp.innerHTML = '<div></div><div></div>';
+  slide.appendChild(sp);
+  videoEl.addEventListener('waiting', () => sp.classList.add('show'));
+  videoEl.addEventListener('playing', () => sp.classList.remove('show'));
+  videoEl.addEventListener('canplay', () => sp.classList.remove('show'));
+  feed.appendChild(slide);
+  if (window._feedObserver) window._feedObserver.observe(slide);
+}
+
 // ── INTERSECTION OBSERVER ─────────────────────────────────────
 function setupObserver() {
   const observer = new IntersectionObserver((entries) => {
@@ -849,6 +929,7 @@ function setupObserver() {
     });
   }, { threshold: 0.7 });
 
+  window._feedObserver = observer;
   document.querySelectorAll('.slide').forEach(s => observer.observe(s));
 }
 
@@ -856,6 +937,8 @@ function setupObserver() {
 async function updateSlide(idx) {
   const video = videos[idx];
   if (!video) return;
+  // Paginacion: si nos acercamos al final, cargar mas (a 3 del final)
+  if (idx >= videos.length - 3) { cargarMasVideos(); }
   // VENTANA DE PRECARGA (como TikTok): buffea el actual + 2 siguientes y 1 anterior
   const slides = document.querySelectorAll('.slide');
   slides.forEach((s, i) => {
