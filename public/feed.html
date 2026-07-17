@@ -405,7 +405,7 @@ html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, query, where, orderBy, limit, getDocs, doc, getDoc, updateDoc, increment, setDoc, deleteDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, orderBy, limit, startAfter, getDocs, doc, getDoc, updateDoc, increment, setDoc, deleteDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
@@ -422,7 +422,7 @@ window._db = db;
 window._auth = getAuth(app);
 window._auth = auth;
 window._db = db;
-window._fb = { collection, query, where, orderBy, limit, getDocs, doc, getDoc, updateDoc, increment, setDoc, deleteDoc, serverTimestamp, addDoc };
+window._fb = { collection, query, where, orderBy, limit, startAfter, getDocs, doc, getDoc, updateDoc, increment, setDoc, deleteDoc, serverTimestamp, addDoc };
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
