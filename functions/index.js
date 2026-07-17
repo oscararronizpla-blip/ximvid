@@ -42,3 +42,7 @@ exports.calcularScoresNow    = scores.calcularScoresNow;
 // RTDN: notificaciones en tiempo real de Google Play (renovaciones, cancelaciones)
 const rtdn = require('./rtdn');
 exports.playBillingRTDN = rtdn.playBillingRTDN;
+
+// Eliminacion de cuentas: purga programada (30 dias tras solicitud)
+const accountDeletion = require('./account-deletion');
+exports.purgarCuentas = accountDeletion.purgarCuentas;

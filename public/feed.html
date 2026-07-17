@@ -440,6 +440,35 @@ onAuthStateChanged(auth, async (user) => {
         window._userData = {...snap.data(), uid: user.uid};
       }
     } catch(e) {}
+    // Cuenta pendiente de eliminacion: ofrecer reactivar o salir
+    if (window._userData && window._userData.accountStatus === 'pending_deletion') {
+      const reactivar = confirm('Tu cuenta esta pendiente de eliminacion definitiva. Quieres cancelar la eliminacion y reactivar tu cuenta?');
+      if (reactivar) {
+        try {
+          await window._fb.updateDoc(window._fb.doc(window._db, 'users', user.uid), {
+            accountStatus: 'active',
+            deletionRequestedAt: null,
+            statusChangedAt: window._fb.serverTimestamp()
+          });
+          const misVids = await window._fb.getDocs(window._fb.query(
+            window._fb.collection(window._db, 'videos'),
+            window._fb.where('userId', '==', user.uid)
+          ));
+          for (const d of misVids.docs) {
+            if (d.data().deactivatedByDeletion) {
+              await window._fb.updateDoc(d.ref, { isActive: true, deactivatedByDeletion: null });
+            }
+          }
+          window._userData.accountStatus = 'active';
+          alert('Tu cuenta ha sido reactivada.');
+        } catch(e) { console.error('Error reactivando:', e); }
+      } else {
+        const { getAuth, signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+        await signOut(getAuth());
+        window.location.href = '/welcome.html';
+        return;
+      }
+    }
 
     // Actualizar ubicacion silenciosa
     if (navigator.geolocation) {

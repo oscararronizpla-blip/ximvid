@@ -201,7 +201,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 <div class="modal-overlay" id="delete-modal">
   <div class="modal-box">
     <div class="modal-title">Eliminar cuenta</div>
-    <div class="modal-sub">Esta acción es irreversible. Perderás todos tus videos y datos. Introduce tu contraseña para confirmar.</div>
+    <div class="modal-sub">Tu cuenta se desactivará ahora y se eliminará definitivamente junto con todos tus vídeos y datos en 30 días. Si inicias sesión antes de ese plazo, podrás cancelar la eliminación. Introduce tu contraseña para confirmar.</div>
     <div class="modal-field">
       <label>Contraseña</label>
       <input type="password" id="delete-pass" placeholder="Tu contraseña actual">
@@ -215,7 +215,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
@@ -229,7 +229,7 @@ const app = initializeApp({
 const auth = getAuth(app);
 const db = getFirestore(app);
 window._auth = auth; window._db = db;
-window._fb = { doc, getDoc, updateDoc, serverTimestamp, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, signOut };
+window._fb = { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, signOut };
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = '/welcome.html'; return; }
@@ -365,12 +365,21 @@ async function confirmDelete() {
     const user = window._currentUser;
     const cred = window._fb.EmailAuthProvider.credential(user.email, pass);
     await window._fb.reauthenticateWithCredential(user, cred);
-    // Baja voluntaria (soft): la cuenta se oculta pero el email sigue siendo suyo.
-    // Al volver a entrar se reactivara automaticamente.
+    // Eliminacion programada: 30 dias de ventana, luego la purga diaria borra todo.
     await window._fb.updateDoc(
       window._fb.doc(window._db, 'users', user.uid),
-      { accountStatus: 'self_paused', statusChangedAt: window._fb.serverTimestamp() }
+      { accountStatus: 'pending_deletion', deletionRequestedAt: window._fb.serverTimestamp(), statusChangedAt: window._fb.serverTimestamp() }
     );
+    // Ocultar sus videos durante la ventana de 30 dias
+    try {
+      const vidsSnap = await window._fb.getDocs(window._fb.query(
+        window._fb.collection(window._db, 'videos'),
+        window._fb.where('userId', '==', user.uid)
+      ));
+      for (const d of vidsSnap.docs) {
+        await window._fb.updateDoc(d.ref, { isActive: false, deactivatedByDeletion: true });
+      }
+    } catch(e) { console.error('Error ocultando videos:', e); }
     await window._fb.signOut(window._auth);
     localStorage.clear();
     window.location.href = '/welcome.html';
