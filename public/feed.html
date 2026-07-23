@@ -967,7 +967,7 @@ async function updateSlide(idx) {
   const video = videos[idx];
   if (!video) return;
   // Paginacion: si nos acercamos al final, cargar mas (a 3 del final)
-  if (idx >= videos.length - 3) { cargarMasVideos(); }
+  if (currentTab === "foryou" && idx >= videos.length - 3) { cargarMasVideos(); }
   // VENTANA DE PRECARGA (como TikTok): buffea el actual + 2 siguientes y 1 anterior
   const slides = document.querySelectorAll('.slide');
   slides.forEach((s, i) => {
