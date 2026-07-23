@@ -1475,7 +1475,10 @@ async function registerActionClick(videoId) {
       { actionClicks: window._fb.increment(1) }
     );
     const creatorId = window._currentVideoData?.userId;
-    if (window._algo) window._algo.registrarInteraccion(videoId, creatorId, 'cta');
+    if (window._algo) {
+      window._algo.registrarInteraccion(videoId, creatorId, 'cta');
+      window._algo.registrarClick(videoId, creatorId, 'cta', null);
+    }
     if (creatorId) {
       const me = window._userData || {};
       const actor = (me.uid && me.username) ? { actorUid: me.uid, actorUsername: me.username, actorName: me.name || '' } : null;
@@ -1508,7 +1511,10 @@ async function registerSocialClick(videoId, network) {
       update
     );
     const creatorId = window._currentVideoData?.userId;
-    if (window._algo) window._algo.registrarInteraccion(videoId, creatorId, 'social');
+    if (window._algo) {
+      window._algo.registrarInteraccion(videoId, creatorId, 'social');
+      window._algo.registrarClick(videoId, creatorId, 'social', network);
+    }
     const netName = network.charAt(0).toUpperCase() + network.slice(1);
     if (creatorId) {
       const me = window._userData || {};

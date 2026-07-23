@@ -128,7 +128,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
       <div class="metric-icon">👆</div>
       <span class="metric-value" id="m-clicks">0</span>
       <div class="metric-label">Clics CTA</div>
-      <div class="metric-trend neutral" id="t-clicks">total acumulado</div>
+      <div class="metric-trend neutral" id="t-clicks">en el periodo</div>
     </div>
     <div class="metric-card">
       <div class="metric-icon">🔗</div>
@@ -239,27 +239,35 @@ async function loadStats(period) {
       return t && t >= dateFrom;
     });
 
-    // Totales acumulados (todos los videos, sin filtro fecha)
-    let totalViews = 0, totalClicks = 0, totalSocial = 0;
-    allVideos.forEach(v => {
-      totalViews += v.views || 0;
-      totalClicks += v.actionClicks || 0;
-    });
+    // Vistas: acumulado (no hay registro fechado de vistas)
+    let totalViews = 0;
+    allVideos.forEach(v => { totalViews += v.views || 0; });
 
-    // Clics en redes y lista: solo videos del período
-    filteredVideos.forEach(v => { totalSocial += v.socialClicks || 0; });
-    document.getElementById('m-social').textContent = formatNum(totalSocial);
-
-    // Construir mapa de clics por red (solo período)
+    // CLICS: leer de la coleccion 'clicks' y filtrar por fecha real del evento
+    let totalClicks = 0, totalSocial = 0;
     const socialClicks = {};
-    filteredVideos.forEach(v => {
-      Object.keys(v).forEach(k => {
-        if (k.startsWith('net_')) {
-          const net = k.replace('net_', '');
-          socialClicks[net] = (socialClicks[net] || 0) + (v[k] || 0);
-        }
+    const desdeMs = dateFrom.getTime();
+    try {
+      const cq = window._fb.query(
+        window._fb.collection(window._db, 'clicks'),
+        window._fb.where('creatorId', '==', uid)
+      );
+      const cSnap = await window._fb.getDocs(cq);
+      cSnap.docs.forEach(d => {
+        const ev = d.data().events || [];
+        ev.forEach(e => {
+          if (!e.ts || e.ts < desdeMs) return;
+          if (e.tipo === 'social') {
+            totalSocial++;
+            const net = e.network || 'otra';
+            socialClicks[net] = (socialClicks[net] || 0) + 1;
+          } else {
+            totalClicks++;
+          }
+        });
       });
-    });
+    } catch(err) { console.warn('clicks:', err); }
+    document.getElementById('m-social').textContent = formatNum(totalSocial);
 
     // Mostrar métricas
     document.getElementById('m-views').textContent = formatNum(totalViews);

@@ -90,6 +90,17 @@ service cloud.firestore {
                     && request.resource.data.creatorId != request.auth.uid;
       allow delete: if isAdmin();
     }
+    match /clicks/{clickId} {
+      allow read: if request.auth != null
+                    && (isAdmin() || isModerator()
+                        || resource.data.creatorId == request.auth.uid
+                        || resource.data.userId == request.auth.uid);
+      allow create, update: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && clickId == request.resource.data.videoId + '_' + request.auth.uid
+                    && request.resource.data.events.size() <= 3;
+      allow delete: if isAdmin();
+    }
     match /config/{configId} {
       allow read: if true;
       allow write: if (configId == 'robot' || configId == 'algoritmo') && isAdmin();
