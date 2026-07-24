@@ -1,12 +1,6 @@
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-// ── Stripe Payment Flow ──────────────────────────────────────────
-const stripeFlow = require('./stripe-payment-flow');
-exports.createStripePaymentIntent = stripeFlow.createStripePaymentIntent;
-exports.cancelStripeSubscription  = stripeFlow.cancelStripeSubscription;
-exports.getStripeBillingPortal    = stripeFlow.getStripeBillingPortal;
-exports.stripeWebhook             = stripeFlow.stripeWebhook;
 
 // Email triggers (notificaciones por email via Gmail)
 const emailTriggers = require('./email-triggers');

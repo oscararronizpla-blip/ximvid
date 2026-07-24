@@ -1505,7 +1505,6 @@ async function registerSocialClick(videoId, network) {
   try {
     const update = { socialClicks: window._fb.increment(1) };
     update['net_' + network] = window._fb.increment(1);
-    update['week_net_' + network] = window._fb.increment(1);
     await window._fb.updateDoc(
       window._fb.doc(window._db, 'videos', videoId),
       update

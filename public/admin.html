@@ -173,6 +173,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
           <option value="">Todos los estados</option>
           <option value="active">Activos</option>
           <option value="self_paused">Pausados</option>
+          <option value="pending_deletion">Pendientes de baja</option>
           <option value="admin_banned">Baneados</option>
         </select>
         <select id="u-vidfilter" onchange="renderUserVideos()">
@@ -708,6 +709,7 @@ function renderDashboard() {
     ['Usuarios totales', u.length],
     ['Activos', u.filter(x => !x.accountStatus || x.accountStatus==='active').length],
     ['Pausados', u.filter(x => x.accountStatus==='self_paused').length],
+    ['Pendientes de baja', u.filter(x => x.accountStatus==='pending_deletion').length],
     ['Baneados', u.filter(x => x.accountStatus==='admin_banned').length],
     ['Premium', u.filter(x => x.isPremium).length],
     ['Videos totales', v.length],
@@ -780,8 +782,8 @@ window.renderUserList = function() {
   if(!list.length){ el.innerHTML='<div class=\"empty\">Sin resultados</div>'; return; }
   el.innerHTML = list.map(u => {
     const st = u.accountStatus||'active';
-    const sc = st==='admin_banned'?'st-banned':(st==='self_paused'?'st-paused':'st-active');
-    const sl = st==='admin_banned'?'Baneado':(st==='self_paused'?'Pausado':'Activo');
+    const sc = st==='admin_banned'?'st-banned':((st==='self_paused'||st==='pending_deletion')?'st-paused':'st-active');
+    const sl = st==='admin_banned'?'Baneado':(st==='self_paused'?'Pausado':(st==='pending_deletion'?'Pendiente baja':'Activo'));
     const av = u.profilePhoto?`<img src=\"${u.profilePhoto}\">`:(u.name?u.name.charAt(0).toUpperCase():'?');
     const nv = window._videos.filter(v => v.userId===u.id).length;
     const sel = window._selectedUser===u.id?'selected':'';
@@ -806,7 +808,7 @@ window.renderUserCard = function() {
   if (!u) { card.style.display = 'none'; return; }
   const ts = t => t && t.seconds ? new Date(t.seconds*1000).toLocaleDateString('es-ES') : '—';
   const st = u.accountStatus || 'active';
-  const stLabel = st==='admin_banned' ? '<span style="color:#e5484d">🚫 Baneado</span>' : st==='self_paused' ? '<span style="color:#f0b429">⏸ Pausado</span>' : '<span style="color:#4caf50">✓ Activo</span>';
+  const stLabel = st==='admin_banned' ? '<span style="color:#e5484d">🚫 Baneado</span>' : st==='self_paused' ? '<span style="color:#f0b429">⏸ Pausado</span>' : st==='pending_deletion' ? '<span style="color:#f0b429">🕐 Pendiente de baja (30 días)</span>' : '<span style="color:#4caf50">✓ Activo</span>';
   const prem = u.isPremium ? '★ Sí' + (u.premiumUntil||u.premiumExpiresAt ? ' (hasta ' + ts(u.premiumUntil||u.premiumExpiresAt) + ')' : '') : 'No';
   const strikes = u.rejectedCount || 0;
   const nv = window._videos.filter(v => v.userId === u.id);
