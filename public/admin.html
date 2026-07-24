@@ -620,7 +620,16 @@ window.runRobotNow = async function() {
       window._videos = vs.docs.map(d => ({id: d.id, ...d.data()}));
     } catch(e) { console.error(e); }
     renderRobotVideos(); loadRobotConfig();
-  } catch(e) { console.error(e); st.textContent = 'Error: ' + (e.message || e); }
+  } catch(e) {
+    console.error(e);
+    const msg = (e.message || e || '').toString();
+    if (msg.includes('deadline-exceeded') || msg.includes('deadline') || msg.includes('internal')) {
+      // El navegador dejo de esperar, pero la function sigue insertando en segundo plano
+      st.textContent = '⏳ El robot sigue trabajando en segundo plano. Los vídeos irán apareciendo en 1-2 min. Recarga la página para verlos.';
+    } else {
+      st.textContent = 'Error: ' + msg;
+    }
+  }
   btn.disabled = false; btn.textContent = '▶ Ejecutar ahora';
 };
 window.renderRobotVideos = function() {
