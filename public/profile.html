@@ -212,6 +212,9 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
     <div class="section-action" onclick="window.location.href='/upload.html'">+ Subir</div>
   </div>
   <div class="videos-grid" id="videos-grid"></div>
+  <div id="ver-todos-videos" onclick="window.location.href='/mis-videos.html'" style="display:none;align-items:center;justify-content:center;gap:6px;padding:12px;margin:0 0 24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;cursor:pointer;color:#f0b429;font-size:.9rem;font-weight:600;">
+    <span>Ver todos</span> <span style="color:#9fb0d0;">›</span>
+  </div>
 
   <!-- UPLOAD CTA (si no tiene videos) -->
   <div class="upload-cta" id="upload-cta" style="display:none" onclick="window.location.href='/upload.html'">
@@ -249,6 +252,11 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
   <div class="menu-section">
     <div class="menu-section-title">Mi contenido</div>
     <div class="menu-card">
+      <div class="menu-item" onclick="window.location.href='/mis-videos.html'">
+        <div class="menu-icon green">🎬</div>
+        <div class="menu-text"><strong>Tus vídeos</strong><span>Todos tus vídeos publicados</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
       <div class="menu-item" onclick="window.location.href='/upload.html'">
         <div class="menu-icon green">📹</div>
         <div class="menu-text"><strong>Subir nuevo video</strong><span>Desde galería o cámara</span></div>
@@ -457,10 +465,10 @@ function renderVideos(videos, userData) {
 
   let totalViews = 0, totalClicks = 0;
 
-  videos.forEach((video, idx) => {
-    totalViews += video.views || 0;
-    totalClicks += video.actionClicks || 0;
+  videos.forEach(v => { totalViews += v.views || 0; totalClicks += v.actionClicks || 0; });
 
+  const visibles = videos.slice(0, 3);
+  visibles.forEach((video, idx) => {
     const div = document.createElement('div');
     div.className = 'video-thumb';
     div.innerHTML = `
@@ -478,6 +486,12 @@ function renderVideos(videos, userData) {
     });
     grid.appendChild(div);
   });
+
+  const verTodos = document.getElementById('ver-todos-videos');
+  if (verTodos) {
+    verTodos.style.display = videos.length > 3 ? 'flex' : 'none';
+    const sp = verTodos.querySelector('span'); if (sp) sp.textContent = 'Ver todos (' + videos.length + ')';
+  }
 
   document.getElementById('stat-videos').textContent = formatNum(videos.length);
   document.getElementById('stat-views').textContent = formatNum(totalViews);
