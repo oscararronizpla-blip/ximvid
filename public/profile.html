@@ -413,6 +413,18 @@ onAuthStateChanged(auth, async (user) => {
     const videos = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     window._userVideos = videos;
     renderVideos(videos, userData);
+    // Si venimos de mis-videos con ?edit=ID, abrir el editor de ese video
+    try {
+      const editId = new URLSearchParams(location.search).get('edit');
+      if (editId) {
+        const idx = videos.findIndex(v => v.id === editId);
+        if (idx >= 0) {
+          currentVideoId = editId;
+          currentVideoIdx = idx;
+          if (typeof openEditVideo === 'function') openEditVideo();
+        }
+      }
+    } catch(e) {}
 
   } catch(e) {
     console.error(e);
