@@ -1434,7 +1434,7 @@ window.submitReport = async function(){
 function shareVideo() {
   const video = window._currentVideoData;
   if (!video) return;
-  const url = 'https://ximvid-c8627.web.app/feed.html?video=' + video.id;
+  const url = 'https://ximvid.com/feed.html?video=' + video.id;
   const txt = 'Mira este vídeo en Ximvid 👉 ' + url;
   if (window.Capacitor && window.Capacitor.Plugins.Share) {
     window.Capacitor.Plugins.Share.share({ title: 'Ximvid', text: txt, url });

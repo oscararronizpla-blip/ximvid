@@ -149,7 +149,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
       <div class="landing-opts">
         <div class="landing-opt selected" id="opt-auto" onclick="selectLanding('auto')">
           <div class="landing-radio"><div class="landing-dot"></div></div>
-          <div class="landing-text"><strong>✨ Ximvid la genera</strong><span id="my-url">app.ximvid.com/...</span></div>
+          <div class="landing-text"><strong>✨ Ximvid la genera</strong><span id="my-url">ximvid.com/...</span></div>
         </div>
         <div class="landing-opt" id="opt-external" onclick="selectLanding('external')">
           <div class="landing-radio"><div class="landing-dot"></div></div>
@@ -191,7 +191,7 @@ onAuthStateChanged(auth, async (user) => {
       document.getElementById('bio-count').textContent=(d.shortDescription||'').length+'/150';
       document.getElementById('cta-text').value = d.actionButtonText||'';
       document.getElementById('cta-url').value = d.actionButtonURL||'';
-      document.getElementById('my-url').textContent = 'app.ximvid.com/'+(d.username||'...');
+      document.getElementById('my-url').textContent = 'ximvid.com/'+(d.username||'...');
       if (d.landingType==='external') { selectLanding('external'); document.getElementById('landing-url').value=d.externalLandingURL||''; }
       if (d.bannerPhoto) {
         document.getElementById('banner-preview').src=d.bannerPhoto;
