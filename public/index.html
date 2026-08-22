@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<script src="/js/device-gate.js"></script>
 <script>
 // Si estamos dentro de la app nativa (Capacitor), saltar directo al feed.
 // En la web normal, esto no se activa y se muestra la landing.
@@ -1403,7 +1402,7 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
     <a href="#faq">FAQ</a>
   </div>
   <div style="display:flex;gap:12px;align-items:center">
-    <a href="#" class="nav-ghost">Iniciar sesión</a>
+    <a href="https://play.google.com/apps/internaltest/4701624204487004333" class="nav-ghost">Iniciar sesión</a>
     <a href="#cta" class="btn-m">Empieza gratis</a>
   </div>
 </nav>
@@ -1766,16 +1765,20 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
 <section id="cta">
   <div class="wrap" style="text-align:center;position:relative;z-index:2">
     <h2 class="cta-h">Un video.<br><em>Todo el mundo</em><br><span style="font-size:.6em;color:rgba(255,255,255,.25);font-weight:300">en cada red.</span></h2>
-    <p class="cta-s">Disponible en iOS y Android. Gratis para siempre.</p>
+    <p class="cta-s">Disponible en Google Play. Gratis para siempre.</p>
     <div class="cta-bt">
-      <a href="#" class="btn-m btn-m-lg">
+      <a href="#cta" class="btn-m btn-m-lg">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9L5 21V3z"/></svg>
         Empieza gratis — sin tarjeta
       </a>
     </div>
     <div class="store-row">
-      <a href="#" class="sbtn"><svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg><div><div class="ssub">Disponible en</div><div class="snm">App Store</div></div></a>
-      <a href="#" class="sbtn"><svg viewBox="0 0 24 24"><path d="M3.18 23.76c.3.17.64.22.98.16l.06-.03 11.2-6.47-2.44-2.44-9.8 8.78zm-1.04-19.9a2 2 0 00-.14.72v18.84c0 .26.05.5.14.72l.07.07 10.55-10.55v-.25L2.21 3.79l-.07.07zM19.66 10.3l-2.4-1.38-2.71 2.71 2.71 2.71 2.42-1.4c.69-.4.69-1.05-.02-1.64zm-16.5 12.17l.07-.04 11.88-6.87-2.44-2.43-9.51 9.34z"/></svg><div><div class="ssub">Disponible en</div><div class="snm">Google Play</div></div></a>
+      
+      <a href="https://play.google.com/apps/internaltest/4701624204487004333" class="sbtn"><svg viewBox="0 0 24 24"><path d="M3.18 23.76c.3.17.64.22.98.16l.06-.03 11.2-6.47-2.44-2.44-9.8 8.78zm-1.04-19.9a2 2 0 00-.14.72v18.84c0 .26.05.5.14.72l.07.07 10.55-10.55v-.25L2.21 3.79l-.07.07zM19.66 10.3l-2.4-1.38-2.71 2.71 2.71 2.71 2.42-1.4c.69-.4.69-1.05-.02-1.64zm-16.5 12.17l.07-.04 11.88-6.87-2.44-2.43-9.51 9.34z"/></svg><div><div class="ssub">Disponible en</div><div class="snm">Google Play</div></div></a>
+    </div>
+    <div style="margin-top:36px;display:flex;flex-direction:column;align-items:center;gap:12px">
+      <img src="/img/qr-web.png" alt="QR para probar Ximvid" style="width:150px;height:150px;border-radius:14px;background:#fff;padding:10px;box-shadow:0 8px 30px rgba(0,0,0,.3)">
+      <span style="font-size:.9rem;color:rgba(255,255,255,.55);max-width:260px">Escanea con tu movil para probar Ximvid al instante, sin descargar nada</span>
     </div>
   </div>
 </section>
@@ -1790,9 +1793,9 @@ html { -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
     </div>
     <div class="fcol"><h4>Producto</h4><a href="#">Cómo funciona</a><a href="#">Las 45 redes</a><a href="#">Plan Premium</a><a href="#">Estadísticas</a><a href="#">Importar TikTok</a></div>
     <div class="fcol"><h4>Empresa</h4><a href="#">Acerca de</a><a href="#">Blog</a><a href="#">Prensa</a><a href="#">Afiliados</a><a href="#">Contacto</a></div>
-    <div class="fcol"><h4>Legal</h4><a href="https://ximvid.com/privacy.html">Privacidad</a><a href="https://ximvid.com/terms.html">Términos</a><a href="#">Cookies</a><a href="#">GDPR</a><a href="#">Eliminar cuenta</a></div>
+    <div class="fcol"><h4>Legal</h4><a href="https://ximvid.com/privacy.html">Privacidad</a><a href="https://ximvid.com/terms.html">Términos</a><a href="https://ximvid.com/privacy.html">Cookies</a><a href="https://ximvid.com/privacy.html">GDPR</a><a href="https://ximvid.com/eliminar-cuenta.html">Eliminar cuenta</a></div>
   </div>
-  <div class="fbot"><div class="fcopy">© 2026 Ximvid. Todos los derechos reservados.</div><div class="fsocs"><a href="#" class="fsi">ig</a><a href="#" class="fsi">tk</a><a href="#" class="fsi">yt</a><a href="#" class="fsi">in</a></div></div>
+  <div class="fbot"><div class="fcopy">© 2026 Ximvid. Todos los derechos reservados.</div><div class="fsocs"><a href="https://instagram.com/ximvid" target="_blank" rel="noopener" class="fsi">ig</a><a href="#" class="fsi">tk</a><a href="#" class="fsi">yt</a><a href="#" class="fsi">in</a></div></div>
 </footer>
 
 <script>
