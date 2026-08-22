@@ -29,7 +29,7 @@ function buildHtml(title, body) {
     <h2 style="color:#f0b429;font-weight:500;margin:0 0 16px">Ximvid</h2>
     <h3 style="font-weight:500;margin:0 0 12px">${title}</h3>
     <p style="color:#c9d4e3;line-height:1.6;margin:0 0 20px">${body}</p>
-    <a href="${process.env.APP_URL || 'https://app.ximvid.com'}" style="display:inline-block;background:#2258a8;color:#fff;text-decoration:none;padding:10px 20px;border-radius:10px">Abrir Ximvid</a>
+    <a href="${process.env.APP_URL || 'https://ximvid.com'}" style="display:inline-block;background:#2258a8;color:#fff;text-decoration:none;padding:10px 20px;border-radius:10px">Abrir Ximvid</a>
   </div>`;
 }
 

@@ -1,4 +1,4 @@
-const APP_URL = process.env.APP_URL || 'https://app.ximvid.com';
+const APP_URL = process.env.APP_URL || 'https://ximvid.com';
 
 const IMGS = {
   feed:     'https://storage.googleapis.com/ximvid-c8627.firebasestorage.app/email-assets/Screenshot_20260614_210637_Chrome.jpg',
