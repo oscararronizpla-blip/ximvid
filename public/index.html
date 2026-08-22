@@ -31,7 +31,18 @@
       }
     } catch(e) {}
     window.location.replace(goTo);
+    return;
   }
+  // Navegador movil (no app nativa): llevar al feed para que puedan probar (modelo TikTok)
+  try {
+    if (!window.Capacitor) {
+      var ua = navigator.userAgent || '';
+      var esMovil = /Android|iPhone|iPad|iPod|Mobile|IEMobile|Opera Mini/i.test(ua);
+      if (esMovil) {
+        window.location.replace('feed.html');
+      }
+    }
+  } catch(e) {}
 })();
 </script>
 <meta charset="UTF-8">
