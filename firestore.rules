@@ -42,7 +42,8 @@ service cloud.firestore {
           'net_linktree','net_onlyfans','net_spotify','net_soundcloud',
           'net_vimeo','net_behance','net_discord','net_bandcamp','net_mixcloud',
           'net_applemusic','net_clubhouse'
-        ])
+        ]) ||
+        (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['destacadoAdmin']))
       );
     }
 

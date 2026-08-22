@@ -690,6 +690,23 @@ async function loadFeed(tab) {
     if (esFeedPrincipal && window._algo) {
       try {
         videos = window._algo.filtrarVistos(videos, 5);
+        // ── DESTACADOS ADMIN: videos fijados que van primero (hasta que el usuario los ve) ──
+        try {
+          const destSnap = await fb.getDocs(fb.query(
+            fb.collection(db, 'videos'),
+            fb.where('isActive', '==', true),
+            fb.where('destacadoAdmin', '==', true),
+            fb.limit(10)
+          ));
+          let dest = destSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          // Solo los NO vistos (una vez visto, sigue el algoritmo normal)
+          dest = dest.filter(v => !window._algo.estaVisto(v.id));
+          if (dest.length > 0) {
+            const destIds = new Set(dest.map(v => v.id));
+            videos = videos.filter(v => !destIds.has(v.id)); // quitar duplicados
+            videos = dest.concat(videos); // destacados primero
+          }
+        } catch(e) { console.warn('destacados:', e); }
         let cada = 4;
         try {
           const cfgSnap = await fb.getDoc(fb.doc(db, 'config', 'algoritmo'));

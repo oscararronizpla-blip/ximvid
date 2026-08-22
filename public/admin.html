@@ -334,6 +334,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
   <button class="modal-close" onclick="closePlayer()">×</button>
   <div class="pv-col pv-left">
     <button class="pv-btn" onclick="downloadVideo()" title="Descargar">⬇</button>
+    <button class="pv-btn" id="pv-destacar" onclick="toggleDestacado()" title="Destacar en el feed">⭐</button>
     <button class="pv-btn danger" onclick="askDeleteCurrentVideo()" title="Eliminar">🗑</button>
   </div>
   <div class="pv-col pv-right">
@@ -1071,8 +1072,27 @@ window.openPlayer = function(vid) {
   const created = v.createdAt&&v.createdAt.seconds?new Date(v.createdAt.seconds*1000).toLocaleString():'';
   document.getElementById('player-info').innerHTML = `<strong>@${v.username||'?'}</strong> · ${v.category||'General'} · ${v.views||0} vistas<br><span style=\"color:rgba(255,255,255,.55)\">${v.description||''}</span><br><span style=\"font-size:.75rem;color:rgba(255,255,255,.4)\">${created} ${v.isActive===false?'· ELIMINADO':''}</span>`;
   document.getElementById('player-modal').classList.add('show');
+  // Reflejar estado destacado
+  const bd = document.getElementById('pv-destacar');
+  if (bd) { if (v.destacadoAdmin === true) { bd.classList.add('active'); bd.title='Quitar destacado'; } else { bd.classList.remove('active'); bd.title='Destacar en el feed'; } }
   p.play().catch(()=>{});
   document.getElementById('pc-play').textContent='⏸';
+};
+// ── DESTACAR / QUITAR DESTACADO (admin) ──
+window.toggleDestacado = async function(){
+  const v = window._currentVideo;
+  if (!v) return;
+  const nuevo = !(v.destacadoAdmin === true);
+  const bd = document.getElementById('pv-destacar');
+  try {
+    await window._dbfns.updateDoc(window._dbfns.doc(window._db, 'videos', v.id), { destacadoAdmin: nuevo });
+    v.destacadoAdmin = nuevo;
+    // actualizar en la lista local
+    const enLista = (window._videos||[]).find(x=>x.id===v.id);
+    if (enLista) enLista.destacadoAdmin = nuevo;
+    if (bd) { if(nuevo){ bd.classList.add('active'); bd.title='Quitar destacado'; } else { bd.classList.remove('active'); bd.title='Destacar en el feed'; } }
+    alert(nuevo ? '⭐ Video destacado: aparecera primero en el feed de todos los usuarios (hasta que cada uno lo vea).' : 'Destacado quitado.');
+  } catch(e){ alert('Error: '+e.message); }
 };
 window.closePlayer = function(){ const p=document.getElementById('player'); p.pause(); p.src=''; document.getElementById('player-modal').classList.remove('show'); };
 window.togglePlay = function(){ const p=document.getElementById('player'); if(p.paused){p.play();document.getElementById('pc-play').textContent='⏸';}else{p.pause();document.getElementById('pc-play').textContent='▶';} };
