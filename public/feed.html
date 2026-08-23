@@ -621,33 +621,19 @@ async function loadFeed(tab) {
       renderFeed();
       return;
     } else if (tab === 'nearby') {
-      // Mostrar slider
+      // Mostrar slider (funciona para usuarios logueados Y anonimos)
       document.getElementById('nearby-slider').style.display = 'block';
-      let myLat = window._userData?.lat;
-      let myLng = window._userData?.lng;
-      // Si no hay en memoria, leer de Firestore
-      if (!myLat || !myLng) {
-        try {
-          const usnap = await fb.getDoc(fb.doc(db, 'users', window._currentUser.uid));
-          if (usnap.exists()) { myLat = usnap.data().lat; myLng = usnap.data().lng; }
-        } catch(e) {}
-      }
-      if (!myLat || !myLng) {
-        document.getElementById('nearby-slider').style.display = 'none';
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(async (pos) => {
-            try {
-              const { latitude: lat, longitude: lng } = pos.coords;
-              window._userData.lat = lat;
-              window._userData.lng = lng;
-              await window._fb.updateDoc(window._fb.doc(window._db, 'users', window._currentUser.uid), { lat, lng });
-              loadFeed('nearby');
-            } catch(e) {}
-          }, () => {});
-        }
+      // Obtener ubicacion (de cuenta si esta logueado, o del navegador si es invitado)
+      const ubi = await getMiUbicacion();
+      if (!ubi) {
+        // Sin ubicacion: mostrar mensaje invitando a activarla
+        videos = [];
+        renderFeed();
+        showEmpty();
         return;
       }
-      // Cargar todos los videos activos y filtrar por distancia en cliente
+      const myLat = ubi.lat, myLng = ubi.lng;
+      // Cargar videos y filtrar por distancia en cliente
       const allSnap = await fb.getDocs(fb.query(
         fb.collection(db, 'videos'),
         fb.where('isActive', '==', true),
@@ -657,12 +643,13 @@ async function loadFeed(tab) {
       const filtered = allSnap.docs
         .map(d => ({id: d.id, ...d.data()}))
         .filter(v => {
-          const distOk = _nearbyKm === null || _nearbyKm === 99999 || (v.lat && v.lng && distanceKm(myLat, myLng, v.lat, v.lng) <= _nearbyKm);
+          const distOk = _nearbyKm === null || _nearbyKm === 99999 || (v.lat != null && v.lng != null && distanceKm(myLat, myLng, v.lat, v.lng) <= _nearbyKm);
           const catOk = !_activeCategory || v.category === _activeCategory;
           return distOk && catOk;
         });
       videos = filtered;
       renderFeed();
+      if (videos.length === 0) showEmpty();
       return;
     } else if (tab === 'following') {
       // Leer follows del usuario
@@ -1284,59 +1271,79 @@ function updateNearbySlider(val) {
   applyFilters();
 }
 
+// Ubicacion unificada: usuario logueado (de su cuenta) o invitado (del navegador, en memoria)
+async function getMiUbicacion() {
+  // 1) Usuario con ubicacion guardada
+  if (window._userData && window._userData.lat != null && window._userData.lng != null) {
+    return { lat: window._userData.lat, lng: window._userData.lng };
+  }
+  // 2) Ya la pedimos antes en esta sesion (invitado o usuario sin guardar)
+  if (window._miLat != null && window._miLng != null) {
+    return { lat: window._miLat, lng: window._miLng };
+  }
+  // 3) Pedir al navegador (funciona tambien para invitados)
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) { resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        window._miLat = pos.coords.latitude;
+        window._miLng = pos.coords.longitude;
+        // Si esta logueado, guardar en su cuenta para futuras sesiones
+        try {
+          if (window._currentUser && window._currentUser.uid) {
+            window._fb.updateDoc(window._fb.doc(window._db, 'users', window._currentUser.uid), { lat: window._miLat, lng: window._miLng });
+            if (window._userData) { window._userData.lat = window._miLat; window._userData.lng = window._miLng; }
+          }
+        } catch(e) {}
+        resolve({ lat: window._miLat, lng: window._miLng });
+      },
+      () => resolve(null),
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+    );
+  });
+}
 async function applyFilters() {
   const db = window._db;
   const fb = window._fb;
-  // Si no hay filtros activos volver al feed normal por idioma
+  // Si no hay filtros activos volver al feed normal
   if (_nearbyKm === null && !_activeCategory) {
     loadFeed('foryou');
     return;
   }
   try {
-    // Cargar videos base
+    // Cargar videos base (recientes)
     const snap = await fb.getDocs(fb.query(
       fb.collection(db, 'videos'),
       fb.where('isActive', '==', true),
       fb.orderBy('createdAt', 'desc'),
       fb.limit(100)
     ));
-    
     let result = snap.docs.map(d => ({id: d.id, ...d.data()}));
-    
-    // Filtro categoria (de cualquier tab)
-    const activeCat = _activeCategory || _activeCategory;
-    if (activeCat) {
-      result = result.filter(v => v.category === activeCat);
+
+    // Filtro categoria
+    if (_activeCategory) {
+      result = result.filter(v => v.category === _activeCategory);
     }
-    
-    // Filtro distancia
-    if (_nearbyKm !== null) {
-      const myLat = window._userData?.lat;
-      const myLng = window._userData?.lng;
-      if (myLat && myLng) {
-        result = result.filter(v => {
-          if (!v.lat || !v.lng) return false;
-          return distanceKm(myLat, myLng, v.lat, v.lng) <= _nearbyKm;
-        });
+
+    // Filtro distancia (funciona para usuarios Y anonimos)
+    if (_nearbyKm !== null && _nearbyKm !== 99999) {
+      const ubi = await getMiUbicacion();
+      if (!ubi) {
+        // Sin ubicacion disponible: avisar e invitar a activarla
+        document.getElementById('feed').innerHTML = '';
+        showEmpty();
+        return;
       }
+      result = result.filter(v => {
+        if (v.lat == null || v.lng == null) return false;
+        return distanceKm(ubi.lat, ubi.lng, v.lat, v.lng) <= _nearbyKm;
+      });
     }
-    
-    // Filtro distancia
-    if (_nearbyKm !== null) {
-      const myLat = window._userData?.lat;
-      const myLng = window._userData?.lng;
-      if (myLat && myLng) {
-        result = result.filter(v => {
-          if (!v.lat || !v.lng) return false;
-          return distanceKm(myLat, myLng, v.lat, v.lng) <= _nearbyKm;
-        });
-      }
-    }
-    
+
     videos = result;
     if (videos.length === 0) { document.getElementById('feed').innerHTML = ''; showEmpty(); return; }
     renderFeed();
-  } catch(e) { console.error(e); }
+  } catch(e) { console.error('applyFilters:', e); }
 }
 
 function clearCategoryFilter() {
