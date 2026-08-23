@@ -104,7 +104,7 @@ service cloud.firestore {
     }
     match /config/{configId} {
       allow read: if true;
-      allow write: if (configId == 'robot' || configId == 'algoritmo') && isAdmin();
+      allow write: if (configId == 'robot' || configId == 'algoritmo' || configId == 'app') && isAdmin();
     }
   }
 }
