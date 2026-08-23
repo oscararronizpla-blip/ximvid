@@ -301,7 +301,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
         <div class="menu-text"><strong>Notificaciones</strong><span>¿Quién se ha interesado?</span></div>
         <div class="menu-arrow">›</div>
       </div>
-      <div class="menu-item" onclick="window.location.href='/info'">
+      <div class="menu-item" onclick="abrirLanding()">
         <div class="menu-icon orange">ℹ️</div>
         <div class="menu-text"><strong>¿Qué es Ximvid?</strong><span>Descubre cómo funciona</span></div>
         <div class="menu-arrow">›</div>
@@ -742,6 +742,25 @@ async function saveEditVideo() {
     alert('Cambios guardados');
   } catch(e) { alert('Error al guardar'); }
 }
+
+// Abrir la landing: en la app nativa, en navegador externo; en web, /info
+async function abrirLanding() {
+  const url = 'https://ximvid.com/info';
+  try {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+      await window.Capacitor.Plugins.Browser.open({ url });
+      return;
+    }
+  } catch(e) {}
+  // Web o sin plugin Browser: abrir normal
+  if (window.Capacitor) {
+    window.open(url, '_blank');
+  } else {
+    window.location.href = '/info';
+  }
+}
+window.abrirLanding = abrirLanding;
+
 </script>
 </body>
 </html>
