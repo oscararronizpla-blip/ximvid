@@ -866,27 +866,51 @@ async function cargarMasVideos() {
   cargandoMas = true;
   try {
     const fb = window._fb, db = window._db;
-    const q = fb.query(
-      fb.collection(db, 'videos'),
-      fb.where('isActive', '==', true),
-      fb.orderBy('score', 'desc'),
-      fb.startAfter(feedCursorScore),
-      fb.limit(30)
-    );
-    const snap = await fb.getDocs(q);
-    if (snap.empty) { feedAgotado = true; return; }
-    feedCursorScore = snap.docs[snap.docs.length - 1];
-    if (snap.docs.length < 30) feedAgotado = true;
-
-    let nuevos = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    // Sigue paginando por score hasta encontrar videos NO vistos.
+    // Con miles de videos, no nos rendimos al primer lote lleno de vistos.
+    let nuevos = [];
+    let intentos = 0;
+    const MAX_INTENTOS = 8;
+    while (nuevos.length === 0 && intentos < MAX_INTENTOS && !feedAgotado) {
+      intentos++;
+      const q = fb.query(
+        fb.collection(db, 'videos'),
+        fb.where('isActive', '==', true),
+        fb.orderBy('score', 'desc'),
+        fb.startAfter(feedCursorScore),
+        fb.limit(30)
+      );
+      const snap = await fb.getDocs(q);
+      if (snap.empty) { feedAgotado = true; break; }
+      feedCursorScore = snap.docs[snap.docs.length - 1];
+      if (snap.docs.length < 30) feedAgotado = true;
+      let lote = snap.docs.map(d => ({ id: d.id, ...d.data() }))
                           .filter(v => !idsCargados.has(v.id));
-    // Priorizar no vistos, pero si no quedan, mostrar los que sean (nunca vacio)
-    if (window._algo) {
-      const noVistos = nuevos.filter(v => !window._algo.estaVisto(v.id));
-      if (noVistos.length > 0) nuevos = noVistos;
+      if (window._algo) {
+        const noVistos = lote.filter(v => !window._algo.estaVisto(v.id));
+        if (noVistos.length > 0) nuevos = noVistos;
+      } else {
+        nuevos = lote;
+      }
+    }
+    // Red de seguridad: si tras MAX_INTENTOS no hay frescos y aun queda catalogo,
+    // mostrar lo que haya para no dejar el scroll muerto.
+    if (nuevos.length === 0 && !feedAgotado && intentos >= MAX_INTENTOS) {
+      const q2 = fb.query(
+        fb.collection(db, 'videos'),
+        fb.where('isActive', '==', true),
+        fb.orderBy('score', 'desc'),
+        fb.startAfter(feedCursorScore),
+        fb.limit(30)
+      );
+      const snap2 = await fb.getDocs(q2);
+      if (!snap2.empty) {
+        feedCursorScore = snap2.docs[snap2.docs.length - 1];
+        nuevos = snap2.docs.map(d => ({ id: d.id, ...d.data() }))
+                           .filter(v => !idsCargados.has(v.id));
+      }
     }
     if (nuevos.length === 0) { return; }
-
     nuevos.forEach(v => { idsCargados.add(v.id); });
     const base = videos.length;
     videos = videos.concat(nuevos);
