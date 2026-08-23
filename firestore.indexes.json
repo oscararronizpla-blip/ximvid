@@ -113,6 +113,20 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "videos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "lat",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []
