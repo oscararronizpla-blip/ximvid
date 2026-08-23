@@ -330,6 +330,15 @@ function renderProfile(user) {
 
   // Info
   document.getElementById('profile-name').textContent = user.name || '';
+  // Badge Premium (estrella dorada junto al nombre)
+  if (user.isPremiumUser === true) {
+    const nm = document.getElementById('profile-name');
+    const badge = document.createElement('span');
+    badge.textContent = ' ⭐';
+    badge.title = 'Creador Premium';
+    badge.style.cssText = 'font-size:.85em;vertical-align:middle;filter:drop-shadow(0 1px 3px rgba(240,180,41,.5))';
+    nm.appendChild(badge);
+  }
   document.getElementById('profile-username').textContent = '@' + (user.username || '');
 
   // Categoría

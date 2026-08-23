@@ -575,14 +575,31 @@ async function loadFeed(tab) {
         fb.limit(50)
       );
     } else if (tab === 'foryou') {
-      // Videos del mismo idioma, ordenados por fecha
-      q = fb.query(
-        fb.collection(db, 'videos'),
-        fb.where('isActive', '==', true),
-        fb.where('userLanguage', '==', userLang),
-        fb.orderBy('score', 'desc'),
-        fb.limit(40)
-      );
+      // Leer flag global: filtrar por idioma? (por defecto NO -> todos ven todo)
+      if (window._filtrarIdioma === undefined) {
+        try {
+          const appCfg = await fb.getDoc(fb.doc(db, 'config', 'app'));
+          window._filtrarIdioma = (appCfg.exists() && appCfg.data().filtrarIdioma === true);
+        } catch(e) { window._filtrarIdioma = false; }
+      }
+      if (window._filtrarIdioma) {
+        // Solo videos del idioma del usuario
+        q = fb.query(
+          fb.collection(db, 'videos'),
+          fb.where('isActive', '==', true),
+          fb.where('userLanguage', '==', userLang),
+          fb.orderBy('score', 'desc'),
+          fb.limit(40)
+        );
+      } else {
+        // Todos los videos, sin filtrar por idioma
+        q = fb.query(
+          fb.collection(db, 'videos'),
+          fb.where('isActive', '==', true),
+          fb.orderBy('score', 'desc'),
+          fb.limit(40)
+        );
+      }
     } else if (tab === 'categories') {
       // Mostrar siempre el selector y esperar seleccion
       showCategorySelector();
@@ -690,6 +707,23 @@ async function loadFeed(tab) {
     if (esFeedPrincipal && window._algo) {
       try {
         videos = window._algo.filtrarVistos(videos, 5);
+        // ── DESTACADOS ADMIN: videos fijados que van primero (hasta que el usuario los ve) ──
+        try {
+          const destSnap = await fb.getDocs(fb.query(
+            fb.collection(db, 'videos'),
+            fb.where('isActive', '==', true),
+            fb.where('destacadoAdmin', '==', true),
+            fb.limit(10)
+          ));
+          let dest = destSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          // Solo los NO vistos (una vez visto, sigue el algoritmo normal)
+          dest = dest.filter(v => !window._algo.estaVisto(v.id));
+          if (dest.length > 0) {
+            const destIds = new Set(dest.map(v => v.id));
+            videos = videos.filter(v => !destIds.has(v.id)); // quitar duplicados
+            videos = dest.concat(videos); // destacados primero
+          }
+        } catch(e) { console.warn('destacados:', e); }
         let cada = 4;
         try {
           const cfgSnap = await fb.getDoc(fb.doc(db, 'config', 'algoritmo'));
@@ -849,27 +883,57 @@ async function cargarMasVideos() {
   cargandoMas = true;
   try {
     const fb = window._fb, db = window._db;
-    const q = fb.query(
-      fb.collection(db, 'videos'),
-      fb.where('isActive', '==', true),
-      fb.orderBy('score', 'desc'),
-      fb.startAfter(feedCursorScore),
-      fb.limit(30)
-    );
-    const snap = await fb.getDocs(q);
-    if (snap.empty) { feedAgotado = true; return; }
-    feedCursorScore = snap.docs[snap.docs.length - 1];
-    if (snap.docs.length < 30) feedAgotado = true;
-
-    let nuevos = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    // Idioma para paginacion coherente con el feed (solo si el flag esta activo)
+    const _ud = window._userData || {};
+    const _userLang = _ud.language || localStorage.getItem('ximvid_lang') || 'es';
+    const _extraLang = (window._filtrarIdioma === true) ? [fb.where('userLanguage', '==', _userLang)] : [];
+    // Sigue paginando por score hasta encontrar videos NO vistos.
+    // Con miles de videos, no nos rendimos al primer lote lleno de vistos.
+    let nuevos = [];
+    let intentos = 0;
+    const MAX_INTENTOS = 8;
+    while (nuevos.length === 0 && intentos < MAX_INTENTOS && !feedAgotado) {
+      intentos++;
+      const q = fb.query(
+        fb.collection(db, 'videos'),
+        fb.where('isActive', '==', true),
+        ..._extraLang,
+        fb.orderBy('score', 'desc'),
+        fb.startAfter(feedCursorScore),
+        fb.limit(30)
+      );
+      const snap = await fb.getDocs(q);
+      if (snap.empty) { feedAgotado = true; break; }
+      feedCursorScore = snap.docs[snap.docs.length - 1];
+      if (snap.docs.length < 30) feedAgotado = true;
+      let lote = snap.docs.map(d => ({ id: d.id, ...d.data() }))
                           .filter(v => !idsCargados.has(v.id));
-    // Priorizar no vistos, pero si no quedan, mostrar los que sean (nunca vacio)
-    if (window._algo) {
-      const noVistos = nuevos.filter(v => !window._algo.estaVisto(v.id));
-      if (noVistos.length > 0) nuevos = noVistos;
+      if (window._algo) {
+        const noVistos = lote.filter(v => !window._algo.estaVisto(v.id));
+        if (noVistos.length > 0) nuevos = noVistos;
+      } else {
+        nuevos = lote;
+      }
+    }
+    // Red de seguridad: si tras MAX_INTENTOS no hay frescos y aun queda catalogo,
+    // mostrar lo que haya para no dejar el scroll muerto.
+    if (nuevos.length === 0 && !feedAgotado && intentos >= MAX_INTENTOS) {
+      const q2 = fb.query(
+        fb.collection(db, 'videos'),
+        fb.where('isActive', '==', true),
+        ..._extraLang,
+        fb.orderBy('score', 'desc'),
+        fb.startAfter(feedCursorScore),
+        fb.limit(30)
+      );
+      const snap2 = await fb.getDocs(q2);
+      if (!snap2.empty) {
+        feedCursorScore = snap2.docs[snap2.docs.length - 1];
+        nuevos = snap2.docs.map(d => ({ id: d.id, ...d.data() }))
+                           .filter(v => !idsCargados.has(v.id));
+      }
     }
     if (nuevos.length === 0) { return; }
-
     nuevos.forEach(v => { idsCargados.add(v.id); });
     const base = videos.length;
     videos = videos.concat(nuevos);
@@ -967,7 +1031,7 @@ async function updateSlide(idx) {
   const video = videos[idx];
   if (!video) return;
   // Paginacion: si nos acercamos al final, cargar mas (a 3 del final)
-  if (idx >= videos.length - 3) { cargarMasVideos(); }
+  if (currentTab === "foryou" && idx >= videos.length - 3) { cargarMasVideos(); }
   // VENTANA DE PRECARGA (como TikTok): buffea el actual + 2 siguientes y 1 anterior
   const slides = document.querySelectorAll('.slide');
   slides.forEach((s, i) => {
@@ -1434,7 +1498,7 @@ window.submitReport = async function(){
 function shareVideo() {
   const video = window._currentVideoData;
   if (!video) return;
-  const url = 'https://ximvid-c8627.web.app/feed.html?video=' + video.id;
+  const url = 'https://ximvid.com/feed.html?video=' + video.id;
   const txt = 'Mira este vídeo en Ximvid 👉 ' + url;
   if (window.Capacitor && window.Capacitor.Plugins.Share) {
     window.Capacitor.Plugins.Share.share({ title: 'Ximvid', text: txt, url });
@@ -1475,7 +1539,10 @@ async function registerActionClick(videoId) {
       { actionClicks: window._fb.increment(1) }
     );
     const creatorId = window._currentVideoData?.userId;
-    if (window._algo) window._algo.registrarInteraccion(videoId, creatorId, 'cta');
+    if (window._algo) {
+      window._algo.registrarInteraccion(videoId, creatorId, 'cta');
+      window._algo.registrarClick(videoId, creatorId, 'cta', null);
+    }
     if (creatorId) {
       const me = window._userData || {};
       const actor = (me.uid && me.username) ? { actorUid: me.uid, actorUsername: me.username, actorName: me.name || '' } : null;
@@ -1502,13 +1569,15 @@ async function registerSocialClick(videoId, network) {
   try {
     const update = { socialClicks: window._fb.increment(1) };
     update['net_' + network] = window._fb.increment(1);
-    update['week_net_' + network] = window._fb.increment(1);
     await window._fb.updateDoc(
       window._fb.doc(window._db, 'videos', videoId),
       update
     );
     const creatorId = window._currentVideoData?.userId;
-    if (window._algo) window._algo.registrarInteraccion(videoId, creatorId, 'social');
+    if (window._algo) {
+      window._algo.registrarInteraccion(videoId, creatorId, 'social');
+      window._algo.registrarClick(videoId, creatorId, 'social', network);
+    }
     const netName = network.charAt(0).toUpperCase() + network.slice(1);
     if (creatorId) {
       const me = window._userData || {};

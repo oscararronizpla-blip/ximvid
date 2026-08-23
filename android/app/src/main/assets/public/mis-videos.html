@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script src="/js/device-gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Ximvid — Tus vídeos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 0%,#0a1628 40%,#0f2040 70%,#06101e 100%);color:#fff;min-height:100%;overflow-x:hidden;padding-bottom:80px;}
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;padding:16px;padding-top:max(16px,env(safe-area-inset-top));background:rgba(6,16,30,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06);}
+.back-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);border:none;color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.tb-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;}
+.tb-count{margin-left:auto;font-size:.85rem;color:#9fb0d0;}
+.wrap{padding:14px;}
+.videos-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;}
+.video-thumb{aspect-ratio:9/16;position:relative;overflow:hidden;background:rgba(255,255,255,.05);cursor:pointer;border-radius:4px;}
+.video-thumb video{width:100%;height:100%;object-fit:cover;}
+.video-thumb-overlay{position:absolute;inset:0;background:rgba(0,0,0,.2);}
+.video-stats{position:absolute;bottom:4px;left:4px;display:flex;gap:6px;}
+.video-stat{font-size:.62rem;color:rgba(255,255,255,.8);text-shadow:0 1px 3px rgba(0,0,0,.9);}
+.video-menu{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;}
+.as-overlay{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:none;}
+.as-overlay.show{display:block;}
+.action-sheet{position:fixed;bottom:0;left:0;right:0;z-index:401;background:linear-gradient(145deg,#0f2040,#0b1a30);border-top:1px solid rgba(255,255,255,.12);border-radius:24px 24px 0 0;padding:16px 20px max(24px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.2,.64,1);}
+.action-sheet.open{transform:translateY(0);}
+.as-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 16px;}
+.as-title{font-size:.72rem;color:rgba(255,255,255,.35);text-align:center;margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;}
+.as-btn{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);cursor:pointer;margin-bottom:8px;}
+.as-btn.danger{background:rgba(229,72,77,.1);border-color:rgba(229,72,77,.3);}
+.as-btn-ico{font-size:1.2rem;}
+.as-btn-txt strong{display:block;font-size:.9rem;color:#fff;}
+.as-btn-txt span{display:block;font-size:.72rem;color:rgba(255,255,255,.45);margin-top:2px;}
+.as-cancel{width:100%;margin-top:8px;padding:14px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:.9rem;cursor:pointer;}
+.empty{text-align:center;padding:80px 20px;color:#9fb0d0;}
+.empty-icon{font-size:3rem;margin-bottom:12px;}
+.loading{text-align:center;padding:80px 20px;color:#9fb0d0;}
+.botnav{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:10px 0;padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(0,0,0,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-around;align-items:center;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 14px;transition:opacity .2s;}
+.nav-ico{font-size:1.3rem;line-height:1;}
+.nav-lbl{font-size:.62rem;color:rgba(255,255,255,.5);}
+.nav-item.active .nav-lbl{color:rgba(255,255,255,.85);}
+.nav-plus{width:48px;height:34px;border-radius:10px;background:linear-gradient(135deg,#1877f2,#0a5dc2);border:none;color:#fff;font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <button class="back-btn" onclick="window.location.href='/profile.html'">←</button>
+  <div class="tb-title">Tus vídeos</div>
+  <div class="tb-count" id="tb-count"></div>
+</div>
+
+<div class="wrap">
+  <div class="loading" id="loading">Cargando tus vídeos…</div>
+  <div class="videos-grid" id="videos-grid" style="display:none"></div>
+  <div class="empty" id="empty" style="display:none">
+    <div class="empty-icon">🎬</div>
+    <div>Aún no has publicado vídeos</div>
+  </div>
+</div>
+
+<div class="as-overlay" id="as-overlay" onclick="closeSheet()"></div>
+<div class="action-sheet" id="action-sheet">
+  <div class="as-handle"></div>
+  <div class="as-title">Opciones del video</div>
+  <div class="as-btn" onclick="goVideo()"><span class="as-btn-ico">&#9654;&#65039;</span><div class="as-btn-txt"><strong>Ver video</strong><span>Abre en el feed</span></div></div>
+  <div class="as-btn" onclick="shareVid()"><span class="as-btn-ico">&#8599;&#65039;</span><div class="as-btn-txt"><strong>Compartir</strong><span>Comparte con tu enlace</span></div></div>
+  <div class="as-btn" onclick="copyVid()"><span class="as-btn-ico">&#128279;</span><div class="as-btn-txt"><strong>Copiar enlace</strong><span>Copia la URL</span></div></div>
+  <div class="as-btn" onclick="editVid()"><span class="as-btn-ico">&#9999;&#65039;</span><div class="as-btn-txt"><strong>Editar video</strong><span>Categoria, descripcion y mas</span></div></div>
+  <div class="as-btn danger" onclick="delVid()"><span class="as-btn-ico">&#128465;&#65039;</span><div class="as-btn-txt"><strong>Eliminar video</strong><span>No se puede deshacer</span></div></div>
+  <button class="as-cancel" onclick="closeSheet()">Cancelar</button>
+</div>
+
+<div class="botnav">
+  <div class="nav-item" onclick="window.location.href='/feed.html'"><div class="nav-ico">🏠</div><div class="nav-lbl">Inicio</div></div>
+  <div class="nav-item" onclick="window.location.href='/search.html'"><div class="nav-ico">🔍</div><div class="nav-lbl">Buscar</div></div>
+  <button class="nav-plus" onclick="window.location.href='/upload.html'">+</button>
+  <div class="nav-item" onclick="window.location.href='/notifications.html'"><div class="nav-ico">🔔</div><div class="nav-lbl">Avisos</div></div>
+  <div class="nav-item active" onclick="window.location.href='/profile.html'"><div class="nav-ico">👤</div><div class="nav-lbl">Perfil</div></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, collection, query, where, getDocs, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD9rczM9lYndi4nt4Cv4EjE63QekuYxBpI",
+  authDomain:"ximvid-c8627.firebaseapp.com",
+  projectId:"ximvid-c8627",
+  storageBucket:"ximvid-c8627.firebasestorage.app",
+  messagingSenderId:"278931359476",
+  appId:"1:278931359476:web:30fef5be9d11890bef80a1"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+function formatNum(n) {
+  n = n || 0;
+  if (n >= 1000000) return (n/1000000).toFixed(1).replace('.0','') + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1).replace('.0','') + 'k';
+  return String(n);
+}
+
+let _vid = null;
+window.openMenu = function(e, id){ e.stopPropagation(); _vid = id; document.getElementById('action-sheet').classList.add('open'); document.getElementById('as-overlay').classList.add('show'); };
+window.closeSheet = function(){ document.getElementById('action-sheet').classList.remove('open'); document.getElementById('as-overlay').classList.remove('show'); };
+window.goVideo = function(){ if(_vid) window.location.href='/feed.html?video='+_vid; };
+window.copyVid = function(){ if(!_vid) return; const u='https://ximvid.com/feed.html?video='+_vid; if(navigator.clipboard) navigator.clipboard.writeText(u).then(function(){alert('Enlace copiado');}); closeSheet(); };
+window.shareVid = async function(){ if(!_vid) return; const u='https://ximvid.com/feed.html?video='+_vid; const t='Mira mi video en Ximvid: '+u; try{ if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Share){ await window.Capacitor.Plugins.Share.share({title:'Ximvid',text:t,url:u}); } else if(navigator.share){ await navigator.share({title:'Ximvid',text:t,url:u}); } else if(navigator.clipboard){ navigator.clipboard.writeText(t); alert('Enlace copiado'); } }catch(e){} closeSheet(); };
+window.editVid = function(){ if(_vid) window.location.href='/profile.html?edit='+_vid; };
+window.delVid = async function(){ if(!_vid) return; if(!confirm('Seguro que quieres eliminar este video? No se puede deshacer.')) return; try{ await updateDoc(doc(db,'videos',_vid),{isActive:false}); closeSheet(); window.location.reload(); }catch(e){ alert('Error al eliminar.'); } };
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = '/welcome.html'; return; }
+  try {
+    const vq = query(
+      collection(db, 'videos'),
+      where('userId', '==', user.uid),
+      where('isActive', '==', true),
+      orderBy('createdAt', 'desc')
+    );
+    const vSnap = await getDocs(vq);
+    const videos = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('tb-count').textContent = videos.length + (videos.length === 1 ? ' vídeo' : ' vídeos');
+
+    if (videos.length === 0) {
+      document.getElementById('empty').style.display = 'block';
+      return;
+    }
+
+    const grid = document.getElementById('videos-grid');
+    grid.style.display = 'grid';
+    videos.forEach(video => {
+      const div = document.createElement('div');
+      div.className = 'video-thumb';
+      div.innerHTML =
+        '<video src="' + video.videoURL + '" muted playsinline preload="metadata" poster="' + (video.thumbnailURL||'') + '"></video>' +
+        '<div class="video-thumb-overlay"></div>' +
+        '<div class="video-stats">' +
+        '<span class="video-stat">👁 ' + formatNum(video.views || 0) + '</span>' +
+        '<span class="video-stat">👆 ' + formatNum(video.actionClicks || 0) + '</span>' +
+        '</div>' +
+        '<div class="video-menu" onclick="openMenu(event,\'' + video.id + '\')">\u22EE</div>';
+      div.addEventListener('click', (e) => {
+        if (!e.target.closest('.video-menu')) {
+          window.location.href = '/feed.html?video=' + video.id;
+        }
+      });
+      grid.appendChild(div);
+    });
+  } catch(e) {
+    console.error(e);
+    document.getElementById('loading').textContent = 'Error al cargar tus vídeos.';
+  }
+});
+</script>
+</body>
+</html>

@@ -161,7 +161,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
     </div>
     <div class="as-btn" onclick="copyVideoLink()">
       <span class="as-btn-icon">🔗</span>
-      <div class="as-btn-text"><strong>Copiar enlace</strong><span>app.ximvid.com/video/...</span></div>
+      <div class="as-btn-text"><strong>Copiar enlace</strong><span>ximvid.com/video/...</span></div>
     </div>
     <div class="as-btn" onclick="openEditVideo()">
       <span class="as-btn-icon">✏️</span>
@@ -212,6 +212,9 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
     <div class="section-action" onclick="window.location.href='/upload.html'">+ Subir</div>
   </div>
   <div class="videos-grid" id="videos-grid"></div>
+  <div id="ver-todos-videos" onclick="window.location.href='/mis-videos.html'" style="display:none;align-items:center;justify-content:center;gap:6px;padding:12px;margin:0 0 24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;cursor:pointer;color:#f0b429;font-size:.9rem;font-weight:600;">
+    <span>Ver todos</span> <span style="color:#9fb0d0;">›</span>
+  </div>
 
   <!-- UPLOAD CTA (si no tiene videos) -->
   <div class="upload-cta" id="upload-cta" style="display:none" onclick="window.location.href='/upload.html'">
@@ -249,6 +252,11 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
   <div class="menu-section">
     <div class="menu-section-title">Mi contenido</div>
     <div class="menu-card">
+      <div class="menu-item" onclick="window.location.href='/mis-videos.html'">
+        <div class="menu-icon green">🎬</div>
+        <div class="menu-text"><strong>Tus vídeos</strong><span>Todos tus vídeos publicados</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
       <div class="menu-item" onclick="window.location.href='/upload.html'">
         <div class="menu-icon green">📹</div>
         <div class="menu-text"><strong>Subir nuevo video</strong><span>Desde galería o cámara</span></div>
@@ -288,9 +296,14 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#06101e 
         <div class="menu-text"><strong>Idioma</strong><span id="current-lang">Español</span></div>
         <div class="menu-arrow">›</div>
       </div>
-      <div class="menu-item" onclick="window.location.href='/settings.html?tab=notifications'">
+      <div class="menu-item" onclick="window.location.href='/notifications.html'">
         <div class="menu-icon orange">🔔</div>
-        <div class="menu-text"><strong>Notificaciones</strong><span>Email y WhatsApp</span></div>
+        <div class="menu-text"><strong>Notificaciones</strong><span>¿Quién se ha interesado?</span></div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" onclick="window.location.href='/info'">
+        <div class="menu-icon orange">ℹ️</div>
+        <div class="menu-text"><strong>¿Qué es Ximvid?</strong><span>Descubre cómo funciona</span></div>
         <div class="menu-arrow">›</div>
       </div>
       <div class="menu-item" onclick="window.location.href='/settings.html?tab=password'">
@@ -405,6 +418,18 @@ onAuthStateChanged(auth, async (user) => {
     const videos = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     window._userVideos = videos;
     renderVideos(videos, userData);
+    // Si venimos de mis-videos con ?edit=ID, abrir el editor de ese video
+    try {
+      const editId = new URLSearchParams(location.search).get('edit');
+      if (editId) {
+        const idx = videos.findIndex(v => v.id === editId);
+        if (idx >= 0) {
+          currentVideoId = editId;
+          currentVideoIdx = idx;
+          if (typeof openEditVideo === 'function') openEditVideo();
+        }
+      }
+    } catch(e) {}
 
   } catch(e) {
     console.error(e);
@@ -426,7 +451,7 @@ function renderProfile(user) {
 
   document.getElementById('profile-name').textContent = user.name || '';
   document.getElementById('profile-username').textContent = '@' + (user.username || '');
-  document.getElementById('profile-url').textContent = 'app.ximvid.com/' + (user.username || '');
+  document.getElementById('profile-url').textContent = 'ximvid.com/' + (user.username || '');
 
   if (user.shortDescription) {
     document.getElementById('profile-bio').textContent = user.shortDescription;
@@ -457,10 +482,10 @@ function renderVideos(videos, userData) {
 
   let totalViews = 0, totalClicks = 0;
 
-  videos.forEach((video, idx) => {
-    totalViews += video.views || 0;
-    totalClicks += video.actionClicks || 0;
+  videos.forEach(v => { totalViews += v.views || 0; totalClicks += v.actionClicks || 0; });
 
+  const visibles = videos.slice(0, 3);
+  visibles.forEach((video, idx) => {
     const div = document.createElement('div');
     div.className = 'video-thumb';
     div.innerHTML = `
@@ -478,6 +503,12 @@ function renderVideos(videos, userData) {
     });
     grid.appendChild(div);
   });
+
+  const verTodos = document.getElementById('ver-todos-videos');
+  if (verTodos) {
+    verTodos.style.display = videos.length > 3 ? 'flex' : 'none';
+    const sp = verTodos.querySelector('span'); if (sp) sp.textContent = 'Ver todos (' + videos.length + ')';
+  }
 
   document.getElementById('stat-videos').textContent = formatNum(videos.length);
   document.getElementById('stat-views').textContent = formatNum(totalViews);
@@ -510,7 +541,7 @@ function closeActionSheet() {
 
 async function shareCurrentVideo() {
   if (!currentVideoId) return;
-  const url = 'https://ximvid-c8627.web.app/feed.html?video=' + currentVideoId;
+  const url = 'https://ximvid.com/feed.html?video=' + currentVideoId;
   const text = 'Mira mi video en Ximvid 👉 ' + url;
   if (window.Capacitor && window.Capacitor.Plugins.Share) {
     await window.Capacitor.Plugins.Share.share({ title: 'Ximvid', text, url });
@@ -529,7 +560,7 @@ function goToVideo() {
 
 function copyVideoLink() {
   if (!currentVideoId) return;
-  const url = 'https://ximvid-c8627.web.app/feed.html?video=' + currentVideoId;
+  const url = 'https://ximvid.com/feed.html?video=' + currentVideoId;
   navigator.clipboard?.writeText(url).then(() => alert('Enlace copiado'));
   closeActionSheet();
 }
@@ -550,7 +581,7 @@ async function deleteVideo() {
 function shareMyProfile() {
   const user = window._userData;
   if (!user) return;
-  const url = 'https://ximvid-c8627.web.app/' + user.username;
+  const url = 'https://ximvid.com/' + user.username;
   const text = 'Sígueme en Ximvid 👉 ' + url;
   if (window.Capacitor && window.Capacitor.Plugins.Share) {
     window.Capacitor.Plugins.Share.share({ title: user.name + ' en Ximvid', text, url });
@@ -562,7 +593,7 @@ function shareMyProfile() {
 }
 
 function inviteFriend() {
-  const url = 'https://ximvid-c8627.web.app/feed.html';
+  const url = 'https://ximvid.com/feed.html';
   const text = '¡Descubre Ximvid! Sube tus videos y consigue seguidores en todas tus redes al mismo tiempo 👉 ' + url;
   if (window.Capacitor && window.Capacitor.Plugins.Share) {
     window.Capacitor.Plugins.Share.share({ title: 'Ximvid', text, url });

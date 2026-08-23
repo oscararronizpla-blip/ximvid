@@ -84,7 +84,7 @@ html,body{min-height:100%;background:linear-gradient(160deg,#06101e 0%,#0a1628 4
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -127,17 +127,23 @@ async function loadData(days){
     const vSnap=await getDocs(query(collection(db,"videos"),where("userId","==",uid),where("isActive","==",true)));
     const allVideos=vSnap.docs.map(d=>({id:d.id,...d.data()}));
     const videos=allVideos.filter(v=>{const t=v.createdAt?.toDate?.();return t&&t>=since;});
+    // Clics por red desde la coleccion 'clicks' (filtrados por fecha real del evento)
     const netMap={};
     let total=0;
-    videos.forEach(v=>{
-      Object.keys(v).forEach(k=>{
-        if(k.startsWith("net_")){
-          const net=k.replace("net_","");
-          netMap[net]=(netMap[net]||0)+(v[k]||0);
-          total+=v[k]||0;
-        }
+    const desdeMs=since.getTime();
+    try{
+      const cSnap=await getDocs(query(collection(db,"clicks"),where("creatorId","==",uid)));
+      cSnap.docs.forEach(d=>{
+        const ev=d.data().events||[];
+        ev.forEach(e=>{
+          if(!e.ts||e.ts<desdeMs)return;
+          if(e.tipo!=="social")return;
+          const net=e.network||"otra";
+          netMap[net]=(netMap[net]||0)+1;
+          total++;
+        });
       });
-    });
+    }catch(err){console.warn("clicks:",err);}
     const entries=Object.entries(netMap).sort((a,b)=>b[1]-a[1]);
     document.getElementById("m-total").textContent=total;
     document.getElementById("m-nets").textContent=entries.length;

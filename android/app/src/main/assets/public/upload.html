@@ -591,6 +591,25 @@ function checkCanPublish() {
 }
 
 // ── PUBLISH ───────────────────────────────────────────────────
+function asegurarUbicacion(statusEl) {
+  return new Promise((resolve) => {
+    if (window._videoLat != null && window._videoLng != null) { resolve(); return; }
+    if (!navigator.geolocation) { resolve(); return; }
+    if (statusEl) statusEl.textContent = 'Obteniendo ubicacion...';
+    let resuelto = false;
+    const finish = () => { if (!resuelto) { resuelto = true; resolve(); } };
+    const t = setTimeout(finish, 12000);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        window._videoLat = pos.coords.latitude;
+        window._videoLng = pos.coords.longitude;
+        clearTimeout(t); finish();
+      },
+      () => { clearTimeout(t); finish(); },
+      { enableHighAccuracy: false, timeout: 11000, maximumAge: 0 }
+    );
+  });
+}
 async function publishVideo() {
   const user = window._auth.currentUser;
   if (!user || !selectedFile || !selectedIntention) return;
@@ -603,6 +622,7 @@ async function publishVideo() {
   try {
     const userData = window._userData || {};
     const videoId = Date.now().toString();
+    await asegurarUbicacion(status);
 
     // 1. Subir video a Storage
     status.textContent = 'Subiendo video...';

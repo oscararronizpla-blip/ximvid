@@ -79,11 +79,39 @@
     } catch (e) {}
   }
 
+  // Registra un clic con fecha para estadisticas. Tope 3 por usuario+video.
+  async function registrarClick(videoId, creatorId, tipo, network) {
+    try {
+      if (!videoId) return;
+      const uid = window._userData && window._userData.uid;
+      if (!uid) return;
+      const fb = window._fb, db = window._db;
+      if (!fb || !db) return;
+      const ref = fb.doc(db, 'clicks', videoId + '_' + uid);
+      const snap = await fb.getDoc(ref);
+      const prev = (snap.exists() && snap.data().events) || [];
+      if (prev.length >= 3) return;
+      const evento = {
+        ts: Date.now(),
+        tipo: tipo || 'cta',
+        network: network || null
+      };
+      await fb.setDoc(ref, {
+        videoId: videoId,
+        userId: uid,
+        creatorId: creatorId || null,
+        events: prev.concat([evento]),
+        updatedAt: fb.serverTimestamp(),
+      }, { merge: true });
+    } catch (e) { console.warn('registrarClick:', e); }
+  }
+
   window._algo = {
     marcarVisto: marcarVisto,
     estaVisto: estaVisto,
     filtrarVistos: filtrarVistos,
     registrarImpresionPremium: registrarImpresionPremium,
     registrarInteraccion: registrarInteraccion,
+    registrarClick: registrarClick,
   };
 })();
