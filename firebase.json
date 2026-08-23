@@ -16,6 +16,10 @@
         "destination": "/index.html"
       },
       {
+        "source": "/info",
+        "destination": "/index.html"
+      },
+      {
         "source": "/feed",
         "destination": "/feed.html"
       },

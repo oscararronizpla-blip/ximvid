@@ -37,7 +37,9 @@
     if (!window.Capacitor) {
       var ua = navigator.userAgent || '';
       var esMovil = /Android|iPhone|iPad|iPod|Mobile|IEMobile|Opera Mini/i.test(ua);
-      if (esMovil) {
+      // Si la URL es /info, mostrar SIEMPRE la landing (no redirigir al feed)
+      var quiereLanding = location.pathname.indexOf('/info') !== -1 || location.search.indexOf('info') !== -1;
+      if (esMovil && !quiereLanding) {
         window.location.replace('feed.html');
       }
     }
