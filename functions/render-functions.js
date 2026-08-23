@@ -4,8 +4,8 @@
  * y las páginas de video cuando se visitan desde el navegador.
  *
  * Rutas gestionadas por Firebase Hosting:
- *   app.ximvid.com/{username}      → renderCreatorPage
- *   app.ximvid.com/video/{videoId} → renderVideoPage
+ *   ximvid.com/{username}      → renderCreatorPage
+ *   ximvid.com/video/{videoId} → renderVideoPage
  */
 
 const functions = require('firebase-functions');
@@ -57,7 +57,7 @@ function getSocialIconUrl(networkId) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// renderCreatorPage — app.ximvid.com/{username}
+// renderCreatorPage — ximvid.com/{username}
 // ══════════════════════════════════════════════════════════════════
 exports.renderCreatorPage = functions.https.onRequest(async (req, res) => {
   // Extraer username de la URL
@@ -149,7 +149,7 @@ exports.renderCreatorPage = functions.https.onRequest(async (req, res) => {
       // Meta tags
       pageTitle:        `${userData.name || username} — Ximvid`,
       pageDescription:  userData.shortDescription || `Perfil de ${userData.name || username} en Ximvid`,
-      pageUrl:          `https://app.ximvid.com/${username}`,
+      pageUrl:          `https://ximvid.com/${username}`,
     };
 
     const template = getTemplate('landing-template');
@@ -171,7 +171,7 @@ exports.renderCreatorPage = functions.https.onRequest(async (req, res) => {
 });
 
 // ══════════════════════════════════════════════════════════════════
-// renderVideoPage — app.ximvid.com/video/{videoId}
+// renderVideoPage — ximvid.com/video/{videoId}
 // ══════════════════════════════════════════════════════════════════
 exports.renderVideoPage = functions.https.onRequest(async (req, res) => {
   const urlParts = req.path.split('/').filter(Boolean);
@@ -210,7 +210,7 @@ exports.renderVideoPage = functions.https.onRequest(async (req, res) => {
   <meta property="og:title"       content="${userData.name || video.username} — Ximvid">
   <meta property="og:description" content="${userData.shortDescription || 'Ver este video en Ximvid'}">
   <meta property="og:image"       content="${video.thumbnailURL || ''}">
-  <meta property="og:url"         content="https://app.ximvid.com/video/${videoId}">
+  <meta property="og:url"         content="https://ximvid.com/video/${videoId}">
   <meta property="og:type"        content="video.other">
   <meta property="og:video"       content="${video.videoURL || ''}">
   <meta property="og:video:type"  content="video/mp4">
@@ -219,7 +219,7 @@ exports.renderVideoPage = functions.https.onRequest(async (req, res) => {
   <meta name="twitter:card"        content="player">
   <meta name="twitter:title"       content="${userData.name || video.username}">
   <meta name="twitter:image"       content="${video.thumbnailURL || ''}">
-  <meta name="twitter:player"      content="https://app.ximvid.com/video/${videoId}">
+  <meta name="twitter:player"      content="https://ximvid.com/video/${videoId}">
 
   <!-- Apple Smart App Banner -->
   <meta name="apple-itunes-app" content="app-id=REEMPLAZAR_APP_ID, app-argument=ximvid://video/${videoId}">
