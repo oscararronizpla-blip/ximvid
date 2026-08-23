@@ -621,35 +621,14 @@ async function loadFeed(tab) {
       renderFeed();
       return;
     } else if (tab === 'nearby') {
-      // Mostrar slider (funciona para usuarios logueados Y anonimos)
       document.getElementById('nearby-slider').style.display = 'block';
-      // Obtener ubicacion (de cuenta si esta logueado, o del navegador si es invitado)
-      const ubi = await getMiUbicacion();
-      if (!ubi) {
-        // Sin ubicacion: mostrar mensaje invitando a activarla
-        videos = [];
-        renderFeed();
-        showEmpty();
-        return;
+      // Inicializar distancia al valor del slider (por defecto 50km) si aun no esta
+      if (_nearbyKm === null) {
+        const sv = parseInt(document.getElementById('nearby-range').value || '1');
+        _nearbyKm = NEARBY_DISTANCES[sv];
+        document.getElementById('nearby-label').textContent = NEARBY_LABELS[sv];
       }
-      const myLat = ubi.lat, myLng = ubi.lng;
-      // Cargar videos y filtrar por distancia en cliente
-      const allSnap = await fb.getDocs(fb.query(
-        fb.collection(db, 'videos'),
-        fb.where('isActive', '==', true),
-        fb.orderBy('createdAt', 'desc'),
-        fb.limit(100)
-      ));
-      const filtered = allSnap.docs
-        .map(d => ({id: d.id, ...d.data()}))
-        .filter(v => {
-          const distOk = _nearbyKm === null || _nearbyKm === 99999 || (v.lat != null && v.lng != null && distanceKm(myLat, myLng, v.lat, v.lng) <= _nearbyKm);
-          const catOk = !_activeCategory || v.category === _activeCategory;
-          return distOk && catOk;
-        });
-      videos = filtered;
-      renderFeed();
-      if (videos.length === 0) showEmpty();
+      await cargarCerca();
       return;
     } else if (tab === 'following') {
       // Leer follows del usuario
@@ -1265,10 +1244,84 @@ const NEARBY_DISTANCES = [25, 50, 100, 500, 99999];
 const NEARBY_LABELS = ['25 km', '50 km', '100 km', '500 km', 'País'];
 let _nearbyKm = null; // null = sin filtro de distancia
 
+// CERCA: carga videos con ubicacion y filtra por el radio actual. Reset total en cada llamada.
+async function cargarCerca() {
+  const db = window._db, fb = window._fb;
+  const feedEl = document.getElementById('feed');
+  // Reset visual
+  feedEl.innerHTML = '';
+  videos = [];
+  // Obtener ubicacion (cuenta si logueado, navegador si invitado)
+  const ubi = await getMiUbicacion();
+  if (!ubi) {
+    mostrarMensajeCerca('ubicacion');
+    return;
+  }
+  const myLat = ubi.lat, myLng = ubi.lng;
+  try {
+    let candidatos = [];
+    if (_nearbyKm === 99999) {
+      // "Pais": no filtrar por distancia, mostrar recientes (con o sin ubicacion)
+      const snap = await fb.getDocs(fb.query(
+        fb.collection(db, 'videos'),
+        fb.where('isActive', '==', true),
+        fb.orderBy('createdAt', 'desc'),
+        fb.limit(100)
+      ));
+      candidatos = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      if (_activeCategory) candidatos = candidatos.filter(v => v.category === _activeCategory);
+    } else {
+      // Distancia concreta: traer MUCHOS videos para no perder los que tienen ubicacion
+      // (los del robot no tienen lat/lng; los reales quedan enterrados si solo miramos recientes)
+      const snap = await fb.getDocs(fb.query(
+        fb.collection(db, 'videos'),
+        fb.where('isActive', '==', true),
+        fb.orderBy('createdAt', 'desc'),
+        fb.limit(800)
+      ));
+      candidatos = snap.docs.map(d => ({id: d.id, ...d.data()}))
+        .filter(v => {
+          if (v.lat == null || v.lng == null) return false;
+          if (_activeCategory && v.category !== _activeCategory) return false;
+          return distanceKm(myLat, myLng, v.lat, v.lng) <= _nearbyKm;
+        });
+    }
+    videos = candidatos;
+    if (videos.length === 0) {
+      mostrarMensajeCerca('distancia');
+      return;
+    }
+    renderFeed();
+  } catch(e) {
+    console.error('cargarCerca:', e);
+    mostrarMensajeCerca('distancia');
+  }
+}
+// Mensaje coherente para "Cerca"
+function mostrarMensajeCerca(tipo) {
+  const feedEl = document.getElementById('feed');
+  let titulo, sub;
+  if (tipo === 'ubicacion') {
+    titulo = 'Activa tu ubicación';
+    sub = 'Necesitamos tu ubicación para mostrarte vídeos cercanos.<br>Actívala en tu navegador y vuelve a intentarlo.';
+  } else {
+    const et = (typeof NEARBY_LABELS !== 'undefined' && _nearbyKm != null) ? '' : '';
+    titulo = 'Sé el primero por aquí';
+    sub = 'Aún no hay vídeos a esta distancia.<br>¡Sube el primero y empieza a crecer en tu zona!';
+  }
+  feedEl.innerHTML = `
+    <div class="feed-empty">
+      <div class="feed-empty-icon">📍</div>
+      <div class="feed-empty-title">${titulo}</div>
+      <div class="feed-empty-sub">${sub}</div>
+    </div>`;
+  document.getElementById('feed-loading').style.display = 'none';
+}
 function updateNearbySlider(val) {
   _nearbyKm = NEARBY_DISTANCES[parseInt(val)];
   document.getElementById('nearby-label').textContent = NEARBY_LABELS[parseInt(val)];
-  applyFilters();
+  // Reset total y recalcular con la nueva distancia
+  cargarCerca();
 }
 
 // Ubicacion unificada: usuario logueado (de su cuenta) o invitado (del navegador, en memoria)
