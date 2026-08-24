@@ -279,6 +279,7 @@ html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans
     <button class="tab" onclick="setTab('following',this)">Siguiendo</button>
     <button class="tab" data-tab="categories" onclick="setTab('categories',this)">Categorías</button>
     <button class="tab" onclick="setTab('nearby',this)">Cerca</button>
+    <button class="tab" onclick="abrirLandingFeed()" style="opacity:.75;" title="¿Qué es Ximvid?">ℹ️</button>
   </div>
 </div>
 
@@ -534,6 +535,7 @@ async function setTab(tab, el) {
   el.classList.add('active');
   if (tab !== 'nearby') {
     document.getElementById('nearby-slider').style.display = 'none';
+    const cf = document.getElementById('cerca-fin'); if (cf) cf.remove();
   }
   if (tab !== 'categories') {
     document.getElementById('category-selector').style.display = 'none';
@@ -998,6 +1000,21 @@ async function updateSlide(idx) {
   if (!video) return;
   // Paginacion: si nos acercamos al final, cargar mas (a 3 del final)
   if (currentTab === "foryou" && idx >= videos.length - 3) { cargarMasVideos(); }
+  // CERCA: al llegar al ultimo video de la distancia, añadir aviso final con salida al feed general
+  if (currentTab === "nearby" && idx === videos.length - 1 && !document.getElementById('cerca-fin')) {
+    const feedEl = document.getElementById('feed');
+    const finSlide = document.createElement('div');
+    finSlide.className = 'slide';
+    finSlide.id = 'cerca-fin';
+    finSlide.innerHTML = `
+      <div class="feed-empty" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <div class="feed-empty-icon">📍</div>
+        <div class="feed-empty-title">No hay más vídeos por aquí</div>
+        <div class="feed-empty-sub">Has visto todos los vídeos de esta distancia.</div>
+        <button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">Ver el feed general →</button>
+      </div>`;
+    feedEl.appendChild(finSlide);
+  }
   // VENTANA DE PRECARGA (como TikTok): buffea el actual + 2 siguientes y 1 anterior
   const slides = document.querySelectorAll('.slide');
   slides.forEach((s, i) => {
@@ -1244,14 +1261,14 @@ const NEARBY_DISTANCES = [25, 50, 100, 500, 99999];
 const NEARBY_LABELS = ['25 km', '50 km', '100 km', '500 km', 'País'];
 let _nearbyKm = null; // null = sin filtro de distancia
 
-// CERCA: carga videos con ubicacion y filtra por el radio actual. Reset total en cada llamada.
+// CERCA: solo videos CON ubicacion (query lat > -999 excluye los sin GPS).
+// Reset total en cada llamada. Ordena por cercania.
 async function cargarCerca() {
   const db = window._db, fb = window._fb;
   const feedEl = document.getElementById('feed');
-  // Reset visual
   feedEl.innerHTML = '';
   videos = [];
-  // Obtener ubicacion (cuenta si logueado, navegador si invitado)
+  const cf = document.getElementById('cerca-fin'); if (cf) cf.remove();
   const ubi = await getMiUbicacion();
   if (!ubi) {
     mostrarMensajeCerca('ubicacion');
@@ -1259,34 +1276,25 @@ async function cargarCerca() {
   }
   const myLat = ubi.lat, myLng = ubi.lng;
   try {
-    let candidatos = [];
-    if (_nearbyKm === 99999) {
-      // "Pais": no filtrar por distancia, mostrar recientes (con o sin ubicacion)
-      const snap = await fb.getDocs(fb.query(
-        fb.collection(db, 'videos'),
-        fb.where('isActive', '==', true),
-        fb.orderBy('createdAt', 'desc'),
-        fb.limit(100)
-      ));
-      candidatos = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      if (_activeCategory) candidatos = candidatos.filter(v => v.category === _activeCategory);
-    } else {
-      // Distancia concreta: traer MUCHOS videos para no perder los que tienen ubicacion
-      // (los del robot no tienen lat/lng; los reales quedan enterrados si solo miramos recientes)
-      const snap = await fb.getDocs(fb.query(
-        fb.collection(db, 'videos'),
-        fb.where('isActive', '==', true),
-        fb.orderBy('createdAt', 'desc'),
-        fb.limit(800)
-      ));
-      candidatos = snap.docs.map(d => ({id: d.id, ...d.data()}))
-        .filter(v => {
-          if (v.lat == null || v.lng == null) return false;
-          if (_activeCategory && v.category !== _activeCategory) return false;
-          return distanceKm(myLat, myLng, v.lat, v.lng) <= _nearbyKm;
-        });
+    // Traer SOLO videos geolocalizados (el robot no tiene lat -> queda fuera)
+    const snap = await fb.getDocs(fb.query(
+      fb.collection(db, 'videos'),
+      fb.where('isActive', '==', true),
+      fb.where('lat', '>', -999),
+      fb.limit(500)
+    ));
+    let cand = snap.docs.map(d => ({id: d.id, ...d.data()}))
+      .filter(v => v.lat != null && v.lng != null);
+    // Filtro categoria si esta activa
+    if (_activeCategory) cand = cand.filter(v => v.category === _activeCategory);
+    // Calcular distancia y filtrar por radio (Pais = 99999 = sin limite)
+    cand.forEach(v => { v._dist = distanceKm(myLat, myLng, v.lat, v.lng); });
+    if (_nearbyKm !== null && _nearbyKm !== 99999) {
+      cand = cand.filter(v => v._dist <= _nearbyKm);
     }
-    videos = candidatos;
+    // Ordenar por cercania (los mas cercanos primero)
+    cand.sort((a, b) => a._dist - b._dist);
+    videos = cand;
     if (videos.length === 0) {
       mostrarMensajeCerca('distancia');
       return;
@@ -1297,26 +1305,73 @@ async function cargarCerca() {
     mostrarMensajeCerca('distancia');
   }
 }
-// Mensaje coherente para "Cerca"
+// Mensajes coherentes de "Cerca" con acciones
 function mostrarMensajeCerca(tipo) {
   const feedEl = document.getElementById('feed');
-  let titulo, sub;
+  let titulo, sub, boton;
   if (tipo === 'ubicacion') {
     titulo = 'Activa tu ubicación';
-    sub = 'Necesitamos tu ubicación para mostrarte vídeos cercanos.<br>Actívala en tu navegador y vuelve a intentarlo.';
+    sub = 'Necesitamos tu ubicación para mostrarte vídeos cercanos.';
+    boton = '<button onclick="activarUbicacionCerca()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">📍 Activar ubicación</button>';
+  } else if (tipo === 'fin') {
+    titulo = 'No hay más vídeos por aquí';
+    sub = 'Has visto todos los vídeos de esta distancia.';
+    boton = '<button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">Ver el feed general →</button>';
   } else {
-    const et = (typeof NEARBY_LABELS !== 'undefined' && _nearbyKm != null) ? '' : '';
     titulo = 'Sé el primero por aquí';
     sub = 'Aún no hay vídeos a esta distancia.<br>¡Sube el primero y empieza a crecer en tu zona!';
+    boton = '<button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;font-family:inherit;font-size:.9rem;cursor:pointer;">Ver el feed general →</button>';
   }
   feedEl.innerHTML = `
     <div class="feed-empty">
       <div class="feed-empty-icon">📍</div>
       <div class="feed-empty-title">${titulo}</div>
       <div class="feed-empty-sub">${sub}</div>
+      ${boton}
     </div>`;
   document.getElementById('feed-loading').style.display = 'none';
 }
+// Boton "Activar ubicacion": dispara el permiso del navegador directamente y recarga Cerca
+async function activarUbicacionCerca() {
+  if (!navigator.geolocation) { alert('Tu dispositivo no soporta geolocalización'); return; }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      window._miLat = pos.coords.latitude;
+      window._miLng = pos.coords.longitude;
+      try {
+        if (window._currentUser && window._currentUser.uid) {
+          window._fb.updateDoc(window._fb.doc(window._db, 'users', window._currentUser.uid), { lat: window._miLat, lng: window._miLng });
+          if (window._userData) { window._userData.lat = window._miLat; window._userData.lng = window._miLng; }
+        }
+      } catch(e) {}
+      cargarCerca();
+    },
+    () => { alert('No se pudo obtener la ubicación. Revisa los permisos de ubicación en los ajustes de tu dispositivo.'); }
+  );
+}
+window.activarUbicacionCerca = activarUbicacionCerca;
+// Ir al feed general (como pulsar "Para ti")
+function irAlFeedGeneral() {
+  _nearbyKm = null;
+  document.getElementById('nearby-range').value = 1;
+  document.getElementById('nearby-slider').style.display = 'none';
+  const tabForyou = document.querySelector('.tab');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (tabForyou) tabForyou.classList.add('active');
+  loadFeed('foryou');
+}
+window.irAlFeedGeneral = irAlFeedGeneral;
+// Abrir la landing desde el feed (visible para anonimos): app nativa -> navegador; web -> /info
+function abrirLandingFeed() {
+  const url = 'https://ximvid.com/info';
+  if (window.Capacitor) {
+    window.open(url, '_blank');
+  } else {
+    window.location.href = '/info';
+  }
+}
+window.abrirLandingFeed = abrirLandingFeed;
+
 function updateNearbySlider(val) {
   _nearbyKm = NEARBY_DISTANCES[parseInt(val)];
   document.getElementById('nearby-label').textContent = NEARBY_LABELS[parseInt(val)];
@@ -1578,13 +1633,18 @@ function searchHashtag(tag) {
 // ── STATS ─────────────────────────────────────────────────────
 async function registerView(videoId) {
   if (!videoId) return;
+  // 1) Marca local SIEMPRE (localStorage del dispositivo, funciona tambien para anonimos).
+  //    Va ANTES del updateDoc: si Firestore rechaza la escritura (invitado), la marca ya esta hecha.
+  try {
+    if (window._algo) window._algo.marcarVisto(videoId);
+  } catch(e) {}
+  // 2) Incremento de views + impresion premium (puede fallar en anonimos, no pasa nada)
   try {
     await window._fb.updateDoc(
       window._fb.doc(window._db, 'videos', videoId),
       { views: window._fb.increment(1) }
     );
     if (window._algo) {
-      window._algo.marcarVisto(videoId);
       const vd = window._currentVideoData;
       if (vd && vd.id === videoId) window._algo.registrarImpresionPremium(vd);
     }

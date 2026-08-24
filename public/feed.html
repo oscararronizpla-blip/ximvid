@@ -279,7 +279,7 @@ html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans
     <button class="tab" onclick="setTab('following',this)">Siguiendo</button>
     <button class="tab" data-tab="categories" onclick="setTab('categories',this)">Categorías</button>
     <button class="tab" onclick="setTab('nearby',this)">Cerca</button>
-    <button class="tab" onclick="abrirLandingFeed()" style="opacity:.75;" title="¿Qué es Ximvid?">ℹ️</button>
+    <button onclick="abrirLandingFeed()" title="¿Qué es Ximvid?" style="width:30px;height:30px;border-radius:50%;border:none;background:radial-gradient(circle at 35% 30%,#ffd970,#f0b429);color:#1a1200;font-weight:800;font-size:.95rem;font-family:Georgia,serif;font-style:italic;cursor:pointer;box-shadow:0 0 10px rgba(240,180,41,.75),0 0 22px rgba(240,180,41,.35);flex-shrink:0;">i</button>
   </div>
 </div>
 
@@ -949,6 +949,13 @@ function setupObserver() {
       const slide = entry.target;
       const video = slide.querySelector('video');
       const idx = parseInt(slide.dataset.idx);
+      // Slides sin video (p.ej. el aviso de fin en Cerca): solo pausar el actual y salir
+      if (!video || isNaN(idx)) {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.7 && currentVideo) {
+          currentVideo.pause();
+        }
+        return;
+      }
 
       if (entry.isIntersecting && entry.intersectionRatio > 0.7) {
         // Pausar el anterior
@@ -1014,6 +1021,7 @@ async function updateSlide(idx) {
         <button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">Ver el feed general →</button>
       </div>`;
     feedEl.appendChild(finSlide);
+    if (window._feedObserver) window._feedObserver.observe(finSlide);
   }
   // VENTANA DE PRECARGA (como TikTok): buffea el actual + 2 siguientes y 1 anterior
   const slides = document.querySelectorAll('.slide');
@@ -1354,11 +1362,9 @@ window.activarUbicacionCerca = activarUbicacionCerca;
 function irAlFeedGeneral() {
   _nearbyKm = null;
   document.getElementById('nearby-range').value = 1;
-  document.getElementById('nearby-slider').style.display = 'none';
+  // setTab hace TODO el reset correcto: currentTab, clases, ocultar slider, quitar cerca-fin
   const tabForyou = document.querySelector('.tab');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  if (tabForyou) tabForyou.classList.add('active');
-  loadFeed('foryou');
+  setTab('foryou', tabForyou);
 }
 window.irAlFeedGeneral = irAlFeedGeneral;
 // Abrir la landing desde el feed (visible para anonimos): app nativa -> navegador; web -> /info
