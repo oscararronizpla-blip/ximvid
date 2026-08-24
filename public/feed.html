@@ -944,6 +944,11 @@ function appendSlide(video, idx) {
 
 // ── INTERSECTION OBSERVER ─────────────────────────────────────
 function setupObserver() {
+  // CRITICO: matar el observer anterior (si no, se acumulan y disparan con listas viejas)
+  if (window._feedObserver) {
+    try { window._feedObserver.disconnect(); } catch(e) {}
+    window._feedObserver = null;
+  }
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       const slide = entry.target;
@@ -987,7 +992,7 @@ function setupObserver() {
         slide.addEventListener('click', () => { if (video.paused) { video.muted = true; video.play().then(()=>{ if (window._audioUnlocked) video.muted = false; }).catch(()=>{}); } }, { once: true });
 
         // Registrar vista
-        registerView(videos[idx].id);
+        if (videos[idx] && videos[idx].id) registerView(videos[idx].id);
 
         // Actualizar UI
         updateSlide(idx);
