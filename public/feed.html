@@ -1012,22 +1012,7 @@ async function updateSlide(idx) {
   if (!video) return;
   // Paginacion: si nos acercamos al final, cargar mas (a 3 del final)
   if (currentTab === "foryou" && idx >= videos.length - 3) { cargarMasVideos(); }
-  // CERCA: al llegar al ultimo video de la distancia, añadir aviso final con salida al feed general
-  if (currentTab === "nearby" && idx === videos.length - 1 && !document.getElementById('cerca-fin')) {
-    const feedEl = document.getElementById('feed');
-    const finSlide = document.createElement('div');
-    finSlide.className = 'slide';
-    finSlide.id = 'cerca-fin';
-    finSlide.innerHTML = `
-      <div class="feed-empty" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-        <div class="feed-empty-icon">📍</div>
-        <div class="feed-empty-title">No hay más vídeos por aquí</div>
-        <div class="feed-empty-sub">Has visto todos los vídeos de esta distancia.</div>
-        <button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">Ver el feed general →</button>
-      </div>`;
-    feedEl.appendChild(finSlide);
-    if (window._feedObserver) window._feedObserver.observe(finSlide);
-  }
+
   // VENTANA DE PRECARGA (como TikTok): buffea el actual + 2 siguientes y 1 anterior
   const slides = document.querySelectorAll('.slide');
   slides.forEach((s, i) => {
@@ -1313,6 +1298,18 @@ async function cargarCerca() {
       return;
     }
     renderFeed();
+    // Slide-fin añadido desde el principio (scroll-snap lo trata como slide normal, sin saltos)
+    setTimeout(() => {
+      if (!document.getElementById('cerca-fin')) {
+        const feedEl2 = document.getElementById('feed');
+        const finSlide = document.createElement('div');
+        finSlide.className = 'slide';
+        finSlide.id = 'cerca-fin';
+        finSlide.innerHTML = `<div class="feed-empty" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div class="feed-empty-icon">📍</div><div class="feed-empty-title">No hay más vídeos por aquí</div><div class="feed-empty-sub">Has visto todos los vídeos de esta distancia.</div><button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">Ver el feed general →</button></div>`;
+        feedEl2.appendChild(finSlide);
+        if (window._feedObserver) window._feedObserver.observe(finSlide);
+      }
+    }, 300);
   } catch(e) {
     console.error('cargarCerca:', e);
     mostrarMensajeCerca('distancia');
@@ -1644,10 +1641,10 @@ function searchHashtag(tag) {
 // ── STATS ─────────────────────────────────────────────────────
 async function registerView(videoId) {
   if (!videoId) return;
-  // 1) Marca local SIEMPRE (localStorage del dispositivo, funciona tambien para anonimos).
-  //    Va ANTES del updateDoc: si Firestore rechaza la escritura (invitado), la marca ya esta hecha.
+  // 1) Marca local SOLO si NO estamos en Cerca (los videos de Cerca son exploracion geografica,
+  //    no algoritmo de feed: no deben contaminar el historial de vistos ni el algoritmo de "Para ti").
   try {
-    if (window._algo) window._algo.marcarVisto(videoId);
+    if (window._algo && currentTab !== "nearby") window._algo.marcarVisto(videoId);
   } catch(e) {}
   // 2) Incremento de views + impresion premium (puede fallar en anonimos, no pasa nada)
   try {
