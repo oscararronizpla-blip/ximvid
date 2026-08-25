@@ -299,7 +299,7 @@ html,body{height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans
   </div>
   <input type="range" id="nearby-range" min="0" max="4" step="1" value="1"
     style="width:100%;accent-color:#f0b429;cursor:pointer;"
-    oninput="updateNearbySlider(this.value)">
+    oninput="cerca2Slider(this.value)">
   <div style="display:flex;justify-content:space-between;margin-top:4px;">
     <span style="font-size:.65rem;color:rgba(255,255,255,.35);">25km</span>
     <span style="font-size:.65rem;color:rgba(255,255,255,.35);">50km</span>
@@ -533,6 +533,7 @@ async function setTab(tab, el) {
   if (tab !== 'nearby') {
     document.getElementById('nearby-slider').style.display = 'none';
     const cf = document.getElementById('cerca-fin'); if (cf) cf.remove();
+    const m = document.getElementById('cerca2-marcador'); if (m) m.style.display = 'none';
   }
   if (tab !== 'categories') {
     document.getElementById('category-selector').style.display = 'none';
@@ -549,7 +550,6 @@ async function setTab(tab, el) {
 
 // ── LOAD FEED ─────────────────────────────────────────────────
 async function loadFeed(tab) {
-  if (tab !== 'nearby') window._modoCerca = false;  // fuera de Cerca, se reanuda el marcado normal
   try {
     const db = window._db;
     const fb = window._fb;
@@ -622,13 +622,7 @@ async function loadFeed(tab) {
       return;
     } else if (tab === 'nearby') {
       document.getElementById('nearby-slider').style.display = 'block';
-      // Inicializar distancia al valor del slider (por defecto 50km) si aun no esta
-      if (_nearbyKm === null) {
-        const sv = parseInt(document.getElementById('nearby-range').value || '1');
-        _nearbyKm = NEARBY_DISTANCES[sv];
-        document.getElementById('nearby-label').textContent = NEARBY_LABELS[sv];
-      }
-      await cargarCerca();
+      await cerca2Entrar();
       return;
     } else if (tab === 'following') {
       // Leer follows del usuario
@@ -921,24 +915,8 @@ async function cargarMasVideos() {
       feedEl.scrollTop = scrollAntes;
       requestAnimationFrame(() => { feedEl.style.scrollSnapType = 'y mandatory'; });
     });
-    // [DIAGNOSTICO] avisar cuantos añadio la paginacion
-    try {
-      let dbg2 = document.getElementById('_dbg_pag');
-      if (!dbg2) {
-        dbg2 = document.createElement('div');
-        dbg2.id = '_dbg_pag';
-        dbg2.style.cssText = 'position:fixed;top:120px;left:8px;z-index:99999;background:rgba(0,120,255,.9);color:#fff;font-size:13px;padding:4px 8px;border-radius:6px;font-family:monospace;pointer-events:none;';
-        document.body.appendChild(dbg2);
-      }
-      dbg2.textContent = 'PAGINO +' + nuevos.length + ' (intentos:' + intentos + ')';
-    } catch(e) {}
   } catch(e) {
     console.warn('cargarMasVideos:', e);
-    try {
-      let dbg2 = document.getElementById('_dbg_pag');
-      if (!dbg2) { dbg2 = document.createElement('div'); dbg2.id='_dbg_pag'; dbg2.style.cssText='position:fixed;top:120px;left:8px;z-index:99999;background:rgba(255,140,0,.95);color:#fff;font-size:12px;padding:4px 8px;border-radius:6px;font-family:monospace;'; document.body.appendChild(dbg2); }
-      dbg2.textContent = 'PAG ERROR: ' + e.message;
-    } catch(e2){}
     feedAgotado = true;
   } finally {
     cargandoMas = false;
@@ -1040,11 +1018,6 @@ function setupObserver() {
 
         // Registrar vista
         if (videos[idx] && videos[idx].id) registerView(videos[idx].id);
-        try {
-          let d3 = document.getElementById('_dbg_idx');
-          if (!d3) { d3=document.createElement('div'); d3.id='_dbg_idx'; d3.style.cssText='position:fixed;top:150px;left:8px;z-index:99999;background:rgba(0,160,0,.9);color:#fff;font-size:13px;padding:4px 8px;border-radius:6px;font-family:monospace;pointer-events:none;'; document.body.appendChild(d3); }
-          d3.textContent = 'idx:'+idx+' vids:'+videos.length+' slides:'+document.querySelectorAll('.slide').length+' hay:'+(videos[idx]?'SI':'NO');
-        } catch(e){}
         // Actualizar UI
         updateSlide(idx);
       } else {
@@ -1308,80 +1281,115 @@ function clearNearbyFilters() {
 }
 const NEARBY_DISTANCES = [25, 50, 100, 500, 99999];
 const NEARBY_LABELS = ['25 km', '50 km', '100 km', '500 km', 'País'];
-let _nearbyKm = null; // null = sin filtro de distancia
 
-// CERCA: solo videos CON ubicacion (query lat > -999 excluye los sin GPS).
-// Reset total en cada llamada. Ordena por cercania.
-async function cargarCerca() {
-  window._modoCerca = true;  // BLINDAJE: mientras Cerca este activo, NADA marca vistos
+// ══════════ CERCA 2.0 — independiente y paralelo al feed ══════════
+// Videos SOLO geolocalizados, del mas nuevo al mas viejo, filtrados por
+// distancia, con historial de vistos PROPIO (ximvid_vistos_cerca).
+const CERCA2_KEY = 'ximvid_vistos_cerca';
+let cerca2Km = null;
+
+function cerca2LeerVistos() {
+  try {
+    const raw = localStorage.getItem(CERCA2_KEY);
+    if (!raw) return {};
+    const data = JSON.parse(raw);
+    const limite = Date.now() - 14 * 24 * 60 * 60 * 1000;
+    const limpio = {};
+    for (const id in data) { if (data[id] > limite) limpio[id] = data[id]; }
+    return limpio;
+  } catch(e) { return {}; }
+}
+function cerca2MarcarVisto(id) {
+  if (!id) return;
+  try {
+    const v = cerca2LeerVistos();
+    v[id] = Date.now();
+    localStorage.setItem(CERCA2_KEY, JSON.stringify(v));
+  } catch(e) {}
+}
+function cerca2Ubicacion() {
+  return new Promise((resolve) => {
+    if (window._miLat != null && window._miLng != null) { resolve({lat: window._miLat, lng: window._miLng}); return; }
+    if (window._userData && window._userData.lat != null && window._userData.lng != null) {
+      resolve({ lat: window._userData.lat, lng: window._userData.lng }); return;
+    }
+    if (!navigator.geolocation) { resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { window._miLat = pos.coords.latitude; window._miLng = pos.coords.longitude; resolve({lat: window._miLat, lng: window._miLng}); },
+      () => resolve(null),
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+    );
+  });
+}
+function cerca2Marcador() {
+  let m = document.getElementById('cerca2-marcador');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'cerca2-marcador';
+    m.style.cssText = 'position:fixed;top:calc(max(14px,env(safe-area-inset-top)) + 100px);left:50%;transform:translateX(-50%);z-index:96;background:#f0b429;color:#1a1200;font-weight:800;font-size:.85rem;padding:5px 14px;border-radius:20px;box-shadow:0 2px 12px rgba(240,180,41,.5);pointer-events:none;';
+    document.body.appendChild(m);
+  }
+  const i = NEARBY_DISTANCES.indexOf(cerca2Km);
+  m.textContent = '📍 ' + (i >= 0 ? NEARBY_LABELS[i] : '');
+  m.style.display = 'block';
+}
+async function cerca2Entrar() {
+  // Inicializar distancia desde el slider si aun no esta
+  if (cerca2Km === null) {
+    const sv = parseInt(document.getElementById('nearby-range').value || '1');
+    cerca2Km = NEARBY_DISTANCES[sv];
+    document.getElementById('nearby-label').textContent = NEARBY_LABELS[sv];
+  }
+  await cerca2Cargar();
+}
+function cerca2Slider(val) {
+  // RESET TOTAL en cada cambio de distancia
+  cerca2Km = NEARBY_DISTANCES[parseInt(val)];
+  document.getElementById('nearby-label').textContent = NEARBY_LABELS[parseInt(val)];
+  cerca2Cargar();
+}
+async function cerca2Cargar() {
   const db = window._db, fb = window._fb;
   const feedEl = document.getElementById('feed');
   feedEl.innerHTML = '';
   videos = [];
-  const cf = document.getElementById('cerca-fin'); if (cf) cf.remove();
-  const ubi = await getMiUbicacion();
-  if (!ubi) {
-    mostrarMensajeCerca('ubicacion');
-    return;
-  }
-  const myLat = ubi.lat, myLng = ubi.lng;
+  cerca2Marcador();
+  const ubi = await cerca2Ubicacion();
+  if (!ubi) { cerca2Mensaje('ubicacion'); return; }
   try {
-    // Traer SOLO videos geolocalizados (el robot no tiene lat -> queda fuera)
+    // SOLO geolocalizados (indice isActive+lat ya existe)
     const snap = await fb.getDocs(fb.query(
       fb.collection(db, 'videos'),
       fb.where('isActive', '==', true),
       fb.where('lat', '>', -999),
       fb.limit(500)
     ));
+    const vistos = cerca2LeerVistos();
     let cand = snap.docs.map(d => ({id: d.id, ...d.data()}))
-      .filter(v => v.lat != null && v.lng != null);
-    // Filtro categoria si esta activa
-    if (_activeCategory) cand = cand.filter(v => v.category === _activeCategory);
-    // Calcular distancia y filtrar por radio (Pais = 99999 = sin limite)
-    cand.forEach(v => { v._dist = distanceKm(myLat, myLng, v.lat, v.lng); });
-    if (_nearbyKm !== null && _nearbyKm !== 99999) {
-      cand = cand.filter(v => v._dist <= _nearbyKm);
-    }
-    // Ordenar por cercania (los mas cercanos primero)
-    cand.sort((a, b) => a._dist - b._dist);
+      .filter(v => v.lat != null && v.lng != null)
+      .filter(v => (cerca2Km === 99999) || (distanceKm(ubi.lat, ubi.lng, v.lat, v.lng) <= cerca2Km))
+      .filter(v => !vistos[v.id]);
+    // Del mas nuevo al mas viejo
+    cand.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     videos = cand;
-    if (videos.length === 0) {
-      mostrarMensajeCerca('distancia');
-      return;
-    }
+    if (videos.length === 0) { cerca2Mensaje('vacio'); return; }
     renderFeed();
-    // Slide-fin como ultimo elemento estatico (NO lo vigila el observer -> no provoca saltos)
-    setTimeout(() => {
-      if (!document.getElementById('cerca-fin')) {
-        const feedEl2 = document.getElementById('feed');
-        const finSlide = document.createElement('div');
-        finSlide.className = 'slide';
-        finSlide.id = 'cerca-fin';
-        finSlide.innerHTML = `<div class="feed-empty" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div class="feed-empty-icon">📍</div><div class="feed-empty-title">No hay más vídeos por aquí</div><div class="feed-empty-sub">Has visto todos los vídeos de esta distancia.</div><button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">Ver el feed general →</button></div>`;
-        feedEl2.appendChild(finSlide);
-      }
-    }, 300);
   } catch(e) {
-    console.error('cargarCerca:', e);
-    mostrarMensajeCerca('distancia');
+    console.error('cerca2:', e);
+    cerca2Mensaje('vacio');
   }
 }
-// Mensajes coherentes de "Cerca" con acciones
-function mostrarMensajeCerca(tipo) {
+function cerca2Mensaje(tipo) {
   const feedEl = document.getElementById('feed');
   let titulo, sub, boton;
   if (tipo === 'ubicacion') {
     titulo = 'Activa tu ubicación';
     sub = 'Necesitamos tu ubicación para mostrarte vídeos cercanos.';
-    boton = '<button onclick="activarUbicacionCerca()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">📍 Activar ubicación</button>';
-  } else if (tipo === 'fin') {
-    titulo = 'No hay más vídeos por aquí';
-    sub = 'Has visto todos los vídeos de esta distancia.';
-    boton = '<button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">Ver el feed general →</button>';
+    boton = '<button onclick="cerca2Activar()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">📍 Activar ubicación</button>';
   } else {
-    titulo = 'Sé el primero por aquí';
-    sub = 'Aún no hay vídeos a esta distancia.<br>¡Sube el primero y empieza a crecer en tu zona!';
-    boton = '<button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;font-family:inherit;font-size:.9rem;cursor:pointer;">Ver el feed general →</button>';
+    titulo = 'No hay más vídeos por aquí';
+    sub = 'Has visto todo lo disponible a esta distancia.<br>Prueba con más distancia o vuelve más tarde.';
+    boton = '<button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">Ver el feed general →</button>';
   }
   feedEl.innerHTML = `
     <div class="feed-empty">
@@ -1392,30 +1400,17 @@ function mostrarMensajeCerca(tipo) {
     </div>`;
   document.getElementById('feed-loading').style.display = 'none';
 }
-// Boton "Activar ubicacion": dispara el permiso del navegador directamente y recarga Cerca
-async function activarUbicacionCerca() {
+function cerca2Activar() {
   if (!navigator.geolocation) { alert('Tu dispositivo no soporta geolocalización'); return; }
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      window._miLat = pos.coords.latitude;
-      window._miLng = pos.coords.longitude;
-      try {
-        if (window._currentUser && window._currentUser.uid) {
-          window._fb.updateDoc(window._fb.doc(window._db, 'users', window._currentUser.uid), { lat: window._miLat, lng: window._miLng });
-          if (window._userData) { window._userData.lat = window._miLat; window._userData.lng = window._miLng; }
-        }
-      } catch(e) {}
-      cargarCerca();
-    },
-    () => { alert('No se pudo obtener la ubicación. Revisa los permisos de ubicación en los ajustes de tu dispositivo.'); }
+    (pos) => { window._miLat = pos.coords.latitude; window._miLng = pos.coords.longitude; cerca2Cargar(); },
+    () => { alert('No se pudo obtener la ubicación. Revisa los permisos en los ajustes.'); }
   );
 }
-window.activarUbicacionCerca = activarUbicacionCerca;
-// Ir al feed general (como pulsar "Para ti")
+window.cerca2Slider = cerca2Slider;
+window.cerca2Activar = cerca2Activar;
+window.cerca2MarcarVisto = cerca2MarcarVisto;
 function irAlFeedGeneral() {
-  _nearbyKm = null;
-  document.getElementById('nearby-range').value = 1;
-  // setTab hace TODO el reset correcto: currentTab, clases, ocultar slider, quitar cerca-fin
   const tabForyou = document.querySelector('.tab');
   setTab('foryou', tabForyou);
 }
@@ -1431,49 +1426,12 @@ function abrirLandingFeed() {
 }
 window.abrirLandingFeed = abrirLandingFeed;
 
-function updateNearbySlider(val) {
-  _nearbyKm = NEARBY_DISTANCES[parseInt(val)];
-  document.getElementById('nearby-label').textContent = NEARBY_LABELS[parseInt(val)];
-  // Reset total y recalcular con la nueva distancia
-  cargarCerca();
-}
 
-// Ubicacion unificada: usuario logueado (de su cuenta) o invitado (del navegador, en memoria)
-async function getMiUbicacion() {
-  // 1) Usuario con ubicacion guardada
-  if (window._userData && window._userData.lat != null && window._userData.lng != null) {
-    return { lat: window._userData.lat, lng: window._userData.lng };
-  }
-  // 2) Ya la pedimos antes en esta sesion (invitado o usuario sin guardar)
-  if (window._miLat != null && window._miLng != null) {
-    return { lat: window._miLat, lng: window._miLng };
-  }
-  // 3) Pedir al navegador (funciona tambien para invitados)
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) { resolve(null); return; }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        window._miLat = pos.coords.latitude;
-        window._miLng = pos.coords.longitude;
-        // Si esta logueado, guardar en su cuenta para futuras sesiones
-        try {
-          if (window._currentUser && window._currentUser.uid) {
-            window._fb.updateDoc(window._fb.doc(window._db, 'users', window._currentUser.uid), { lat: window._miLat, lng: window._miLng });
-            if (window._userData) { window._userData.lat = window._miLat; window._userData.lng = window._miLng; }
-          }
-        } catch(e) {}
-        resolve({ lat: window._miLat, lng: window._miLng });
-      },
-      () => resolve(null),
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
-    );
-  });
-}
 async function applyFilters() {
   const db = window._db;
   const fb = window._fb;
-  // Si no hay filtros activos volver al feed normal
-  if (_nearbyKm === null && !_activeCategory) {
+  // Si no hay filtro de categoria, volver al feed normal
+  if (!_activeCategory) {
     loadFeed('foryou');
     return;
   }
@@ -1492,20 +1450,6 @@ async function applyFilters() {
       result = result.filter(v => v.category === _activeCategory);
     }
 
-    // Filtro distancia (funciona para usuarios Y anonimos)
-    if (_nearbyKm !== null && _nearbyKm !== 99999) {
-      const ubi = await getMiUbicacion();
-      if (!ubi) {
-        // Sin ubicacion disponible: avisar e invitar a activarla
-        document.getElementById('feed').innerHTML = '';
-        showEmpty();
-        return;
-      }
-      result = result.filter(v => {
-        if (v.lat == null || v.lng == null) return false;
-        return distanceKm(ubi.lat, ubi.lng, v.lat, v.lng) <= _nearbyKm;
-      });
-    }
 
     videos = result;
     if (videos.length === 0) { document.getElementById('feed').innerHTML = ''; showEmpty(); return; }
@@ -1692,27 +1636,14 @@ function searchHashtag(tag) {
 // ── STATS ─────────────────────────────────────────────────────
 async function registerView(videoId) {
   if (!videoId) return;
-  // 1) Marca local SIEMPRE (localStorage del dispositivo; funciona igual anonimo o registrado)
+  // 1) Marca local: en Cerca usa SU historial propio; en el feed el normal
   try {
-    if (window._algo) window._algo.marcarVisto(videoId);
-  } catch(e) {}
-  // [DIAGNOSTICO TEMPORAL] mostrar cuantos vistos hay guardados
-  try {
-    const raw = localStorage.getItem('ximvid_vistos');
-    const n = raw ? Object.keys(JSON.parse(raw)).length : 0;
-    let dbg = document.getElementById('_dbg_vistos');
-    if (!dbg) {
-      dbg = document.createElement('div');
-      dbg.id = '_dbg_vistos';
-      dbg.style.cssText = 'position:fixed;top:90px;left:8px;z-index:99999;background:rgba(255,0,0,.85);color:#fff;font-size:13px;padding:4px 8px;border-radius:6px;font-family:monospace;pointer-events:none;';
-      document.body.appendChild(dbg);
+    if (currentTab === "nearby") {
+      cerca2MarcarVisto(videoId);
+    } else if (window._algo) {
+      window._algo.marcarVisto(videoId);
     }
-    const u = window._currentUser ? 'USER' : 'ANON';
-    dbg.textContent = u + ' vistos:' + n + ' | vids:' + (videos ? videos.length : 0) + ' agotado:' + (feedAgotado ? 'SI' : 'no') + ' cursor:' + (feedCursorScore ? 'ok' : 'NULL');
-  } catch(e) {
-    let dbg = document.getElementById('_dbg_vistos');
-    if (dbg) dbg.textContent = 'ERROR:' + e.message;
-  }
+  } catch(e) {}
   // 2) Incremento de views + impresion premium (puede fallar en anonimos, no pasa nada)
   try {
     await window._fb.updateDoc(
