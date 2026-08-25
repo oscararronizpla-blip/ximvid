@@ -717,6 +717,31 @@ async function loadFeed(tab) {
         idsCargados = new Set(videos.map(v => v.id));
       } catch(e) { console.warn('algoritmo feed:', e); }
     }
+    // RELLENO INICIAL: si tras filtrar vistos quedan pocos, paginar hasta juntar un minimo
+    if (esFeedPrincipal && window._algo && videos.length < 15 && feedCursorScore && !feedAgotado) {
+      try {
+        let rellenos = 0;
+        while (videos.length < 20 && !feedAgotado && rellenos < 6) {
+          rellenos++;
+          const qR = fb.query(
+            fb.collection(db, 'videos'),
+            fb.where('isActive', '==', true),
+            fb.orderBy('score', 'desc'),
+            fb.startAfter(feedCursorScore),
+            fb.limit(30)
+          );
+          const snapR = await fb.getDocs(qR);
+          if (snapR.empty) { feedAgotado = true; break; }
+          feedCursorScore = snapR.docs[snapR.docs.length - 1];
+          if (snapR.docs.length < 30) feedAgotado = true;
+          const loteR = snapR.docs.map(d => ({ id: d.id, ...d.data() }))
+            .filter(v => !idsCargados.has(v.id))
+            .filter(v => !window._algo.estaVisto(v.id));
+          loteR.forEach(v => { idsCargados.add(v.id); });
+          videos = videos.concat(loteR);
+        }
+      } catch(e) { console.warn('relleno inicial:', e); }
+    }
 
     // Si llegamos por un link, poner ese video primero y evitar duplicado
     if (window._linkVideo) {
