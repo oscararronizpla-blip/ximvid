@@ -878,7 +878,7 @@ async function cargarMasVideos() {
     let nuevos = [];
     let intentos = 0;
     const MAX_INTENTOS = 8;
-    while (nuevos.length === 0 && intentos < MAX_INTENTOS && !feedAgotado) {
+    while (nuevos.length === 0 && !feedAgotado) {
       intentos++;
       const q = fb.query(
         fb.collection(db, 'videos'),
