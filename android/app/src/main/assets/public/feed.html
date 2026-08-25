@@ -471,16 +471,8 @@ onAuthStateChanged(auth, async (user) => {
       }
     }
 
-    // Actualizar ubicacion silenciosa
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        try {
-          const { latitude: lat, longitude: lng } = pos.coords;
-          await window._fb.updateDoc(window._fb.doc(window._db, 'users', user.uid), { lat, lng });
-          if (window._userData) { window._userData.lat = lat; window._userData.lng = lng; }
-        } catch(e) {}
-      }, () => {});
-    }
+    // [TEST TEMPORAL] Ubicacion silenciosa DESACTIVADA para diagnostico
+    // if (navigator.geolocation) { ... }
   }
 
   // Mostrar UI y cargar feed
@@ -1642,10 +1634,9 @@ function searchHashtag(tag) {
 // ── STATS ─────────────────────────────────────────────────────
 async function registerView(videoId) {
   if (!videoId) return;
-  // 1) Marca local SOLO si NO estamos en Cerca (los videos de Cerca son exploracion geografica,
-  //    no algoritmo de feed: no deben contaminar el historial de vistos ni el algoritmo de "Para ti").
+  // 1) Marca local SIEMPRE (localStorage del dispositivo; funciona igual anonimo o registrado)
   try {
-    if (window._algo && !window._modoCerca && currentTab !== "nearby") window._algo.marcarVisto(videoId);
+    if (window._algo) window._algo.marcarVisto(videoId);
   } catch(e) {}
   // 2) Incremento de views + impresion premium (puede fallar en anonimos, no pasa nada)
   try {
