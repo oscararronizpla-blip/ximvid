@@ -898,7 +898,12 @@ async function cargarMasVideos() {
     nuevos.forEach(v => { idsCargados.add(v.id); });
     const base = videos.length;
     videos = videos.concat(nuevos);
+    // CRITICO: guardar posicion de scroll antes de añadir slides (scroll-snap la resetea)
+    const feedEl = document.getElementById('feed');
+    const scrollAntes = feedEl.scrollTop;
     nuevos.forEach((v, i) => appendSlide(v, base + i));
+    // Restaurar la posicion para que NO salte al inicio
+    feedEl.scrollTop = scrollAntes;
     // [DIAGNOSTICO] avisar cuantos añadio la paginacion
     try {
       let dbg2 = document.getElementById('_dbg_pag');
