@@ -1638,6 +1638,23 @@ async function registerView(videoId) {
   try {
     if (window._algo) window._algo.marcarVisto(videoId);
   } catch(e) {}
+  // [DIAGNOSTICO TEMPORAL] mostrar cuantos vistos hay guardados
+  try {
+    const raw = localStorage.getItem('ximvid_vistos');
+    const n = raw ? Object.keys(JSON.parse(raw)).length : 0;
+    let dbg = document.getElementById('_dbg_vistos');
+    if (!dbg) {
+      dbg = document.createElement('div');
+      dbg.id = '_dbg_vistos';
+      dbg.style.cssText = 'position:fixed;top:90px;left:8px;z-index:99999;background:rgba(255,0,0,.85);color:#fff;font-size:13px;padding:4px 8px;border-radius:6px;font-family:monospace;pointer-events:none;';
+      document.body.appendChild(dbg);
+    }
+    const u = window._currentUser ? 'USER' : 'ANON';
+    dbg.textContent = u + ' vistos:' + n;
+  } catch(e) {
+    let dbg = document.getElementById('_dbg_vistos');
+    if (dbg) dbg.textContent = 'ERROR:' + e.message;
+  }
   // 2) Incremento de views + impresion premium (puede fallar en anonimos, no pasa nada)
   try {
     await window._fb.updateDoc(

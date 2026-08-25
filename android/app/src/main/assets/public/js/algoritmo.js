@@ -34,10 +34,10 @@
 
   function filtrarVistos(videos, minimo) {
     if (!Array.isArray(videos)) return [];
-    const noVistos = videos.filter(v => !estaVisto(v.id));
-    // Si quedan muy pocos, devolver todo (nunca dejar el feed vacio)
-    if (noVistos.length < (minimo || 5)) return videos;
-    return noVistos;
+    // Con miles de videos ya no hace falta proteccion anti-vacio:
+    // devolver SIEMPRE los no-vistos (nunca repetir). Si quedara vacio,
+    // loadFeed tiene su propio fallback que carga videos recientes.
+    return videos.filter(v => !estaVisto(v.id));
   }
 
   // Registra impresion SOLO de videos premium (metrica de alcance real)
