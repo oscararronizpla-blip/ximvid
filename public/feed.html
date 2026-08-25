@@ -713,7 +713,7 @@ async function loadFeed(tab) {
           }
           videos = mezcla;
         }
-        videos = videos.slice(0, 25);
+        // (Sin recorte: mostramos todos los no-vistos cargados; la paginacion trae mas al llegar al final)
         idsCargados = new Set(videos.map(v => v.id));
       } catch(e) { console.warn('algoritmo feed:', e); }
     }

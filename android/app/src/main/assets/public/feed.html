@@ -899,8 +899,24 @@ async function cargarMasVideos() {
     const base = videos.length;
     videos = videos.concat(nuevos);
     nuevos.forEach((v, i) => appendSlide(v, base + i));
+    // [DIAGNOSTICO] avisar cuantos añadio la paginacion
+    try {
+      let dbg2 = document.getElementById('_dbg_pag');
+      if (!dbg2) {
+        dbg2 = document.createElement('div');
+        dbg2.id = '_dbg_pag';
+        dbg2.style.cssText = 'position:fixed;top:120px;left:8px;z-index:99999;background:rgba(0,120,255,.9);color:#fff;font-size:13px;padding:4px 8px;border-radius:6px;font-family:monospace;pointer-events:none;';
+        document.body.appendChild(dbg2);
+      }
+      dbg2.textContent = 'PAGINO +' + nuevos.length + ' (intentos:' + intentos + ')';
+    } catch(e) {}
   } catch(e) {
     console.warn('cargarMasVideos:', e);
+    try {
+      let dbg2 = document.getElementById('_dbg_pag');
+      if (!dbg2) { dbg2 = document.createElement('div'); dbg2.id='_dbg_pag'; dbg2.style.cssText='position:fixed;top:120px;left:8px;z-index:99999;background:rgba(255,140,0,.95);color:#fff;font-size:12px;padding:4px 8px;border-radius:6px;font-family:monospace;'; document.body.appendChild(dbg2); }
+      dbg2.textContent = 'PAG ERROR: ' + e.message;
+    } catch(e2){}
     feedAgotado = true;
   } finally {
     cargandoMas = false;
@@ -1650,7 +1666,7 @@ async function registerView(videoId) {
       document.body.appendChild(dbg);
     }
     const u = window._currentUser ? 'USER' : 'ANON';
-    dbg.textContent = u + ' vistos:' + n;
+    dbg.textContent = u + ' vistos:' + n + ' | vids:' + (videos ? videos.length : 0) + ' agotado:' + (feedAgotado ? 'SI' : 'no') + ' cursor:' + (feedCursorScore ? 'ok' : 'NULL');
   } catch(e) {
     let dbg = document.getElementById('_dbg_vistos');
     if (dbg) dbg.textContent = 'ERROR:' + e.message;
