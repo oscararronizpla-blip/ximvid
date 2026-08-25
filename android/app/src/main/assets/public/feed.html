@@ -552,6 +552,7 @@ async function setTab(tab, el) {
 
 // ── LOAD FEED ─────────────────────────────────────────────────
 async function loadFeed(tab) {
+  if (tab !== 'nearby') window._modoCerca = false;  // fuera de Cerca, se reanuda el marcado normal
   try {
     const db = window._db;
     const fb = window._fb;
@@ -1262,6 +1263,7 @@ let _nearbyKm = null; // null = sin filtro de distancia
 // CERCA: solo videos CON ubicacion (query lat > -999 excluye los sin GPS).
 // Reset total en cada llamada. Ordena por cercania.
 async function cargarCerca() {
+  window._modoCerca = true;  // BLINDAJE: mientras Cerca este activo, NADA marca vistos
   const db = window._db, fb = window._fb;
   const feedEl = document.getElementById('feed');
   feedEl.innerHTML = '';
@@ -1298,7 +1300,7 @@ async function cargarCerca() {
       return;
     }
     renderFeed();
-    // Slide-fin añadido desde el principio (scroll-snap lo trata como slide normal, sin saltos)
+    // Slide-fin como ultimo elemento estatico (NO lo vigila el observer -> no provoca saltos)
     setTimeout(() => {
       if (!document.getElementById('cerca-fin')) {
         const feedEl2 = document.getElementById('feed');
@@ -1307,7 +1309,6 @@ async function cargarCerca() {
         finSlide.id = 'cerca-fin';
         finSlide.innerHTML = `<div class="feed-empty" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div class="feed-empty-icon">📍</div><div class="feed-empty-title">No hay más vídeos por aquí</div><div class="feed-empty-sub">Has visto todos los vídeos de esta distancia.</div><button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">Ver el feed general →</button></div>`;
         feedEl2.appendChild(finSlide);
-        if (window._feedObserver) window._feedObserver.observe(finSlide);
       }
     }, 300);
   } catch(e) {
@@ -1644,7 +1645,7 @@ async function registerView(videoId) {
   // 1) Marca local SOLO si NO estamos en Cerca (los videos de Cerca son exploracion geografica,
   //    no algoritmo de feed: no deben contaminar el historial de vistos ni el algoritmo de "Para ti").
   try {
-    if (window._algo && currentTab !== "nearby") window._algo.marcarVisto(videoId);
+    if (window._algo && !window._modoCerca && currentTab !== "nearby") window._algo.marcarVisto(videoId);
   } catch(e) {}
   // 2) Incremento de views + impresion premium (puede fallar en anonimos, no pasa nada)
   try {
