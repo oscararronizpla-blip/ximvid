@@ -882,7 +882,6 @@ async function cargarMasVideos() {
     // Con miles de videos, no nos rendimos al primer lote lleno de vistos.
     let nuevos = [];
     let intentos = 0;
-    const MAX_INTENTOS = 8;
     while (nuevos.length === 0 && !feedAgotado) {
       intentos++;
       const q = fb.query(
@@ -904,24 +903,6 @@ async function cargarMasVideos() {
         if (noVistos.length > 0) nuevos = noVistos;
       } else {
         nuevos = lote;
-      }
-    }
-    // Red de seguridad: si tras MAX_INTENTOS no hay frescos y aun queda catalogo,
-    // mostrar lo que haya para no dejar el scroll muerto.
-    if (nuevos.length === 0 && !feedAgotado && intentos >= MAX_INTENTOS) {
-      const q2 = fb.query(
-        fb.collection(db, 'videos'),
-        fb.where('isActive', '==', true),
-        ..._extraLang,
-        fb.orderBy('score', 'desc'),
-        fb.startAfter(feedCursorScore),
-        fb.limit(30)
-      );
-      const snap2 = await fb.getDocs(q2);
-      if (!snap2.empty) {
-        feedCursorScore = snap2.docs[snap2.docs.length - 1];
-        nuevos = snap2.docs.map(d => ({ id: d.id, ...d.data() }))
-                           .filter(v => !idsCargados.has(v.id));
       }
     }
     if (nuevos.length === 0) { return; }
@@ -990,6 +971,22 @@ function appendSlide(video, idx) {
   videoEl.addEventListener('canplay', () => sp.classList.remove('show'));
   feed.appendChild(slide);
   if (window._feedObserver) window._feedObserver.observe(slide);
+  // RECICLAJE: mantener el DOM ligero (los moviles colapsan con cientos de <video>).
+  // Eliminar slides muy antiguos (a mas de 15 posiciones detras del actual).
+  try {
+    const todos = feed.querySelectorAll('.slide');
+    if (todos.length > 30) {
+      todos.forEach(sl => {
+        const i2 = parseInt(sl.dataset.idx);
+        if (!isNaN(i2) && i2 < currentIndex - 15) {
+          const v2 = sl.querySelector('video');
+          if (v2) { try { v2.pause(); v2.removeAttribute('src'); v2.load(); } catch(e){} }
+          if (window._feedObserver) { try { window._feedObserver.unobserve(sl); } catch(e){} }
+          sl.remove();
+        }
+      });
+    }
+  } catch(e) {}
 }
 
 // ── INTERSECTION OBSERVER ─────────────────────────────────────
