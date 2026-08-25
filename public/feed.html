@@ -1002,7 +1002,11 @@ function setupObserver() {
 
         // Registrar vista
         if (videos[idx] && videos[idx].id) registerView(videos[idx].id);
-
+        try {
+          let d3 = document.getElementById('_dbg_idx');
+          if (!d3) { d3=document.createElement('div'); d3.id='_dbg_idx'; d3.style.cssText='position:fixed;top:150px;left:8px;z-index:99999;background:rgba(0,160,0,.9);color:#fff;font-size:13px;padding:4px 8px;border-radius:6px;font-family:monospace;pointer-events:none;'; document.body.appendChild(d3); }
+          d3.textContent = 'idx:'+idx+' vids:'+videos.length+' slides:'+document.querySelectorAll('.slide').length+' hay:'+(videos[idx]?'SI':'NO');
+        } catch(e){}
         // Actualizar UI
         updateSlide(idx);
       } else {
