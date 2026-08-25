@@ -506,7 +506,12 @@ onAuthStateChanged(auth, async (user) => {
       }
     } catch(e) { console.error(e); }
   }
-  await loadFeed(window._userFeedUid ? 'userfeed' : (window._tagFeed ? 'tagfeed' : 'foryou'));
+  // Cargar el feed SOLO la primera vez: onAuthStateChanged se re-dispara al renovar
+  // el token (~cada hora) y sin este guard reseteaba el feed entero a mitad de sesion.
+  if (!window._feedYaIniciado) {
+    window._feedYaIniciado = true;
+    await loadFeed(window._userFeedUid ? 'userfeed' : (window._tagFeed ? 'tagfeed' : 'foryou'));
+  }
 });
 </script>
 
