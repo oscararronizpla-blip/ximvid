@@ -1329,7 +1329,7 @@ function cerca2Marcador() {
   if (!m) {
     m = document.createElement('div');
     m.id = 'cerca2-marcador';
-    m.style.cssText = 'position:fixed;top:calc(max(14px,env(safe-area-inset-top)) + 104px);left:50%;transform:translateX(-50%);z-index:96;background:#f0b429;color:#1a1200;font-weight:800;font-size:.85rem;padding:5px 14px;border-radius:20px;box-shadow:0 2px 12px rgba(240,180,41,.5);pointer-events:none;';
+    m.style.cssText = 'position:fixed;top:calc(max(14px,env(safe-area-inset-top)) + 58px);left:50%;transform:translateX(-50%);z-index:96;background:#f0b429;color:#1a1200;font-weight:800;font-size:.85rem;padding:5px 14px;border-radius:20px;box-shadow:0 2px 12px rgba(240,180,41,.5);pointer-events:none;';
     document.body.appendChild(m);
   }
   const i = NEARBY_DISTANCES.indexOf(cerca2Km);
@@ -1371,6 +1371,7 @@ async function cerca2Cargar() {
     let cand = snap.docs.map(d => ({id: d.id, ...d.data()}))
       .filter(v => v.lat != null && v.lng != null)
       .filter(v => (cerca2Km === 99999) || (distanceKm(ubi.lat, ubi.lng, v.lat, v.lng) <= cerca2Km))
+      .filter(v => !_activeCategory || v.category === _activeCategory)
       .filter(v => !vistos[v.id]);
     // Del mas nuevo al mas viejo
     cand.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
@@ -1390,8 +1391,14 @@ function cerca2Mensaje(tipo) {
     sub = 'Necesitamos tu ubicación para mostrarte vídeos cercanos.';
     boton = '<button onclick="cerca2Activar()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">📍 Activar ubicación</button>';
   } else {
-    titulo = 'No hay más vídeos por aquí';
-    sub = 'Has visto todo lo disponible a esta distancia.<br>Prueba con más distancia o vuelve más tarde.';
+    if (_activeCategory) {
+      const catLimpia = _activeCategory.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim();
+      titulo = 'No hay vídeos de ' + catLimpia + ' por aquí';
+      sub = 'No quedan vídeos de esta categoría a esta distancia.<br>Prueba con más distancia o mira el feed general.';
+    } else {
+      titulo = 'No hay más vídeos por aquí';
+      sub = 'Has visto todo lo disponible a esta distancia.<br>Prueba con más distancia o vuelve más tarde.';
+    }
     boton = '<button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">Ver el feed general →</button>';
   }
   feedEl.innerHTML = `
