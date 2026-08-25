@@ -898,12 +898,18 @@ async function cargarMasVideos() {
     nuevos.forEach(v => { idsCargados.add(v.id); });
     const base = videos.length;
     videos = videos.concat(nuevos);
-    // CRITICO: guardar posicion de scroll antes de añadir slides (scroll-snap la resetea)
+    // CRITICO: el scroll-snap resetea el scroll al añadir slides.
+    // Solucion: desactivar snap, añadir, restaurar posicion, reactivar snap.
     const feedEl = document.getElementById('feed');
     const scrollAntes = feedEl.scrollTop;
+    feedEl.style.scrollSnapType = 'none';
     nuevos.forEach((v, i) => appendSlide(v, base + i));
-    // Restaurar la posicion para que NO salte al inicio
     feedEl.scrollTop = scrollAntes;
+    // Reactivar el snap en el siguiente frame (tras aplicar el scroll)
+    requestAnimationFrame(() => {
+      feedEl.scrollTop = scrollAntes;
+      requestAnimationFrame(() => { feedEl.style.scrollSnapType = 'y mandatory'; });
+    });
     // [DIAGNOSTICO] avisar cuantos añadio la paginacion
     try {
       let dbg2 = document.getElementById('_dbg_pag');
