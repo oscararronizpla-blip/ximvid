@@ -1394,7 +1394,6 @@ async function cerca2Cargar() {
         <button onclick="irAlFeedGeneral()" style="margin-top:16px;padding:12px 26px;border:none;border-radius:12px;background:linear-gradient(115deg,#1a3668,#2258a8);color:#fff;font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;">Ver el feed general →</button>
       </div>`;
     feedFin.appendChild(finSlide);
-    if (window._feedObserver) window._feedObserver.observe(finSlide);
     // Personalizar el texto del slide-fin si hay categoria activa
     if (_activeCategory) {
       const catLimpia = _activeCategory.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim();
