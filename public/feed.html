@@ -1036,6 +1036,10 @@ async function updateSlide(idx) {
   if (!video) return;
   // Paginacion: si nos acercamos al final, cargar mas (a 3 del final)
   if (currentTab === "foryou" && idx >= videos.length - 3) { cargarMasVideos(); }
+  // CERCA 2.0: al llegar al ultimo video, mostrar el mensaje de fin
+  if (currentTab === "nearby" && idx >= videos.length - 1) {
+    setTimeout(() => { if (currentTab === "nearby") cerca2Mensaje('vacio'); }, 400);
+  }
 
   // VENTANA DE PRECARGA (como TikTok): buffea el actual + 2 siguientes y 1 anterior
   const slides = document.querySelectorAll('.slide');
@@ -1329,7 +1333,7 @@ function cerca2Marcador() {
   if (!m) {
     m = document.createElement('div');
     m.id = 'cerca2-marcador';
-    m.style.cssText = 'position:fixed;top:calc(max(14px,env(safe-area-inset-top)) + 58px);left:50%;transform:translateX(-50%);z-index:96;background:#f0b429;color:#1a1200;font-weight:800;font-size:.85rem;padding:5px 14px;border-radius:20px;box-shadow:0 2px 12px rgba(240,180,41,.5);pointer-events:none;';
+    m.style.cssText = 'position:fixed;top:calc(max(14px,env(safe-area-inset-top)) + 58px);left:12px;z-index:96;background:#f0b429;color:#1a1200;font-weight:800;font-size:.85rem;padding:5px 14px;border-radius:20px;box-shadow:0 2px 12px rgba(240,180,41,.5);pointer-events:none;';
     document.body.appendChild(m);
   }
   const i = NEARBY_DISTANCES.indexOf(cerca2Km);
