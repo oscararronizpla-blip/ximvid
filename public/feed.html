@@ -471,8 +471,6 @@ onAuthStateChanged(auth, async (user) => {
       }
     }
 
-    // [TEST TEMPORAL] Ubicacion silenciosa DESACTIVADA para diagnostico
-    // if (navigator.geolocation) { ... }
   }
 
   // Mostrar UI y cargar feed
@@ -875,9 +873,7 @@ async function cargarMasVideos() {
     // Sigue paginando por score hasta encontrar videos NO vistos.
     // Con miles de videos, no nos rendimos al primer lote lleno de vistos.
     let nuevos = [];
-    let intentos = 0;
     while (nuevos.length === 0 && !feedAgotado) {
-      intentos++;
       const q = fb.query(
         fb.collection(db, 'videos'),
         fb.where('isActive', '==', true),
