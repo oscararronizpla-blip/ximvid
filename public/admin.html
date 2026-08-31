@@ -454,6 +454,14 @@ onAuthStateChanged(auth, async (user) => {
 async function loadData() {
   const us = await getDocs(collection(db, 'users'));
   window._users = us.docs.map(d => ({ id: d.id, ...d.data() }));
+  // Fusionar datos privados (email, ubicacion, pago) desde la subcoleccion protegida.
+  // El admin tiene permiso para leerla; asi la ficha sigue mostrando el email.
+  await Promise.all(window._users.map(async (u) => {
+    try {
+      const pd = await getDoc(doc(db, 'users', u.id, 'private', 'data'));
+      if (pd.exists()) Object.assign(u, pd.data());
+    } catch(e) { /* sin datos privados: se queda con lo publico */ }
+  }));
   const vs = await getDocs(query(collection(db, 'videos'), orderBy('createdAt','desc')));
   try {
     const rs = await getDocs(query(collection(db, 'reports'), orderBy('createdAt','desc')));

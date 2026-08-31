@@ -19,6 +19,10 @@ service cloud.firestore {
         request.auth.uid == userId ||
         (isModerator() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rejectedCount']))
       );
+      // Datos personales sensibles (email, ubicacion, pago): SOLO el dueno o un admin
+      match /private/{doc} {
+        allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      }
     }
 
     match /videos/{videoId} {
