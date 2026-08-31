@@ -1,0 +1,6 @@
+
+# Keystores - NUNCA subir (secretos)
+*.jks
+*.keystore
+functions/.env
+.env
